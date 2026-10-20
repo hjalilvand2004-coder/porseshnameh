@@ -14,7 +14,7 @@ import {
 import { faDateTime, faNum, faPct } from "@/lib/mpi/format";
 import {
   ArrowLeft, ClipboardList, Database, FlaskConical, Layers, Lock, Sparkles, Trash2,
-  TriangleAlert, Upload, Users2, ShieldCheck, Compass,
+  TriangleAlert, Upload, Users2, ShieldCheck, Compass, BookOpenCheck, Landmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
@@ -70,6 +70,12 @@ export function HomeView() {
             <Button size="lg" variant="outline" className="bg-transparent text-white border-white/40 hover:bg-white/10 hover:text-white" onClick={() => usePorsesh.getState().setView("rules")}>
               <FlaskConical className="size-4" aria-hidden /> قواعد و خودآزمایی
             </Button>
+            {/* راهنمای تصویری — صفحه مستقل با انیمیشن */}
+            <Button asChild size="lg" variant="outline" className="bg-white text-primary border-white hover:bg-white/90">
+              <a href="help.html" target="_blank" rel="noopener">
+                <BookOpenCheck className="size-4" aria-hidden /> راهنمای سامانه
+              </a>
+            </Button>
           </div>
         </div>
       </section>
@@ -109,6 +115,22 @@ export function HomeView() {
             </li>
           ))}
         </ol>
+      </section>
+
+      {/* وب‌سرویس‌ها و میراث پرسشنامه قبلی */}
+      <section className="rounded-2xl border bg-card p-6 flex flex-wrap items-center gap-4">
+        <Landmark className="size-6 text-teal-strong shrink-0" aria-hidden />
+        <div className="min-w-64 flex-1">
+          <h2 className="font-bold text-lg">میراث پرسشنامه قبلی و منابع ثبتی</h2>
+          <p className="text-sm text-muted-foreground leading-6 mt-0.5">
+            بخشی از داده از وب‌سرویس سازمان‌های متولی (ثبت احوال، پست، بیمه، املاک، علوم، آموزش‌وپرورش) دریافت و
+            ملاک قرار می‌گیرد؛ در گام «اطلاعات پایه» قابل استعلام است. نگاشت فیلدهای قبلی به ۳۰ شاخص جدید هم
+            داخل فرم (برچسب میراث روی هر شاخص) و هم در نقشه مهاجرت قابل مشاهده است.
+          </p>
+        </div>
+        <Button variant="outline" onClick={() => usePorsesh.getState().setView("migration")}>
+          مشاهده نقشه مهاجرت <ArrowLeft className="size-4" aria-hidden />
+        </Button>
       </section>
 
       {/* بانک داده نمونه */}

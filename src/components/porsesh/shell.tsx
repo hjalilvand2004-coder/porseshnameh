@@ -10,6 +10,7 @@ import {
   GitCompareArrows,
   ShieldCheck,
   TriangleAlert,
+  BookOpenCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -76,6 +77,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 {n.label}
               </Button>
             ))}
+            {/* راهنمای سامانه — صفحه مستقل HTML با گرافیک و انیمیشن */}
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-primary-foreground hover:text-primary"
+            >
+              <a href="help.html" target="_blank" rel="noopener" title="راهنمای تصویری سامانه — در تب جدید باز می‌شود">
+                <BookOpenCheck className="size-4" aria-hidden />
+                راهنما
+              </a>
+            </Button>
             <div className="ms-2 flex rounded-lg bg-white/10 p-0.5 border border-white/15" role="group" aria-label="انتخاب نمای کاربری">
               <button
                 onClick={() => setMode("household")}

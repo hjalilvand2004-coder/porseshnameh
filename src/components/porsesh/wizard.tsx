@@ -2,20 +2,24 @@
 
 import { useMemo, useState } from "react";
 import { usePorsesh } from "@/lib/store";
-import { STEPS, groupsOfStep, REQUEST_TYPES, type Question, type QuestionGroup } from "@/lib/mpi/questions";
+import { STEPS, groupsOfStep, QUESTION_GROUPS, REQUEST_TYPES, type Question, type QuestionGroup } from "@/lib/mpi/questions";
 import type { Assessment, Member } from "@/lib/mpi/types";
+import { indicatorLegacyBadge } from "@/lib/mpi/legacy-map";
+import { WEIGHTS } from "@/lib/mpi/rules";
+import type { IndicatorId } from "@/lib/mpi/types";
 import { QuestionField } from "@/components/porsesh/fields";
 import { MemberManager, IncomeEditor } from "@/components/porsesh/editors";
 import { FlagsDialog, FlagsList } from "@/components/porsesh/flags";
 import { QualityPanel, ReferralPanel, ResultCard } from "@/components/porsesh/dashboard";
+import { WebServicePanel } from "@/components/porsesh/web-services";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { faNum } from "@/lib/mpi/format";
-import { CircleCheck, ChevronLeft, ChevronRight, Info, Siren, Save, CheckCircle2 } from "lucide-react";
+import { faNum, faPct } from "@/lib/mpi/format";
+import { CircleCheck, ChevronLeft, ChevronRight, History, Info, Lock, Siren, Save, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -25,16 +29,105 @@ import { toast } from "@/hooks/use-toast";
  * بررسی فوریت در آغاز انجام می‌شود و در همه گام‌ها در دسترس می‌ماند.
  */
 
+/* ---------------- محاسبه پیشرفت ---------------- */
+
+export interface ProgressInfo {
+  applicable: number;
+  answered: number;
+  pct: number;
+  /** درصد پاسخ هر بُعد A..E */
+  dims: Record<string, { pct: number; answered: number; applicable: number }>;
+}
+
+/** درصد تکمیل پاسخ‌های پرسشنامه — فقط پرسش‌های دارای پاسخ قابل‌شمارش (نه فیلدهای آزاد) */
+export function computeProgress(assessment: Assessment): ProgressInfo {
+  const provider = assessment.members.find((m) => m.isMainProvider);
+  let applicable = 0;
+  let answered = 0;
+  const dims: ProgressInfo["dims"] = {};
+  const bump = (d: string | undefined, ok: boolean) => {
+    if (!d) return;
+    const cur = dims[d] ?? { pct: 0, answered: 0, applicable: 0 };
+    cur.applicable += 1;
+    if (ok) cur.answered += 1;
+    cur.pct = cur.answered / cur.applicable;
+    dims[d] = cur;
+  };
+  for (const g of QUESTION_GROUPS) {
+    const list: (Member | null)[] = g.loop
+      ? (g.memberFilter === "schoolAge"
+          ? assessment.members.filter((m) => m.schoolAge || (typeof m.age === "number" && m.age >= 6 && m.age <= 18))
+          : g.memberFilter === "provider" ? (provider ? [provider] : []) : assessment.members)
+      : [null];
+    const qs = g.questions.filter((qq) => ["single", "multi", "boolean", "number"].includes(qq.type));
+    for (const m of list) {
+      for (const qq of qs) {
+        applicable += 1;
+        const key = m ? `${qq.id}#${m.id}` : qq.id;
+        const v = assessment.answers[key];
+        const has = v !== null && v !== undefined && v !== "" && !(Array.isArray(v) && v.length === 0);
+        if (has) answered += 1;
+        bump(qq.dimension, has);
+      }
+    }
+  }
+  return { applicable, answered, pct: applicable ? answered / applicable : 0, dims };
+}
+
+function DimensionChips({ dims }: { dims: ProgressInfo["dims"] }) {
+  const D: { id: string; label: string }[] = [
+    { id: "A", label: "سلامت" }, { id: "B", label: "آموزش" }, { id: "C", label: "مسکن" },
+    { id: "D", label: "معیشت" }, { id: "E", label: "مراقبت" },
+  ];
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {D.map((d) => {
+        const st = dims[d.id];
+        const p = st ? Math.round(st.pct * 100) : 0;
+        return (
+          <span key={d.id} title={`تکمیل بُعد ${d.label}: ${faNum(p)}٪`} className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2 py-0.5 text-[10px] whitespace-nowrap">
+            <b className="text-teal-strong">{d.id}</b> {d.label}
+            <span className="inline-block w-8 h-1 rounded-full bg-muted overflow-hidden align-middle">
+              <span className="block h-full bg-teal-strong rounded-full transition-all" style={{ width: `${p}%` }} />
+            </span>
+            {faNum(p)}٪
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 export function Wizard({ assessment }: { assessment: Assessment }) {
   const step = usePorsesh((s) => s.wizardStep);
   const setStep = usePorsesh((s) => s.setWizardStep);
   const mode = usePorsesh((s) => s.mode);
   const stepDef = STEPS[step - 1];
+  const progress = useMemo(() => computeProgress(assessment), [assessment]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6">
+    <div className="mx-auto max-w-6xl px-4 py-4">
+      {/* نوار پیشرفت چسبان — تصویر کامل پیشرفت پرکردن پرسشنامه */}
+      <div className="sticky top-0 z-30 -mx-4 px-4 py-2.5 bg-background/95 backdrop-blur border-b no-print" role="status" aria-label="پیشرفت تکمیل پرسشنامه">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mb-1.5">
+          <span className="text-xs font-semibold whitespace-nowrap">
+            گام {faNum(step)} از {faNum(10)} — {stepDef.short}
+          </span>
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            تکمیل پاسخ‌های سنجش: <b className="text-teal-strong">{faPct(progress.pct)}</b>
+            <span className="text-[10px]"> ({faNum(progress.answered)} از {faNum(progress.applicable)})</span>
+          </span>
+          <div className="ms-auto hidden md:block">
+            <DimensionChips dims={progress.dims} />
+          </div>
+        </div>
+        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+          <div className="h-full rounded-full bg-gradient-to-l from-teal-strong to-emerald-400 transition-all duration-500" style={{ width: `${Math.round(progress.pct * 100)}%` }} />
+        </div>
+      </div>
+
       {/* نوار گام‌ها */}
-      <div className="mb-5 overflow-x-auto thin-scroll">
+      <div className="mt-4 mb-4 overflow-x-auto thin-scroll">
         <ol className="flex gap-1.5 min-w-max" aria-label="مراحل پرسشنامه">
           {STEPS.map((s) => (
             <li key={s.key}>
@@ -113,6 +206,26 @@ function FinishButton({ assessment }: { assessment: Assessment }) {
       <CircleCheck className="size-4" aria-hidden /> ثبت نهایی پرسشنامه
     </Button>
   );
+}
+
+/* برچسب میراث نسخه قبلی — نشان می‌دهد این شاخص از کدام فیلد پرسشنامه قبلی آمده و با چه اقدامی */
+function LegacyBadge({ id }: { id: IndicatorId }) {
+  const lg = indicatorLegacyBadge(id);
+  return (
+    <span
+      title={lg.title}
+      aria-label={`منبع نسخه قبلی: ${lg.old}`}
+      className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] cursor-help select-none whitespace-nowrap", lg.className)}
+    >
+      <History className="size-3" aria-hidden /> {lg.short}
+    </span>
+  );
+}
+
+/* وزن شاخص */
+function WeightBadge({ id }: { id: IndicatorId }) {
+  const w = WEIGHTS[id];
+  return <Badge variant="outline" className="text-[10px] whitespace-nowrap" title="وزن رسمی این شاخص در امتیاز کل ۱۰۰۰">وزن {faNum(w)}</Badge>;
 }
 
 /* ---------------- بدنه هر گام ---------------- */
@@ -207,32 +320,59 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
   const h = assessment.household;
   const set = (patch: Partial<Assessment["household"]>) => updateHousehold(assessment.id, patch);
 
-  const field = (key: keyof Assessment["household"], label: string, opts?: { dir?: "ltr" | "rtl"; type?: "text" | "number"; placeholder?: string }) => (
-    <div className="space-y-1.5">
-      <Label htmlFor={`hh-${key}`}>{label}</Label>
-      <Input
-        id={`hh-${key}`}
-        dir={opts?.dir}
-        type={opts?.type ?? "text"}
-        value={(h[key] as string | number | undefined) ?? ""}
-        onChange={(e) => set({ [key]: opts?.type === "number" ? (e.target.value === "" ? undefined : Number(e.target.value)) : e.target.value } as Partial<Assessment["household"]>)}
-        placeholder={opts?.placeholder}
-      />
-    </div>
-  );
+  // قفل فیلدهای ملاک ثبتی: پس از استعلام موفق، مقدار مرجع غیرقابل ویرایش است
+  const ws = assessment.webServices ?? {};
+  const civilOk = ws.civil_registry?.status === "ok";
+  const postAny = ws.post?.status === "ok" || ws.post?.status === "partial";
+  const postFull = ws.post?.status === "ok";
+
+  const field = (key: keyof Assessment["household"], label: string, opts?: { dir?: "ltr" | "rtl"; type?: "text" | "number"; placeholder?: string; locked?: string }) => {
+    const val = (h[key] as string | number | undefined) ?? "";
+    if (opts?.locked) {
+      return (
+        <div key={`hh-${String(key)}`} className="space-y-1.5">
+          <Label htmlFor={`hh-${String(key)}`} className="flex items-center gap-1.5">
+            {label}
+            <Badge variant="outline" className="text-[10px] gap-1 bg-teal-soft text-teal-strong border-teal-strong/30">
+              <Lock className="size-3" aria-hidden /> {opts.locked} — ملاک، غیرقابل ویرایش
+            </Badge>
+          </Label>
+          <div className="rounded-lg border bg-muted/50 px-3 py-2.5 text-sm min-h-9 text-foreground/90" aria-readonly>
+            {String(val || "—")}
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div key={`hh-${String(key)}`} className="space-y-1.5">
+        <Label htmlFor={`hh-${String(key)}`}>{label}</Label>
+        <Input
+          id={`hh-${String(key)}`}
+          dir={opts?.dir}
+          type={opts?.type ?? "text"}
+          value={val}
+          onChange={(e) => set({ [key]: opts?.type === "number" ? (e.target.value === "" ? undefined : Number(e.target.value)) : e.target.value } as Partial<Assessment["household"]>)}
+          placeholder={opts?.placeholder}
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-5">
-      <div className="rounded-2xl border bg-card p-5">
-        <h3 className="font-semibold mb-1.5 flex items-center gap-2"><Info className="size-5 text-teal-strong" aria-hidden /> اطلاعات پایه و پرونده‌ای</h3>
+      <WebServicePanel assessment={assessment} />
+
+      <div className="rounded-2xl border bg-card p-4">
+        <h3 className="font-semibold mb-1 flex items-center gap-2"><Info className="size-5 text-teal-strong" aria-hidden /> اطلاعات پایه و پرونده‌ای</h3>
         <p className="text-xs text-muted-foreground mb-4 leading-5">
           این اطلاعات «شناخت خانوار» است و <b>بدون امتیاز مستقل</b>؛ فقط برای اجرای منطق نمایش و مراجعه. سرپرست و فرد پاسخ‌گو دو نقش مستقل‌اند.
+          فیلدهای دارای ملاک ثبتی پس از استعلام موفق فقط‌خواندنی می‌شوند.
         </p>
-        <div className="grid sm:grid-cols-2 gap-3.5">
+        <div className="grid sm:grid-cols-2 gap-3">
           {field("responderName", "نام فرد پاسخ‌گو / مسئول پیگیری خانوار")}
           {field("responderRelation", "نسبت پاسخ‌گو با سرپرست", { placeholder: "مثلاً خود سرپرست، همسر، فرزند ..." })}
-          {field("headName", "نام سرپرست خانوار")}
-          {field("headNationalId", "کد ملی سرپرست (اختیاری)", { dir: "ltr" })}
+          {field("headName", "نام سرپرست خانوار", { locked: civilOk ? "وب‌سرویس ثبت احوال" : undefined })}
+          {field("headNationalId", "کد ملی سرپرست (اختیاری)", { dir: "ltr", locked: civilOk ? "وب‌سرویس ثبت احوال" : undefined })}
           {field("contactPhone", "تلفن تماس", { dir: "ltr" })}
           <div className="space-y-1.5">
             <Label htmlFor="hh-nidstatus">وضعیت مدرک هویتی سرپرست</Label>
@@ -246,8 +386,8 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
             </Select>
             <p className="text-[11px] text-muted-foreground">نبود کد ملی موجب رد درخواست نمی‌شود.</p>
           </div>
-          {field("province", "استان")}
-          {field("county", "شهرستان")}
+          {field("province", "استان", { locked: postAny ? "وب‌سرویس پست" : undefined })}
+          {field("county", "شهرستان", { locked: postAny ? "وب‌سرویس پست" : undefined })}
           <div className="space-y-1.5">
             <Label htmlFor="hh-dwell">نوع محل سکونت</Label>
             <Select value={h.dwellingType ?? "none"} onValueChange={(v) => set({ dwellingType: v === "none" ? undefined : v })}>
@@ -272,8 +412,8 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
             <p className="text-[11px] text-muted-foreground">مستأجر بودن به‌تنهایی معیار محرومیت مسکن نیست.</p>
           </div>
         </div>
-        <div className="mt-3.5 space-y-2.5">
-          {field("address", "نشانی قابل مراجعه (در صورت وجود)", { placeholder: "برای فرد بی‌خانمان اجباری نیست" })}
+        <div className="mt-3 space-y-2">
+          {field("address", "نشانی قابل مراجعه (در صورت وجود)", { placeholder: "برای فرد بی‌خانمان اجباری نیست", locked: postFull ? "وب‌سرویس پست" : undefined })}
           <label className="flex items-center gap-2.5 text-sm cursor-pointer rounded-lg border bg-amber-50/50 border-amber-200 p-3">
             <Checkbox checked={!!h.noFixedAddress} onCheckedChange={(c) => set({ noFixedAddress: !!c })} aria-label="فاقد نشانی ثابت" />
             <span>خانوار <b>فاقد نشانی ثابت</b> است — مسیر بررسی میدانی فعال شود</span>
@@ -283,10 +423,10 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
 
       <MemberManager assessment={assessment} />
 
-      <div className="rounded-2xl border bg-card p-5">
-        <h3 className="font-semibold mb-1.5">مشخصات مسکن و هزینه‌ها (داده‌های محاسبه C4 و C8)</h3>
-        <p className="text-xs text-muted-foreground mb-4 leading-5">وديعه جدا از هزینه ماهانه ثبت می‌شود و در محاسبه فشار هزینه مسکن لحاظ نمی‌گردد.</p>
-        <div className="grid sm:grid-cols-3 gap-3.5">
+      <div className="rounded-2xl border bg-card p-4">
+        <h3 className="font-semibold mb-1">مشخصات مسکن و هزینه‌ها (داده‌های محاسبه C4 و C8)</h3>
+        <p className="text-xs text-muted-foreground mb-3 leading-5">وديعه جدا از هزینه ماهانه ثبت می‌شود و در محاسبه فشار هزینه مسکن لحاظ نمی‌گردد.</p>
+        <div className="grid sm:grid-cols-3 gap-3">
           {field("usableRooms", "تعداد اتاق قابل سکونت", { type: "number" })}
           {field("usableArea", "زیربنای قابل استفاده (متر)", { type: "number" })}
           {field("monthlyRent", "اجاره ماهانه (تومان)", { type: "number" })}
@@ -347,10 +487,12 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
             )}
 
             {rel.map((m) => (
-              <div key={`${g.key}-${m.id}`} className="rounded-2xl border bg-card p-5 space-y-3.5">
-                <div className="flex flex-wrap items-center gap-2 border-b pb-3">
+              <div key={`${g.key}-${m.id}`} className="rounded-2xl border bg-card p-4 space-y-3">
+                <div className="flex flex-wrap items-center gap-2 border-b pb-2.5">
                   <h3 className="font-semibold">{g.title}</h3>
                   <Badge variant="outline" className="font-mono">{g.indicator}</Badge>
+                  <LegacyBadge id={g.indicator} />
+                  <WeightBadge id={g.indicator} />
                   <span className="text-sm text-muted-foreground">— {m.firstName} {m.lastName ?? ""}</span>
                   {m.isMainProvider && <Badge className="bg-teal-strong">تأمین‌کننده اصلی</Badge>}
                 </div>
@@ -367,10 +509,12 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
             ))}
 
             {!g.loop && (
-              <div className="rounded-2xl border bg-card p-5 space-y-3.5">
-                <div className="flex flex-wrap items-center gap-2 border-b pb-3">
+              <div className="rounded-2xl border bg-card p-4 space-y-3">
+                <div className="flex flex-wrap items-center gap-2 border-b pb-2.5">
                   <h3 className="font-semibold">{g.title}</h3>
                   <Badge variant="outline" className="font-mono">{g.indicator}</Badge>
+                  <LegacyBadge id={g.indicator} />
+                  <WeightBadge id={g.indicator} />
                   <span className="text-xs text-muted-foreground">سطح خانوار</span>
                 </div>
                 {g.questions.filter((q) => q.level === "household").map((q) => (

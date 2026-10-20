@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>راهنمای سامانه پرسش‌نامه EM-MPI — غربالگری محرومیت چندبعدی خانوار</title>
+<meta name="description" content="راهنمای تصویری سامانه پرسش‌نامه EM-MPI: پنج بُعد، ۳۰ شاخص، پرچم‌های قرمز، وب‌سرویس‌های متولی و نگاشت نسخه قبلی به جدید.">
+<style>
+/* ===================== فونت ===================== */
+@font-face{font-family:"Vazirmatn";src:url("./fonts/Vazirmatn-Regular.woff2") format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Vazirmatn";src:url("./fonts/Vazirmatn-Medium.woff2") format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Vazirmatn";src:url("./fonts/Vazirmatn-SemiBold.woff2") format("woff2");font-weight:600;font-display:swap}
+@font-face{font-family:"Vazirmatn";src:url("./fonts/Vazirmatn-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
+
+/* ===================== متغیرها ===================== */
+:root{
+  --bg:#071a2b;--bg2:#0a2338;--card:rgba(255,255,255,.055);--card-strong:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.12);--line-soft:rgba(255,255,255,.07);
+  --text:#eaf4f6;--muted:#9db8c4;
+  --teal:#2dd4bf;--teal-deep:#14b8a6;--emerald:#34d399;--amber:#fbbf24;--rose:#fb7185;
+  --sky:#38bdf8;--violet:#a78bfa;
+  --radius:22px;--radius-s:14px;
+  --shadow:0 20px 60px rgba(0,0,0,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Vazirmatn",Tahoma,"Segoe UI",sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.9;
+  overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(45,212,191,.35)}
+a{color:var(--teal);text-decoration:none}
+.wrap{max-width:1080px;margin-inline:auto;padding-inline:22px}
+section{padding-block:74px;position:relative}
+
+/* ===================== پس‌زمینه رؤیایی ===================== */
+.aurora{position:fixed;inset:0;z-index:-2;background:
+  radial-gradient(1100px 620px at 82% -8%,rgba(20,184,166,.20),transparent 62%),
+  radial-gradient(900px 560px at 8% 12%,rgba(56,189,248,.14),transparent 60%),
+  radial-gradient(1000px 700px at 50% 115%,rgba(52,211,153,.13),transparent 65%),
+  linear-gradient(180deg,#071a2b 0%,#0a2338 48%,#082132 100%);
+}
+.orb{position:fixed;border-radius:50%;filter:blur(70px);opacity:.5;z-index:-1;pointer-events:none;animation:float 16s ease-in-out infinite}
+.orb.o1{width:420px;height:420px;background:rgba(20,184,166,.35);top:-120px;left:-120px}
+.orb.o2{width:340px;height:340px;background:rgba(56,189,248,.26);top:34%;right:-140px;animation-delay:-6s}
+.orb.o3{width:300px;height:300px;background:rgba(52,211,153,.25);bottom:-110px;left:22%;animation-delay:-11s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-34px) scale(1.06)}}
+.grid-lines{position:fixed;inset:0;z-index:-2;opacity:.05;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px);
+  background-size:56px 56px;mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 30%,transparent 75%)}
+
+/* ===================== ناوبری ===================== */
+.nav{position:fixed;top:0;right:0;left:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(7,26,43,.72);border-bottom:1px solid var(--line-soft)}
+.nav .wrap{display:flex;align-items:center;gap:14px;height:60px}
+.nav .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;color:var(--text)}
+.nav .brand .dot{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--teal),var(--sky));color:#06283a;flex-shrink:0}
+.nav .links{display:flex;gap:4px;margin-inline-start:auto;flex-wrap:wrap}
+.nav .links a{color:var(--muted);font-size:13px;padding:7px 12px;border-radius:999px;transition:.25s}
+.nav .links a:hover{color:var(--text);background:var(--card)}
+.progress-top{position:fixed;top:60px;right:0;left:0;height:3px;z-index:50;background:transparent}
+.progress-top b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--emerald));transition:width .15s}
+
+/* ===================== قهرمان ===================== */
+.hero{min-height:100svh;display:grid;place-items:center;text-align:center;padding-top:90px}
+.hero .kicker{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--teal);
+  border:1px solid rgba(45,212,191,.4);background:rgba(45,212,191,.08);padding:7px 16px;border-radius:999px;margin-bottom:26px}
+.hero h1{font-size:clamp(28px,5.2vw,54px);font-weight:700;line-height:1.55;max-width:840px}
+.hero h1 .grad{background:linear-gradient(120deg,var(--teal) 15%,var(--sky) 55%,var(--emerald));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{color:var(--muted);max-width:680px;margin:22px auto 0;font-size:clamp(14px,1.7vw,17px)}
+.hero .stats{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:40px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-s);padding:18px 30px;min-width:130px;backdrop-filter:blur(8px)}
+.stat b{display:block;font-size:clamp(24px,3.4vw,36px);font-weight:700;background:linear-gradient(120deg,var(--teal),var(--emerald));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{font-size:12.5px;color:var(--muted)}
+.hero .cta{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:38px}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 26px;border-radius:14px;font-size:14.5px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:.3s;font-family:inherit}
+.btn.primary{background:linear-gradient(135deg,var(--teal),var(--teal-deep));color:#04222b;box-shadow:0 12px 32px rgba(20,184,166,.35)}
+.btn.primary:hover{transform:translateY(-3px);box-shadow:0 18px 42px rgba(20,184,166,.45)}
+.btn.ghost{background:var(--card);border-color:var(--line);color:var(--text)}
+.btn.ghost:hover{background:var(--card-strong);transform:translateY(-3px)}
+.scroll-hint{position:absolute;bottom:26px;right:50%;transform:translateX(50%);color:var(--muted);font-size:12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.scroll-hint i{display:block;width:22px;height:34px;border:2px solid var(--muted);border-radius:12px;position:relative}
+.scroll-hint i::after{content:"";position:absolute;top:6px;right:50%;transform:translateX(50%);width:4px;height:8px;border-radius:3px;background:var(--teal);animation:wheel 1.6s infinite}
+@keyframes wheel{0%{opacity:1;top:6px}70%{opacity:0;top:16px}100%{opacity:0;top:6px}}
+
+/* ===================== عمومی ===================== */
+.head{max-width:720px;margin-inline:auto;text-align:center;margin-bottom:46px}
+.head .tag{font-size:12.5px;color:var(--teal);letter-spacing:.06em;border:1px solid rgba(45,212,191,.35);border-radius:999px;padding:4px 14px;display:inline-block;margin-bottom:14px;background:rgba(45,212,191,.07)}
+.head h2{font-size:clamp(22px,3.4vw,34px);font-weight:700;line-height:1.6}
+.head p{color:var(--muted);margin-top:12px;font-size:14.5px}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .8s cubic-bezier(.2,.65,.3,1),transform .8s cubic-bezier(.2,.65,.3,1)}
+.reveal.in{opacity:1;transform:none}
+.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}.d4{transition-delay:.32s}
+
+/* ===================== معماری سه‌لایه ===================== */
+.layers{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.layer{padding:30px 26px;position:relative;overflow:hidden}
+.layer .num{position:absolute;top:14px;left:18px;font-size:56px;font-weight:700;color:rgba(255,255,255,.06)}
+.layer .ic{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;margin-bottom:16px}
+.layer h3{font-size:17px;margin-bottom:9px}
+.layer p{color:var(--muted);font-size:13.5px}
+.lc1 .ic{background:rgba(45,212,191,.14);color:var(--teal)}
+.lc2 .ic{background:rgba(56,189,248,.14);color:var(--sky)}
+.lc3 .ic{background:rgba(52,211,153,.14);color:var(--emerald)}
+
+/* ===================== تایم‌لاین ۱۰ گام ===================== */
+.timeline{position:relative;max-width:760px;margin-inline:auto}
+.timeline::before{content:"";position:absolute;top:8px;bottom:8px;right:23px;width:2px;background:linear-gradient(180deg,var(--teal),rgba(45,212,191,.05))}
+.tl-item{position:relative;padding:0 66px 26px 0}
+.tl-item .n{position:absolute;right:0;top:0;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:15px;
+  background:var(--bg2);border:2px solid var(--teal);color:var(--teal);box-shadow:0 0 0 6px rgba(45,212,191,.08)}
+.tl-item.scored .n{background:linear-gradient(135deg,var(--teal),var(--teal-deep));color:#04222b;border-color:transparent}
+.tl-item h4{font-size:15.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tl-item p{color:var(--muted);font-size:13.5px;margin-top:5px}
+.pill{font-size:10.5px;border-radius:999px;padding:2px 10px;border:1px solid var(--line);color:var(--muted)}
+.pill.noscore{color:var(--amber);border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.07)}
+
+/* ===================== ابعاد ===================== */
+.dims{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.dim{padding:26px;transition:transform .35s,box-shadow .35s;position:relative;overflow:hidden}
+.dim:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.dim .top{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.dim .letter{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:22px;font-weight:700;flex-shrink:0}
+.dim h3{font-size:16px}
+.dim .cap{font-size:12px;color:var(--muted)}
+.dim .bar{height:9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:12px 0 15px}
+.dim .bar b{display:block;height:100%;width:0;border-radius:99px;transition:width 1.3s cubic-bezier(.2,.65,.3,1)}
+.dim ul{list-style:none;display:flex;flex-wrap:wrap;gap:7px}
+.dim ul li{font-size:11.5px;border:1px solid var(--line);border-radius:999px;padding:3.5px 11px;color:var(--muted);background:rgba(255,255,255,.03)}
+.dim ul li b{color:var(--text);font-weight:600}
+.dA .letter{background:rgba(251,113,133,.15);color:var(--rose)}.dA .bar b{background:linear-gradient(90deg,var(--rose),#f43f5e)}
+.dB .letter{background:rgba(56,189,248,.15);color:var(--sky)}.dB .bar b{background:linear-gradient(90deg,var(--sky),#0ea5e9)}
+.dC .letter{background:rgba(45,212,191,.15);color:var(--teal)}.dC .bar b{background:linear-gradient(90deg,var(--teal),#0d9488)}
+.dD .letter{background:rgba(251,191,36,.15);color:var(--amber)}.dD .bar b{background:linear-gradient(90deg,var(--amber),#f59e0b)}
+.dE .letter{background:rgba(52,211,153,.15);color:var(--emerald)}.dE .bar b{background:linear-gradient(90deg,var(--emerald),#10b981)}
+
+/* ===================== امتیازدهی و سطوح ===================== */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+@media(max-width:820px){.two-col{grid-template-columns:1fr}}
+.panel{padding:28px}
+.panel h3{font-size:17px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.panel p{color:var(--muted);font-size:13.5px}
+.formula{background:rgba(45,212,191,.09);border:1px dashed rgba(45,212,191,.45);border-radius:var(--radius-s);padding:14px 18px;margin-top:14px;font-size:14px;color:var(--teal);font-weight:600}
+.levels{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.level{display:flex;align-items:center;gap:12px;border-radius:var(--radius-s);border:1px solid var(--line);padding:11px 15px;font-size:13px;background:rgba(255,255,255,.03)}
+.level .rng{font-family:inherit;font-weight:700;font-size:13px;min-width:96px;text-align:center;border-radius:9px;padding:3px 8px}
+.level b{font-weight:600}
+.level span{color:var(--muted);font-size:12px;margin-inline-start:auto;text-align:left}
+.lv1 .rng{background:rgba(52,211,153,.16);color:var(--emerald)}
+.lv2 .rng{background:rgba(56,189,248,.16);color:var(--sky)}
+.lv3 .rng{background:rgba(251,191,36,.16);color:var(--amber)}
+.lv4 .rng{background:rgba(251,146,60,.16);color:#fb923c}
+.lv5 .rng{background:rgba(251,113,133,.16);color:var(--rose)}
+
+/* ===================== پرچم‌های قرمز ===================== */
+.flags{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.flag{padding:20px;border-radius:var(--radius-s);border:1px solid rgba(251,113,133,.28);background:rgba(251,113,133,.05);transition:.3s;display:flex;gap:14px;align-items:flex-start}
+.flag:hover{background:rgba(251,113,133,.1);transform:translateY(-3px)}
+.flag .code{font-weight:700;color:var(--rose);background:rgba(251,113,133,.14);border-radius:10px;min-width:44px;height:40px;display:grid;place-items:center;font-size:13.5px;flex-shrink:0}
+.flag h4{font-size:14px;margin-bottom:3px}
+.flag p{font-size:12px;color:var(--muted)}
+.flag .acts{margin-top:7px;display:flex;flex-wrap:wrap;gap:5px}
+.flag .acts i{font-style:normal;font-size:10.5px;border:1px solid rgba(251,113,133,.35);color:var(--rose);border-radius:999px;padding:1.5px 9px}
+
+/* ===================== وب‌سرویس‌ها ===================== */
+.services{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.service{padding:22px;transition:.3s}
+.service:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.service .top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.service .ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:rgba(45,212,191,.13);color:var(--teal);flex-shrink:0}
+.service h4{font-size:14.5px}
+.service .org{font-size:11.5px;color:var(--muted)}
+.service .lock{margin-inline-start:auto;font-size:10.5px;color:var(--teal);border:1px solid rgba(45,212,191,.4);border-radius:999px;padding:2px 10px;background:rgba(45,212,191,.08)}
+.service ul{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.service ul li{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+.service .feeds{margin-top:10px;font-size:11.5px;color:var(--muted)}
+.service .feeds b{color:var(--sky);font-weight:600}
+.ladder{margin-top:16px;display:flex;flex-direction:column;gap:9px}
+.rung{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:var(--radius-s);padding:10px 15px;background:rgba(255,255,255,.03);font-size:13px}
+.rung .r{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-weight:700;font-size:13px;flex-shrink:0;background:linear-gradient(135deg,rgba(45,212,191,.25),rgba(56,189,248,.25));color:var(--teal)}
+.rung span{color:var(--muted);font-size:12px}
+
+/* ===================== نگاشت ===================== */
+.map-note{padding:24px 26px;border-radius:var(--radius);border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.06);margin-bottom:20px}
+.map-note b{color:var(--amber)}
+.map-note p{color:var(--muted);font-size:13.5px;margin-top:6px}
+.map-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px}
+.map-card{padding:19px;border-radius:var(--radius-s);border:1px solid var(--line);background:rgba(255,255,255,.035)}
+.map-card .t{display:flex;align-items:center;gap:9px;margin-bottom:7px;flex-wrap:wrap}
+.map-card .t b{font-size:13.5px}
+.badge{font-size:10.5px;border-radius:999px;padding:2px 10px;border:1px solid}
+.b-keep{color:var(--emerald);border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
+.b-re{color:var(--amber);border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
+.b-split{color:var(--violet);border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.08)}
+.b-ctrl{color:var(--sky);border-color:rgba(56,189,248,.4);background:rgba(56,189,248,.08)}
+.b-new{color:var(--teal);border-color:rgba(45,212,191,.4);background:rgba(45,212,191,.08)}
+.map-card .old{font-size:12px;color:var(--muted)}
+.map-card .note{font-size:11.5px;color:rgba(255,255,255,.5);margin-top:6px;line-height:1.8}
+
+/* ===================== پرسش‌های متداول ===================== */
+.faq{max-width:780px;margin-inline:auto;display:flex;flex-direction:column;gap:11px}
+.q{border:1px solid var(--line);border-radius:var(--radius-s);background:var(--card);overflow:hidden;transition:.3s}
+.q:hover{border-color:rgba(45,212,191,.4)}
+.q button{width:100%;display:flex;align-items:center;gap:12px;padding:17px 20px;background:none;border:none;color:var(--text);font-family:inherit;font-size:14.5px;font-weight:600;cursor:pointer;text-align:right}
+.q button .plus{margin-inline-start:auto;transition:.35s;color:var(--teal);font-size:20px;flex-shrink:0}
+.q.open button .plus{transform:rotate(45deg)}
+.q .a{max-height:0;overflow:hidden;transition:max-height .45s ease}
+.q .a p{padding:0 20px 18px;color:var(--muted);font-size:13.5px}
+
+/* ===================== فوتر ===================== */
+footer{border-top:1px solid var(--line-soft);padding:34px 0 44px;text-align:center;color:var(--muted);font-size:12.5px}
+footer .warn{max-width:760px;margin:0 auto 14px;border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.06);border-radius:var(--radius-s);padding:13px 18px;color:#fcd34d;font-size:12.5px}
+#toTop{position:fixed;bottom:24px;left:24px;width:46px;height:46px;border-radius:14px;border:1px solid var(--line);background:rgba(7,26,43,.8);color:var(--teal);font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:.3s;z-index:40;backdrop-filter:blur(8px)}
+#toTop.show{opacity:1;pointer-events:auto}
+#toTop:hover{background:var(--teal);color:#04222b}
+
+@media(max-width:640px){
+  section{padding-block:52px}
+  .nav .links{display:none}
+  .tl-item{padding-left:6px}
+}
+@media print{.nav,.scroll-hint,#toTop,.orb{display:none}body{background:#fff;color:#111}}
+</style>
+</head>
+<body>
+<div class="aurora" aria-hidden="true"></div>
+<div class="grid-lines" aria-hidden="true"></div>
+<div class="orb o1" aria-hidden="true"></div>
+<div class="orb o2" aria-hidden="true"></div>
+<div class="orb o3" aria-hidden="true"></div>
+
+<nav class="nav" aria-label="ناوبری راهنما">
+  <div class="wrap">
+    <span class="brand"><span class="dot" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>راهنمای سامانه پرسش‌نامه EM-MPI</span>
+    <div class="links">
+      <a href="#how">چگونه کار می‌کند</a>
+      <a href="#steps">۱۰ گام</a>
+      <a href="#dims">پنج بُعد</a>
+      <a href="#score">امتیاز و سطوح</a>
+      <a href="#flags">پرچم‌های قرمز</a>
+      <a href="#services">وب‌سرویس‌ها</a>
+      <a href="#map">نگاشت نسخه‌ها</a>
+      <a href="#faq">پرسش‌ها</a>
+    </div>
+  </div>
+</nav>
+<div class="progress-top" aria-hidden="true"><b id="readProgress"></b></div>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">سند راهنمای تصویری — نسخه نمایشی EM-MPI-RF 1.0.0</span>
+    <h1>غربالگری محرومیت چندبعدی خانوار<br><span class="grad">شفاف، عادلانه و انسان‌محور</span></h1>
+    <p class="lead">
+      این راهنما نشان می‌دهد سامانه پرسش‌نامه EM-MPI چگونه با ۳۰ شاخص در ۵ بُعد، وضعیت خانوار را سطح‌بندی اولیه می‌کند؛
+      کدام داده‌ها از وب‌سرویس سازمان‌های متولی به‌عنوان «ملاک» دریافت می‌شوند، پرچم‌های قرمز کدام خطرها را فوری می‌کنند
+      و از پرسشنامه قبلی چه چیزهایی حفظ، بازتعریف یا تجزیه شده است.
+    </p>
+    <div class="stats">
+      <div class="stat"><b data-count="30">۰</b><span>شاخص سنجش</span></div>
+      <div class="stat"><b data-count="5">۰</b><span>بُعد محرومیت</span></div>
+      <div class="stat"><b data-count="1000">۰</b><span>امتیاز کل</span></div>
+      <div class="stat"><b data-count="9">۰</b><span>پرچم قرمز R1–R9</span></div>
+      <div class="stat"><b data-count="6">۰</b><span>وب‌سرویس متولی</span></div>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="#how">شروع مرور راهنما</a>
+      <a class="btn ghost" href="index.html">بازگشت به سامانه</a>
+    </div>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"><i></i>پیمایش</div>
+</header>
+<!-- ================= معماری ================= -->
+<section id="how">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="tag">معماری سنجش</span>
+      <h2>سامانه چگونه کار می‌کند؟ سه لایه، یک حقیقت</h2>
+      <p>EM-MPI ابزار «سطح‌بندی اولیه» است؛ نه تصمیم‌گیرنده پذیرش یا میزان حمایت. تصمیم نهایی همیشه انسانی، مستند و قابل اعتراض است.</p>
+    </div>
+    <div class="layers">
+      <div class="layer glass lc1 reveal d1">
+        <span class="num">۱</span>
+        <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        <h3>اطلاعات پرونده‌ای و مراجع ثبتی</h3>
+        <p>هویت، ترکیب خانوار، بیمه، نشانی و مالکیت از وب‌سرویس سازمان‌های متولی دریافت و «ملاک» قرار می‌گیرد؛ در فرم قابل تغییر نیست.</p>
+      </div>
+      <div class="layer glass lc2 reveal d2">
+        <span class="num">۲</span>
+        <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+        <h3>پرسشنامه عملیاتی ۳۰ شاخص</h3>
+        <p>شدت محرومیت مستقیم پرسیده نمی‌شود؛ ابتدا شواهد عملیاتی جمع می‌شود و موتور قواعد قطعی، ضریب مجاز را تعیین می‌کند.</p>
+      </div>
+      <div class="layer glass lc3 reveal d3">
+        <span class="num">۳</span>
+        <span class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+        <h3>بازبینی انسانی و ارجاع</h3>
+        <p>مددکار با دلیل و مدرک داده را تأیید یا اصلاح می‌کند؛ پرچم قرمز مسیر رسیدگی فوری مستقل از امتیاز فعال می‌کند.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ۱۰ گام ================= -->
+<section id="steps">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="tag">مسیر تکمیل</span>
+      <h2>پرسشنامه در ۱۰ گام — با نوار پیشرفت همیشه جلوی چشم شما</h2>
+      <p>بالای صفحه در همه گام‌ها، درصد تکمیل پاسخ‌های سنجش و پیشرفت هر بُعد به‌صورت زنده نمایش داده می‌شود. پاسخ‌ها خودکار ذخیره می‌شوند و می‌توانید بعداً ادامه دهید.</p>
+    </div>
+    <div class="timeline">
+      <div class="tl-item reveal"><span class="n">۱</span><h4>معرفی، محرمانگی و ثبت درخواست <span class="pill noscore">بدون امتیاز</span></h4><p>هدف پرسشنامه، حقوق خانوار و نوع درخواست (چندانتخابی). پاسخ «نمی‌دانم» یا «مایل به پاسخ نیستم» اختیار شماست.</p></div>
+      <div class="tl-item reveal"><span class="n">۲</span><h4>بررسی اولیه نشانه‌های فوریت <span class="pill noscore">بدون امتیاز</span></h4><p>خطر جانی یا بی‌خانمانی؟ همین‌جا ثبت کنید؛ رسیدگی فوری به تکمیل بقیه فرم وابسته نیست. دکمه «فوریت» در همه گام‌ها در دسترس است.</p></div>
+      <div class="tl-item reveal"><span class="n">۳</span><h4>اطلاعات پایه و اعضای خانوار <span class="pill noscore">بدون امتیاز</span> <span class="pill">استعلام وب‌سرویس</span></h4><p>هویت سرپرست و اعضا با استعلام از ثبت احوال، نشانی با سرویس پست و سابقه مالکیت با سامانه املاک دریافت و قفل می‌شود.</p></div>
+      <div class="tl-item scored reveal"><span class="n">۴</span><h4>سلامت و امنیت زیستی (A) <span class="pill">۷ شاخص — سقف ۲۵۰</span></h4><p>بیماری مؤثر، محدودیت عملکرد، درمان انجام‌نشده، فشار هزینه درمان، پوشش بیمه، ناامنی غذایی و ایمنی روان.</p></div>
+      <div class="tl-item scored reveal"><span class="n">۵</span><h4>آموزش و رشد انسانی (B) <span class="pill">۷ شاخص — سقف ۲۰۰</span></h4><p>ترک تحصیل، خطر ترک تحصیل، سواد کارکردی، دسترسی آموزشی، ابزار دیجیتال، نیاز ویژه و مسیر مهارت.</p></div>
+      <div class="tl-item scored reveal"><span class="n">۶</span><h4>استاندارد زندگی و مسکن (C) <span class="pill">۹ شاخص — سقف ۳۰۰</span></h4><p>بی‌خانمانی، ایمنی مسکن، امنیت تصرف، تراکم، خدمات پایه، بهداشت، وسایل ضروری، فشار هزینه و دسترسی.</p></div>
+      <div class="tl-item scored reveal"><span class="n">۷</span><h4>معیشت، اشتغال و درآمد (D) <span class="pill">۳ شاخص — سقف ۱۵۰</span></h4><p>استمرار درآمد تأمین‌کننده، بیکاری سایر اعضای توانمند و نسبت منابع قابل اتکا به خط فقر منطقه‌ای.</p></div>
+      <div class="tl-item scored reveal"><span class="n">۸</span><h4>ظرفیت مراقبت و پشتوانه اجتماعی (E) <span class="pill">۴ شاخص — سقف ۱۰۰</span></h4><p>چشم‌انداز معیشت ۱۲ ماه آینده، بار مراقبت، شبکه حمایتی در بحران و موانع حقوقی/اداری.</p></div>
+      <div class="tl-item reveal"><span class="n">۹</span><h4>مدارک، کیفیت داده و موارد نیازمند بررسی <span class="pill noscore">بدون امتیاز</span></h4><p>منبع شواهد هر شاخص ثبت می‌شود؛ تناقض‌ها با «هشدار کیفیت داده» مشخص و تصمیم خودکار متوقف می‌شود.</p></div>
+      <div class="tl-item reveal"><span class="n">۱۰</span><h4>خلاصه غربالگری، بازبینی انسانی و ارجاع <span class="pill noscore">بدون امتیاز</span></h4><p>نتیجه اولیه، اعلام تغییر شرایط توسط خانوار و مشاهده داشبورد حرفه‌ای برای مددکار.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= پنج بُعد ================= -->
+<section id="dims">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="tag">ساختار پنج‌بعدی</span>
+      <h2>پنج بُعد، ۳۰ شاخص، سقف ۱۰۰۰ امتیاز</h2>
+      <p>امتیاز هر شاخص = وزن شاخص × ضریب شدت محرومیت. ضرایب شاخص سه‌حالته ۰ / ۰٫۵ / ۱ و شاخص پنج‌حالته ۰ / ۰٫۲۵ / ۰٫۵ / ۰٫۷۵ / ۱ است.</p>
+    </div>
+    <div class="dims">
+      <div class="dim glass dA reveal d1"><div class="top"><span class="letter">A</span><div><h3>سلامت و امنیت زیستی</h3><span class="cap">سقف ۲۵۰ امتیاز — ۷ شاخص</span></div></div><div class="bar"><b data-w="100"></b></div><ul><li><b>A1</b> بیماری مزمن مؤثر</li><li><b>A2</b> محدودیت عملکردی</li><li><b>A3</b> درمان انجام‌نشده</li><li><b>A4</b> فشار هزینه درمان</li><li><b>A5</b> پوشش بیمه مؤثر</li><li><b>A6</b> ناامنی غذایی</li><li><b>A7</b> سلامت روان و ایمنی</li></ul></div>
+      <div class="dim glass dB reveal d2"><div class="top"><span class="letter">B</span><div><h3>آموزش و رشد انسانی</h3><span class="cap">سقف ۲۰۰ امتیاز — ۷ شاخص</span></div></div><div class="bar"><b data-w="80"></b></div><ul><li><b>B1</b> ترک تحصیل</li><li><b>B2</b> خطر ترک تحصیل</li><li><b>B3</b> سواد کارکردی</li><li><b>B4</b> مانع دسترسی آموزش</li><li><b>B5</b> ابزار دیجیتال</li><li><b>B6</b> نیاز آموزشی ویژه</li><li><b>B7</b> مسیر مهارت</li></ul></div>
+      <div class="dim glass dC reveal d3"><div class="top"><span class="letter">C</span><div><h3>استاندارد زندگی و مسکن</h3><span class="cap">سقف ۳۰۰ امتیاز — ۹ شاخص</span></div></div><div class="bar"><b data-w="120"></b></div><ul><li><b>C1</b> بی‌خانمانی</li><li><b>C2</b> ایمنی مسکن</li><li><b>C3</b> امنیت تصرف</li><li><b>C4</b> تراکم سکونت</li><li><b>C5</b> خدمات پایه</li><li><b>C6</b> بهداشت محیط</li><li><b>C7</b> وسایل ضروری</li><li><b>C8</b> فشار هزینه مسکن</li><li><b>C9</b> دسترسی خدمات</li></ul></div>
+      <div class="dim glass dD reveal d4"><div class="top"><span class="letter">D</span><div><h3>معیشت، اشتغال و درآمد</h3><span class="cap">سقف ۱۵۰ امتیاز — ۳ شاخص</span></div></div><div class="bar"><b data-w="60"></b></div><ul><li><b>D1</b> اشتغال تأمین‌کننده</li><li><b>D2</b> بیکاری سایر اعضا</li><li><b>D3</b> کفایت منابع به خط فقر</li></ul></div>
+      <div class="dim glass dE reveal d1"><div class="top"><span class="letter">E</span><div><h3>ظرفیت مراقبت و پشتوانه</h3><span class="cap">سقف ۱۰۰ امتیاز — ۴ شاخص</span></div></div><div class="bar"><b data-w="40"></b></div><ul><li><b>E1</b> چشم‌انداز معیشت</li><li><b>E2</b> بار مراقبت</li><li><b>E3</b> پشتوانه بحران</li><li><b>E4</b> مانع حقوقی/اداری</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= امتیاز و سطوح ================= -->
+<section id="score">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="tag">فرمول و سطوح</span>
+      <h2>امتیازدهی شفاف و پنج سطح محرومیت</h2>
+    </div>
+    <div class="two-col">
+      <div class="panel glass reveal d1">
+        <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6M9 13h6M9 17h4"/></svg> قاعده مشترک امتیازدهی</h3>
+        <p>
+          هر شاخص یکی از حالت‌های مصوب معیار عملیاتی خود را می‌گیرد؛ سطوح «خفیف، متوسط، زیاد و شدید» فقط نام سطوح انتخاب ضریب‌اند و انتخاب باید بر اساس شواهد و آستانه‌های جدول شاخص انجام شود، نه برداشت شخصی ارزیاب. اطلاعات ناکافی، «نیازمند تکمیل اطلاعات» می‌شود و هرگز خودکار صفر یا یک نمی‌گیرد.
+        </p>
+        <div class="formula">EM-MPI = A + B + C + D + E</div>
+        <p style="margin-top:12px">
+          شاخص‌های پنج‌حالته نسخه حاضر: <b style="color:var(--text)">A6 (ناامنی غذایی)، C4 (تراکم)، C8 (فشار هزینه مسکن) و D3 (کفایت منابع)</b> — بقیه سه‌حالته‌اند. پرچم قرمز امتیاز اضافه نمی‌کند؛ فقط مسیر فوری فعال می‌کند.
+        </p>
+      </div>
+      <div class="panel glass reveal d2">
+        <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 15l4-6 4 3 5-8"/></svg> پنج سطح محرومیت اولیه</h3>
+        <p>نتیجه، مسیر پیشنهادی رسیدگی را تعیین می‌کند؛ سطح به‌تنهایی درباره پذیرش یا رد خانوار تصمیم نمی‌گیرد.</p>
+        <div class="levels">
+          <div class="level lv1"><span class="rng">۰ تا ۱۴۹</span><b>سطح ۱ — محدود</b><span>پایش و اطلاع‌رسانی خدمات</span></div>
+          <div class="level lv2"><span class="rng">۱۵۰ تا ۲۹۹</span><b>سطح ۲ — خفیف</b><span>بررسی تکمیلی محدود</span></div>
+          <div class="level lv3"><span class="rng">۳۰۰ تا ۴۴۹</span><b>سطح ۳ — متوسط</b><span>ارجاع عادی به CDI</span></div>
+          <div class="level lv4"><span class="rng">۴۵۰ تا ۵۹۹</span><b>سطح ۴ — زیاد</b><span>ارجاع اولویت‌دار</span></div>
+          <div class="level lv5"><span class="rng">۶۰۰ تا ۱۰۰۰</span><b>سطح ۵ — بسیار زیاد</b><span>ارزیابی سریع و مداخله چندبخشی</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ================= پرچم‌های قرمز ================= -->
+<section id="flags">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="tag">فوریت مستقل از امتیاز</span>
+      <h2>پرچم‌های قرمز R1 تا R9</h2>
+      <p>وجود پرچم قرمز معتبر، حتی با امتیاز پایین، مسیر ارجاع فوری را فعال می‌کند. پرچم امتیاز اضافی ندارد؛ فقط هشدار و مسیر رسیدگی است و فعال‌سازی/خاتمه آن با تأیید انسانی انجام می‌شود.</p>
+    </div>
+    <div class="flags">
+      <div class="flag reveal d1"><span class="code">R1</span><div><h4>بی‌خانمانی یا خطر فوری تخلیه</h4><p>سرپناه ناپایدار، سکونت در خودرو یا فضای عمومی، اخطار تخلیه معتبر.</p><div class="acts"><i>C1</i><i>C3</i><i>C8</i></div></div></div>
+      <div class="flag reveal d1"><span class="code">R2</span><div><h4>بیماری حیاتی یا نیاز درمانی فوری</h4><p>تأخیر در درمان می‌تواند به سلامت یا زندگی آسیب جدی بزند.</p><div class="acts"><i>A1</i><i>A3</i></div></div></div>
+      <div class="flag reveal d2"><span class="code">R3</span><div><h4>فقدان غذا یا سوءتغذیه شدید</h4><p>حذف مکرر وعده، گرسنگی، سوءتغذیه نیازمند بررسی فوری.</p><div class="acts"><i>A6</i></div></div></div>
+      <div class="flag reveal d2"><span class="code">R4</span><div><h4>کودک در معرض آسیب یا ترک تحصیل بحرانی</h4><p>کار کودک، حذف از آموزش، مراقبت اجباری سنگین.</p><div class="acts"><i>B1</i><i>B2</i><i>B6</i></div></div></div>
+      <div class="flag reveal d3"><span class="code">R5</span><div><h4>خشونت خانوادگی یا تهدید امنیتی</h4><p>با محرمانگی کامل؛ دسترسی محدود و ارجاع تخصصی فوری.</p><div class="acts"><i>A7</i><i>E3</i></div></div></div>
+      <div class="flag reveal d3"><span class="code">R6</span><div><h4>سالمند/بیمار/معلول بدون مراقب</h4><p>فرد نیازمند مراقبت مستمر که پشتیبان در دسترس ندارد.</p><div class="acts"><i>A2</i><i>E2</i><i>E3</i></div></div></div>
+      <div class="flag reveal d4"><span class="code">R7</span><div><h4>قطع خدمات حیاتی در شرایط بحرانی</h4><p>قطع آب، برق یا سوخت به‌دلیل بدهی یا زیرساخت در بحران.</p><div class="acts"><i>C5</i></div></div></div>
+      <div class="flag reveal d4"><span class="code">R8</span><div><h4>بحران حقوقی مؤثر بر امنیت یا سکونت</h4><p>مانع حقوقی/هویتی/اداری که دسترسی به حق و خدمات را بسته است.</p><div class="acts"><i>E4</i><i>C3</i></div></div></div>
+      <div class="flag reveal d4"><span class="code">R9</span><div><h4>احتمال قریب‌الوقوع از دست رفتن درآمد اصلی یا مسکن</h4><p>خطر پیشگیرانه؛ ارجاع فوری یا پیشگیرانه حسب شدت.</p><div class="acts"><i>D3</i><i>C1</i><i>C8</i><i>E1</i></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= وب‌سرویس‌ها ================= -->
+<section id="services">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="tag">منابع ثبتی — ملاک غیرقابل تغییر</span>
+      <h2>بخش مهمی از پرسشنامه از وب‌سرویس سازمان‌های متولی می‌آید</h2>
+      <p>در گام «اطلاعات پایه»، برای هر سرویس دکمه استعلام وجود دارد. پس از دریافت موفق، فیلد مرتبط قفل می‌شود؛ اصلاح آن فقط از مسیر درخواست به مرجع ثبتی ممکن است. در نسخه نمایشی آفلاین، پاسخ استعلام شبیه‌سازی می‌شود.</p>
+    </div>
+    <div class="services">
+      <div class="service glass reveal d1"><div class="top"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M4 21v-1a7 7 0 0 1 14 0v1"/><path d="M12 3v2M9.5 4.5l1 1.7M14.5 4.5l-1 1.7"/></svg></span><div><h4>ثبت احوال</h4><div class="org">هویت و ترکیب خانوار</div></div><span class="lock">ملاک</span></div><ul><li>نام و کد ملی اعضا</li><li>نسبت خویشاوندی</li><li>سن و تاریخ تولد</li><li>ازدواج و رویدادهای حیاتی</li></ul><div class="feeds">خوراک: <b>A2، A7، E1، E2، E4</b></div></div>
+      <div class="service glass reveal d2"><div class="top"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span><div><h4>پست</h4><div class="org">نشانی و موقعیت جغرافیایی</div></div><span class="lock">ملاک</span></div><ul><li>نشانی استاندارد از کدپستی</li><li>استان / شهرستان / منطقه</li><li>موقعیت جغرافیایی سکونت</li></ul><div class="feeds">خوراک: <b>C1، C9، D3</b> (خط فقر منطقه‌ای)</div></div>
+      <div class="service glass reveal d3"><div class="top"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span><div><h4>بیمه‌ها</h4><div class="org">تأمین اجتماعی و سایر صندوق‌ها</div></div><span class="lock">ملاک</span></div><ul><li>پوشش پایه اعضا</li><li>نوع صندوق و اعتبار</li><li>سابقه بیمه اجتماعی</li></ul><div class="feeds">خوراک: <b>A5</b> (پوشش مؤثر)</div></div>
+      <div class="service glass reveal d1"><div class="top"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4M9 11h.01M15 11h.01M12 11h.01"/></svg></span><div><h4>اموال و املاک</h4><div class="org">وضعیت مالکیت مسکن</div></div><span class="lock">ملاک</span></div><ul><li>سابقه سند به نام سرپرست</li><li>وضعیت مالکیت</li><li>راستی‌آزمایی حق سکونت</li></ul><div class="feeds">خوراک: <b>C3</b> (امنیت تصرف)</div></div>
+      <div class="service glass reveal d2"><div class="top"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></span><div><h4>آموزش‌وپرورش</h4><div class="org">وضعیت تحصیل مدارس</div></div><span class="lock">ملاک</span></div><ul><li>ثبت‌نام و حضور</li><li>وقفه / ترک تحصیل</li><li>مدرک تحصیلی مدارس</li></ul><div class="feeds">خوراک: <b>B1، B2، B4</b></div></div>
+      <div class="service glass reveal d3"><div class="top"><span class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg></span><div><h4>علوم / دانشگاه آزاد</h4><div class="org">مدارک تحصیلی دانشگاهی</div></div><span class="lock">ملاک</span></div><ul><li>مدارک دانشگاهی اعضا</li><li>وضعیت تحصیل دانشگاهی</li></ul><div class="feeds">خوراک: <b>B3، B7</b> (داده زمینه‌ای)</div></div>
+    </div>
+
+    <div class="ladder reveal">
+      <div class="rung"><span class="r">۱</span><b>مراجع ثبتی و استعلام وب‌سرویس</b><span>بالاترین تقدم — ملاک و قابل تغییر در فرم نیست</span></div>
+      <div class="rung"><span class="r">۲</span><b>مدارک معتبر خانوار</b><span>گواهی پزشکی، قرارداد، قبض، اخطار و اسناد هزینه</span></div>
+      <div class="rung"><span class="r">۳</span><b>خوداظهاری ساختاریافته خانوار</b><span>شرایط جاری و موضوعات فاقد داده ثبتی</span></div>
+      <div class="rung"><span class="r">۴</span><b>ابزارک مددکار</b><span>تماس، بازدید میدانی و راستی‌آزمایی وضعیت واقعی</span></div>
+      <div class="rung"><span class="r">۵</span><b>تأیید / اصلاح / رد مددکار</b><span>قضاوت حرفه‌ای با ثبت دلیل و نهایی‌سازی شاخص</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= نگاشت نسخه‌ها ================= -->
+<section id="map">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="tag">میراث داده — از پرسشنامه قبلی چه می‌آید؟</span>
+      <h2>نگاشت نسخه قبلی (اکسل) به نسخه جدید (EM-MPI)</h2>
+      <p>روی هر شاخص در فرم، برچسب «منبع نسخه قبلی» را ببینید؛ جدول کامل ۳۰ شاخص در سامانه، بخش «نقشه مهاجرت» قرار دارد.</p>
+    </div>
+    <div class="map-note reveal">
+      <b>نکته مهم مهاجرت داده:</b>
+      <p>«حذف» به معنای حذف از پرسشنامه عمومی غربالگری است، نه حذف از سوابق سازمانی. از داده تاریخی ناقص، ضریب شدت جدید ساخته نمی‌شود؛ بخش عمده شدت محرومیت باید با معیارهای عملیاتی جدید دوباره جمع‌آوری شود — از «بیمه دارد» یا «گوشی دارد» نمی‌توان امتیاز معتبر استخراج کرد.</p>
+    </div>
+    <div class="map-grid">
+      <div class="map-card reveal d1"><div class="t"><b>A5 — پوشش بیمه مؤثر</b><span class="badge b-re">بازتعریف</span></div><div class="old">از: «بیمه پایه درمانی دارد؟» + سابقه بیمه اجتماعی</div><div class="note">به‌جای دارد/ندارد، قابلیت استفاده واقعی (اعتبار، فرانشیز، دسترسی) سنجیده می‌شود.</div></div>
+      <div class="map-card reveal d1"><div class="t"><b>C1 + C2 + C3 — مسکن</b><span class="badge b-split">تجزیه</span></div><div class="old">از: «وضعیت سکونت» (ملکی، رهن و اجاره، آلونک و ...)</div><div class="note">یک فیلد ترکیبی به سه شاخص مستقل (خانمانی، ایمنی، امنیت تصرف) تفکیک شد.</div></div>
+      <div class="map-card reveal d2"><div class="t"><b>C9 — دسترسی خدمات</b><span class="badge b-ctrl">کنترل</span></div><div class="old">از: «محل زندگی» (شهر / روستا / حاشیه)</div><div class="note">شهر یا روستا بودن امتیاز مستقیم ندارد؛ فقط برای خط فقر منطقه‌ای و دسترسی خدمات.</div></div>
+      <div class="map-card reveal d2"><div class="t"><b>E1 / E2 / E3 — وضعیت سرپرست</b><span class="badge b-re">بازتعریف</span></div><div class="old">از: «ویژگی‌های فردی» (سالمند، مطلقه، زندانی و ...)</div><div class="note">عنوان‌ها بدون امتیاز خودکار؛ اثر واقعی بر معیشت، مراقبت و پشتوانه سنجیده می‌شود.</div></div>
+      <div class="map-card reveal d3"><div class="t"><b>D3 — کفایت منابع</b><span class="badge b-re">بازتعریف</span></div><div class="old">از: «منبع درآمدی خانوار» + نیازسنجی</div><div class="note">نسبت منابع قابل اتکا به خط فقر منطقه‌ای متناسب با خانوار محاسبه می‌شود.</div></div>
+      <div class="map-card reveal d3"><div class="t"><b>A4 / B2 / B6 / C4 / C7 / E3</b><span class="badge b-new">جدید</span></div><div class="old">بدون معادل مستقیم در پرسشنامه قبلی</div><div class="note">فشار مالی درمان، خطر ترک تحصیل، نیاز ویژه، تراکم، وسایل ضروری و پشتوانه بحران افزوده شدند.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= پرسش‌های متداول ================= -->
+<section id="faq">
+  <div class="wrap">
+    <div class="head reveal">
+      <span class="tag">پرسش‌های متداول</span>
+      <h2>سؤال‌های پرتکرار خانوارها و کاربران</h2>
+    </div>
+    <div class="faq">
+      <div class="q reveal"><button type="button">آیا امتیاز پایین به معنای رد درخواست است؟<span class="plus">+</span></button><div class="a"><p>خیر. EM-MPI ابزار سطح‌بندی اولیه و اولویت‌بندی رسیدگی است. هیچ امتیاز یا خروجی الگوریتمی به‌تنهایی مبنای پذیرش، رد، حذف یا تعیین میزان حمایت نیست؛ تصمیم نهایی با مددکار و مرجع انسانی است، مستند، قابل توضیح و قابل اعتراض.</p></div></div>
+      <div class="q reveal"><button type="button">اگر به همه سؤال‌ها جواب نداده باشم چه می‌شود؟<span class="plus">+</span></button><div class="a"><p>پاسخ دادن اجباری نیست. اطلاعات ناکافی به‌جای امتیاز صفر یا یک، وضعیت «نیازمند تکمیل اطلاعات» می‌گیرد و نتیجه «غیرنهایی» نمایش داده می‌شود. می‌توانید پیش‌نویس را ذخیره کنید و بعداً ادامه دهید.</p></div></div>
+      <div class="q reveal"><button type="button">چرا بعضی فیلدها قابل ویرایش نیستند؟<span class="plus">+</span></button><div class="a"><p>فیلدهایی که از وب‌سرویس سازمان‌های متولی (ثبت احوال، پست، بیمه، املاک، علوم، آموزش‌وپرورش) دریافت شده‌اند «ملاک ثبتی» هستند و در فرم قفل می‌شوند. اگر اشکالی در آن داده‌ها می‌بینید، اصلاح باید از طریق درخواست به همان مرجع ثبتی انجام شود.</p></div></div>
+      <div class="q reveal"><button type="button">پرچم قرمز چیست و چه تفاوتی با امتیاز دارد؟<span class="plus">+</span></button><div class="a"><p>پرچم قرمز نشانه وضعیت فوری یا خطرناک (مانند بی‌خانمانی، خطر جانی، فقدان مراقب) است. امتیاز اضافه نمی‌کند اما مستقل از امتیاز، مسیر ارجاع فوری و رسیدگی اضطراری را فعال می‌کند. ثبت آن در گام ۲ یا از دکمه «فوریت» در همه گام‌ها ممکن است.</p></div></div>
+      <div class="q reveal"><button type="button">اطلاعات من کجا ذخیره می‌شود؟<span class="plus">+</span></button><div class="a"><p>در نسخه نمایشی، همه داده‌ها فقط در مرورگر خود شما (ذخیره‌سازی محلی) نگهداری می‌شود و به هیچ سروری ارسال نمی‌گردد. در استقرار عملی، دسترسی داده تابع ضرورت، مجوز قانونی و سطوح محرمانگی سازمانی خواهد بود.</p></div></div>
+      <div class="q reveal"><button type="button">از پرسشنامه قبلی چه داده‌ای استفاده می‌شود؟<span class="plus">+</span></button><div class="a"><p>اطلاعات پایه قابل انتقال است و نگاشت هر فیلد قدیمی به شاخص جدید مشخص شده (برچسب میراث روی هر شاخص در فرم + جدول کامل در «نقشه مهاجرت»). اما بخش عمده شدت محرومیت باید با معیارهای عملیاتی جدید دوباره جمع‌آوری شود؛ از داده تاریخی ناقص ضریب جدید ساخته نمی‌شود.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="warn">این صفحه بخشی از نسخه نمایشی سامانه است؛ هیچ داده واقعی خانوار در آن ثبت یا ارسال نشود. قواعد نسخه EM-MPI-RF 1.0.0-demo است و موارد آستانه‌ای برچسب «نیازمند تصویب» دارند.</div>
+  <div>پرسش‌نامه — سامانه غربالگری محرومیت چندبعدی EM-MPI خانوار • ۳۰ شاخص • ۵ بُعد • سقف ۱۰۰۰ امتیاز</div>
+</footer>
+
+<button id="toTop" aria-label="بازگشت به بالای صفحه" title="بازگشت به بالا">↑</button>
+
+<script>
+(function(){
+  "use strict";
+  /* --- نوار پیشرفت مطالعه --- */
+  var bar=document.getElementById("readProgress");
+  var toTop=document.getElementById("toTop");
+  function onScroll(){
+    var h=document.documentElement;
+    var max=h.scrollHeight-h.clientHeight;
+    bar.style.width=(max>0?(h.scrollTop/max*100):0)+"%";
+    if(h.scrollTop>600) toTop.classList.add("show"); else toTop.classList.remove("show");
+  }
+  window.addEventListener("scroll",onScroll,{passive:true}); onScroll();
+  toTop.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"})});
+
+  /* --- نمایان‌شدن هنگام اسکرول --- */
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} });
+  },{threshold:.14});
+  document.querySelectorAll(".reveal").forEach(function(el){io.observe(el)});
+
+  /* --- شمارنده‌های قهرمان --- */
+  function faNum(n){return String(n).replace(/\d/g,function(d){return "۰۱۲۳۴۵۶۷۸۹"[d]})}
+  var cio=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      var el=e.target,target=parseInt(el.getAttribute("data-count"),10),start=null,dur=1400;
+      function tick(ts){
+        if(!start)start=ts;
+        var p=Math.min((ts-start)/dur,1);
+        p=1-Math.pow(1-p,3);
+        el.textContent=faNum(Math.round(target*p));
+        if(p<1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick); cio.unobserve(el);
+    });
+  },{threshold:.6});
+  document.querySelectorAll("[data-count]").forEach(function(el){cio.observe(el)});
+
+  /* --- نوارهای وزن ابعاد --- */
+  var wio=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(!e.isIntersecting) return;
+      e.target.style.width=e.target.getAttribute("data-w")+"%";
+      wio.unobserve(e.target);
+    });
+  },{threshold:.5});
+  document.querySelectorAll(".dim .bar b").forEach(function(el){wio.observe(el)});
+
+  /* --- آکاردئون پرسش‌ها --- */
+  document.querySelectorAll(".q button").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var q=btn.parentElement,a=q.querySelector(".a"),open=q.classList.contains("open");
+      document.querySelectorAll(".q.open").forEach(function(o){o.classList.remove("open");o.querySelector(".a").style.maxHeight="0"});
+      if(!open){q.classList.add("open");a.style.maxHeight=a.scrollHeight+"px";}
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

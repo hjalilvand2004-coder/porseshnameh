@@ -201,6 +201,21 @@ export interface Household {
 
 export type AssessmentStatus = "draft" | "submitted" | "in_review" | "referred" | "closed";
 
+/**
+ * نتیجه استعلام از مراجع ثبتی (وب‌سرویس سازمان‌های متولی).
+ * طبق قاعده تقدم منابع، داده مرجع ثبتی «ملاک» است و در فرم غربالگری قابل ویرایش نیست.
+ * در نسخه نمایشی آفلاین، پاسخ به‌شکل شبیه‌سازی‌شده از داده واردشده ساخته می‌شود.
+ */
+export interface WebServiceResult {
+  serviceId: string;
+  status: "ok" | "partial" | "error";
+  fetchedAt: string;
+  /** داده دریافتی (کلید → مقدار نمایشی) */
+  data: Record<string, string>;
+  /** یادداشت وضعیت (مثلاً اطلاعات کافی برای استعلام وجود ندارد) */
+  note?: string;
+}
+
 export interface Assessment {
   id: string;
   createdAt: string;
@@ -225,6 +240,8 @@ export interface Assessment {
   audit: AuditEvent[];
   /** سهم خانوار: بیانیه تغییر شرایط */
   changeStatements?: { at: string; text: string }[];
+  /** نتایج استعلام مراجع ثبتی (وب‌سرویس‌ها) — کلید = شناسه خدمت */
+  webServices?: Record<string, WebServiceResult>;
 }
 
 /** وضعیت هر شاخص پس از حل */

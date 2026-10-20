@@ -1,8 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { GitCompareArrows, ShieldAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { GitCompareArrows, ShieldAlert, Landmark, Layers3 } from "lucide-react";
 import { faNum } from "@/lib/mpi/format";
+import {
+  LEGACY_ACTION_META, LEGACY_INDICATOR_TABLE, legacySummary, WEB_SERVICES,
+  type LegacyAction,
+} from "@/lib/mpi/legacy-map";
+import { DataPriorityLegend } from "@/components/porsesh/web-services";
+import { usePorsesh } from "@/lib/store";
+import { cn } from "@/lib/utils";
 
 /**
  * نقشه مهاجرت پرسشنامه قدیمی — بازنگری فیلدبه‌فیلد
@@ -128,16 +137,138 @@ function MigrationTable({ title, rows }: { title: string; rows: Row[] }) {
   );
 }
 
+/* جدول نگاشت ۳۰ شاخص جدید به فیلدهای پرسشنامه قبلی — نمای شاخص‌محور */
+function IndicatorMapTable() {
+  const [filter, setFilter] = useState<LegacyAction | "all">("all");
+  const rows = LEGACY_INDICATOR_TABLE.filter((r) => filter === "all" || r.legacy.action === filter);
+  const counts = legacySummary();
+  const total = LEGACY_INDICATOR_TABLE.length;
+
+  const FILTERS: { key: LegacyAction | "all"; label: string }[] = [
+    { key: "all", label: `همه (${faNum(total)})` },
+    { key: "keep", label: `${LEGACY_ACTION_META.keep.short} (${faNum(counts.keep)})` },
+    { key: "reinterpret", label: `${LEGACY_ACTION_META.reinterpret.short} (${faNum(counts.reinterpret)})` },
+    { key: "split", label: `${LEGACY_ACTION_META.split.short} (${faNum(counts.split)})` },
+    { key: "control", label: `${LEGACY_ACTION_META.control.short} (${faNum(counts.control)})` },
+    { key: "new", label: `${LEGACY_ACTION_META.new.short} (${faNum(counts.new)})` },
+  ];
+
+  return (
+    <div className="rounded-2xl border bg-card overflow-hidden">
+      <div className="px-5 py-3.5 border-b bg-muted/40 flex flex-wrap items-center gap-2">
+        <h3 className="font-semibold flex items-center gap-2">
+          <Layers3 className="size-5 text-teal-strong" aria-hidden />
+          جدول ۰ — شاخص‌محور: هر ۳۰ شاخص EM-MPI از کجای پرسشنامه قبلی آمده است؟
+        </h3>
+        <div className="ms-auto flex flex-wrap gap-1.5">
+          {FILTERS.map((f) => (
+            <Button key={f.key} size="sm" variant={filter === f.key ? "default" : "outline"} className="h-7 px-2.5 text-xs" onClick={() => setFilter(f.key)}>
+              {f.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+      <div className="overflow-x-auto thin-scroll">
+        <table className="w-full text-sm min-w-[860px]">
+          <thead>
+            <tr className="text-xs text-muted-foreground border-b bg-card">
+              <th className="text-start py-2.5 px-4">شاخص جدید</th>
+              <th className="text-start py-2.5 px-4">وزن</th>
+              <th className="text-start py-2.5 px-4">اقدام نسبت به نسخه قبلی</th>
+              <th className="text-start py-2.5 px-4">فیلد(های) پرسشنامه قبلی</th>
+              <th className="text-start py-2.5 px-4">چه چیزی تغییر کرده است</th>
+              <th className="text-start py-2.5 px-4">راستی‌آزمایی ثبتی</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => {
+              const meta = LEGACY_ACTION_META[r.legacy.action];
+              return (
+                <tr key={r.id} className="border-b last:border-0 align-top">
+                  <td className="py-2.5 px-4 whitespace-nowrap">
+                    <div className="font-semibold">{r.id} — {r.title}</div>
+                  </td>
+                  <td className="py-2.5 px-4 font-mono text-xs whitespace-nowrap">{faNum(r.weight)}</td>
+                  <td className="py-2.5 px-4">
+                    <Badge variant="outline" className={meta.className}>{meta.short}</Badge>
+                    <p className="text-[11px] text-muted-foreground mt-1 max-w-44">{meta.label}</p>
+                  </td>
+                  <td className="py-2.5 px-4 leading-6 max-w-xs">
+                    <ul className="list-disc ps-4 space-y-0.5 text-[13px]">
+                      {r.legacy.old.map((o, i) => <li key={i}>{o}</li>)}
+                    </ul>
+                  </td>
+                  <td className="py-2.5 px-4 leading-6 max-w-md text-[13px]">{r.legacy.note}</td>
+                  <td className="py-2.5 px-4 text-[13px] whitespace-nowrap">{r.services.length ? r.services.join("، ") : <span className="text-muted-foreground">—</span>}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* کاتالوگ وب‌سرویس‌های متولی */
+function WebServicesCatalog() {
+  return (
+    <div className="space-y-3">
+      <div className="rounded-2xl border border-teal-strong/30 bg-teal-soft/40 p-5 flex gap-3">
+        <Landmark className="size-6 text-teal-strong shrink-0 mt-0.5" aria-hidden />
+        <div className="text-sm leading-6">
+          <h3 className="font-bold">منابع ثبتی — بخش قابل توجهی از پرسشنامه از وب‌سرویس سازمان‌های متولی استخراج می‌شود</h3>
+          <p>
+            این داده‌ها با <b>بالاترین تقدم</b> اعتبار دارند، «ملاک» هستند و در فرم غربالگری <b>قابل تغییر نیستند</b>.
+            در فرم گام «اطلاعات پایه» دکمه استعلام هر سرویس موجود است؛ پس از دریافت موفق، فیلد مرتبط فقط‌خواندنی می‌شود
+            و اصلاح آن فقط از مسیر درخواست به مرجع ثبتی امکان‌پذیر است.
+          </p>
+        </div>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {WEB_SERVICES.map((s) => (
+          <div key={s.id} className="rounded-2xl border bg-card p-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <h4 className="font-semibold text-sm leading-5">{s.name}</h4>
+              <Badge variant="outline" className="ms-auto shrink-0 text-[10px] bg-teal-soft text-teal-strong border-teal-strong/30">ملاک</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">{s.org}</p>
+            <ul className="text-[13px] leading-6 list-disc ps-4">
+              {s.provides.map((p, i) => <li key={i}>{p}</li>)}
+            </ul>
+            <p className="text-xs">
+              <b>خوراک شاخص‌ها:</b> <span className="font-mono">{s.feeds.join("، ")}</span>
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function MigrationView() {
   const totalFields = TABLE1.length + TABLE2.length;
+  const counts = legacySummary();
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
       <header className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-bold flex items-center gap-2">
-          <GitCompareArrows className="size-6 text-teal-strong" aria-hidden /> نقشه مهاجرت پرسشنامه قدیمی
+          <GitCompareArrows className="size-6 text-teal-strong" aria-hidden /> نقشه مهاجرت پرسشنامه قدیمی ← نسخه EM-MPI
         </h1>
-        <Badge variant="outline">{faNum(totalFields)} فیلد بررسی‌شده</Badge>
+        <Badge variant="outline">{faNum(totalFields)} فیلد قدیمی بررسی‌شده</Badge>
+        <Badge variant="outline">{faNum(30)} شاخص جدید نگاشت شده</Badge>
       </header>
+
+      {/* خلاصه اقدام‌ها */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-2.5">
+        {(Object.keys(LEGACY_ACTION_META) as LegacyAction[]).map((k) => (
+          <div key={k} className={cn("rounded-2xl border p-4", LEGACY_ACTION_META[k].className)}>
+            <div className="text-2xl font-bold">{faNum(counts[k])}</div>
+            <div className="text-sm font-semibold mt-0.5">{LEGACY_ACTION_META[k].label}</div>
+            <p className="text-xs mt-1 leading-5 opacity-80">{LEGACY_ACTION_META[k].desc}</p>
+          </div>
+        ))}
+      </div>
 
       <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-5 text-sm leading-7 flex gap-3">
         <ShieldAlert className="size-5 shrink-0 text-amber-600 mt-1" aria-hidden />
@@ -155,8 +286,13 @@ export function MigrationView() {
         </div>
       </div>
 
-      <MigrationTable title="جدول ۱ — اطلاعات خانوار، مسکن، درخواست و درآمد" rows={TABLE1} />
-      <MigrationTable title="جدول ۲ — اطلاعات فردی، اجتماعی، اشتغال، بیمه، سلامت و تحصیل" rows={TABLE2} />
+      <IndicatorMapTable />
+
+      <MigrationTable title="جدول ۱ — اطلاعات خانوار، مسکن، درخواست و درآمد (نمای فیلدمحور قبلی)" rows={TABLE1} />
+      <MigrationTable title="جدول ۲ — اطلاعات فردی، اجتماعی، اشتغال، بیمه، سلامت و تحصیل (نمای فیلدمحور قبلی)" rows={TABLE2} />
+
+      <WebServicesCatalog />
+      <DataPriorityLegend />
     </div>
   );
 }

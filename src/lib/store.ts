@@ -20,6 +20,7 @@ import {
 import { FLAG_DEFS, RULE_SET } from "@/lib/mpi/rules";
 import { buildDemoBank } from "@/lib/mpi/demo-bank";
 import { nowIso, uid } from "@/lib/mpi/format";
+import type { WebServiceResult } from "@/lib/mpi/types";
 
 /**
  * Store سامانه — نمونه نمایشی
@@ -74,6 +75,11 @@ export interface PorseshState {
 
   /** اعلام تغییر شرایط توسط خانوار */
   addChangeStatement: (id: string, text: string) => void;
+
+  /** ثبت نتیجه استعلام مرجع ثبتی (وب‌سرویس) — داده ملاک و غیرقابل ویرایش در فرم */
+  setWebService: (id: string, serviceId: string, result: WebServiceResult) => void;
+  /** حذف نتیجه استعلام (فقط برای بازآزمایی در نسخه نمایشی) */
+  clearWebService: (id: string, serviceId: string) => void;
 
   /** اصلاح مستند داده توسط مددکار — محاسبه مجدد و ثبت نسخه */
   correctData: (id: string, by: string, c: { answerKey: string; newValue: AnswerValue; reason: string; evidence?: string }) => void;
@@ -138,6 +144,7 @@ export const usePorsesh = create<PorseshState>()(
             { id: uid("aud"), at: now, actor: "سیستم", role: "system", action: "ایجاد پیش‌نویس ارزیابی", detail: `نسخه قواعد: ${RULE_SET.fullId}` },
           ],
           changeStatements: [],
+          webServices: {},
           ...init,
         };
         set((st) => ({ assessments: { ...st.assessments, [id]: a }, activeId: id, view: "wizard", wizardStep: 1 }));
@@ -367,6 +374,28 @@ export const usePorsesh = create<PorseshState>()(
           return { assessments: { ...st.assessments, [id]: updated } };
         }),
 
+      setWebService: (id, serviceId, result) =>
+        set((st) => {
+          const a = st.assessments[id];
+          if (!a) return st;
+          const webServices = { ...(a.webServices ?? {}), [serviceId]: result };
+          const updated = withAudit({ ...a, webServices }, {
+            actor: "سیستم", role: "system", action: `استعلام وب‌سرویس «${serviceId}»`,
+            detail: `وضعیت: ${result.status}`,
+          });
+          return { assessments: { ...st.assessments, [id]: updated } };
+        }),
+
+      clearWebService: (id, serviceId) =>
+        set((st) => {
+          const a = st.assessments[id];
+          if (!a) return st;
+          const webServices = { ...(a.webServices ?? {}) };
+          delete webServices[serviceId];
+          const updated = { ...a, webServices, updatedAt: nowIso() };
+          return { assessments: { ...st.assessments, [id]: updated } };
+        }),
+
       correctData: (id, by, c) =>
         set((st) => {
           const a = st.assessments[id];
@@ -405,6 +434,7 @@ export const usePorsesh = create<PorseshState>()(
               flags: a.flags ?? [], qualityIssues: a.qualityIssues ?? [], referrals: a.referrals ?? [],
               reviews: a.reviews ?? [], corrections: a.corrections ?? [], audit: a.audit ?? [],
               members: a.members ?? [], answers: a.answers ?? {}, incomeSources: a.incomeSources ?? [],
+              webServices: a.webServices ?? {},
             };
           }
           set((st) => ({ assessments: { ...incoming, ...st.assessments } }));
