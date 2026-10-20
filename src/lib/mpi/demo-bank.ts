@@ -84,6 +84,7 @@ const urgent: DemoBuilder = {
     a.household = {
       responderName: "مریم احمدی (نمونه)", responderRelation: "همسر",
       headName: "علی محمدی (نمونه)", headNationalIdStatus: "has",
+      headNationalId: "1234567890", headBirthDate: "۱۳۵۸/۰۳/۱۴", postalCode: "1234567890",
       province: "اصفهان", county: "نجف‌آباد",
       dwellingType: "واحد مسکونی", tenureType: "مستأجر",
       monthlyRent: 3_000_000, monthlyCharge: 300_000, monthlyBills: 400_000, arrears: 0,
@@ -140,6 +141,7 @@ const homeless: DemoBuilder = {
     a.household = {
       responderName: "زهرا کریمی (نمونه)", responderRelation: "سرپرست",
       headName: "زهرا کریمی (نمونه)", headNationalIdStatus: "missing",
+      headNationalId: undefined, headBirthDate: "۱۳۷۲/۰۹/۰۲", postalCode: undefined,
       province: "خوزستان", county: "اهواز",
       dwellingType: "خودرو/فضای عمومی", tenureType: "—",
       noFixedAddress: true, arrears: 0,
@@ -202,6 +204,7 @@ const incomplete: DemoBuilder = {
     a.household = {
       responderName: "حسن رضایی (نمونه)", responderRelation: "سرپرست",
       headName: "حسن رضایی (نمونه)", headNationalIdStatus: "in_progress",
+      headNationalId: "2345678901", headBirthDate: "۱۳۴۹/۱۱/۲۵", postalCode: "2345678901",
       province: "کرمان", county: "سیرجان",
       dwellingType: "واحد مسکونی", tenureType: "مالک",
       monthlyRent: 2_500_000, // تناقض با «مالک»
@@ -263,6 +266,7 @@ const singleMother: DemoBuilder = {
     a.household = {
       responderName: "نیلوفر صادقی (نمونه)", responderRelation: "سرپرست",
       headName: "نیلوفر صادقی (نمونه)", headNationalIdStatus: "has",
+      headNationalId: "3456789012", headBirthDate: "۱۳۶۸/۰۵/۰۸", postalCode: "3456789012",
       province: "خراسان رضوی", county: "مشهد",
       dwellingType: "واحد مسکونی", tenureType: "مستأجر",
       monthlyRent: 4_000_000, monthlyCharge: 250_000, monthlyBills: 450_000, arrears: 2_000_000,
@@ -322,6 +326,7 @@ const elderly: DemoBuilder = {
     a.household = {
       responderName: "جعفر نوروزی (نمونه)", responderRelation: "سرپرست",
       headName: "جعفر نوروزی (نمونه)", headNationalIdStatus: "has",
+      headNationalId: "4567890123", headBirthDate: "۱۳۴۰/۰۱/۱۹", postalCode: "4567890123",
       province: "گیلان", county: "رشت",
       dwellingType: "خانه ویلایی قدیمی", tenureType: "استیجاری نزد اقوام",
       monthlyRent: 2_200_000, monthlyCharge: 0, monthlyBills: 500_000, arrears: 0,
@@ -378,6 +383,7 @@ const severe: DemoBuilder = {
     a.household = {
       responderName: "محمود شریفی (نمونه)", responderRelation: "سرپرست",
       headName: "محمود شریفی (نمونه)", headNationalIdStatus: "has",
+      headNationalId: undefined, headBirthDate: "۱۳۵۲/۰۷/۳۰", postalCode: undefined,
       province: "سیستان و بلوچستان", county: "چابهار",
       dwellingType: "سازه غیررسمی (کلبه چادری)", tenureType: "سکونت غیرمجاز",
       arrears: 0,
@@ -458,6 +464,7 @@ const disabledChild: DemoBuilder = {
     a.household = {
       responderName: "سمیه موسوی (نمونه)", responderRelation: "همسر",
       headName: "رسول موسوی (نمونه)", headNationalIdStatus: "has",
+      headNationalId: "5678901234", headBirthDate: "۱۳۶۳/۱۲/۰۳", postalCode: "5678901234",
       province: "آذربایجان شرقی", county: "تبریز",
       dwellingType: "آپارتمان اجاره‌ای", tenureType: "مستأجر",
       monthlyRent: 5_000_000, monthlyCharge: 400_000, monthlyBills: 600_000, arrears: 0,
@@ -522,6 +529,7 @@ const stable: DemoBuilder = {
     a.household = {
       responderName: "فرهاد هاشمی (نمونه)", responderRelation: "سرپرست",
       headName: "فرهاد هاشمی (نمونه)", headNationalIdStatus: "has",
+      headNationalId: "6789012345", headBirthDate: "۱۳۷۵/۰۴/۱۷", postalCode: "6789012345",
       province: "البرز", county: "کرج",
       dwellingType: "آپارتمان مالک", tenureType: "مالک",
       monthlyRent: 0, monthlyCharge: 350_000, monthlyBills: 800_000, arrears: 0,

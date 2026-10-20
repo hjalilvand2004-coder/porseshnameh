@@ -102,6 +102,11 @@ export function MemberManager({ assessment, editable = true }: { assessment: Ass
             {m.isMainCaregiver && <Badge variant="outline" className="border-teal-strong text-teal-strong">مراقب اصلی</Badge>}
             {m.needsCare && <Badge variant="outline" className="border-amber-400 text-amber-700">نیازمند مراقبت</Badge>}
             {m.schoolAge && <Badge variant="outline">سن آموزش</Badge>}
+            {m.fromRegistry && (
+              <Badge variant="outline" className="bg-teal-soft text-teal-strong border-teal-strong/30" title="این عضو از واکشی سابقه ثبتی ثبت احوال پیش‌تکمیل شده است؛ ترکیب جاری خانوار جداگانه تأیید می‌شود">
+                واکشی از ثبت احوال
+              </Badge>
+            )}
             {m.nationalIdStatus === "missing" && (
               <Badge variant="outline" className="border-destructive/40 text-destructive gap-1">
                 <CircleAlert className="size-3" aria-hidden /> فاقد مدرک — بدون رد درخواست

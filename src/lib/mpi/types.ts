@@ -31,6 +31,8 @@ export interface Member {
   id: string;
   firstName: string;
   lastName?: string;
+  /** عضو از واکشی ثبت احوال ایجاد شده (پیش‌تکمیل با حفظ منبع — قابل ویرایش برای شرایط جاری) */
+  fromRegistry?: boolean;
   /** اختیاری — نبود مدرک موجب رد درخواست نمی‌شود */
   nationalId?: string;
   nationalIdStatus?: "has" | "missing" | "in_progress";
@@ -174,6 +176,10 @@ export interface Household {
   headName?: string;
   headNationalId?: string;
   headNationalIdStatus?: "has" | "missing" | "in_progress";
+  /** تاریخ تولد سرپرست — ورودی شروع واکشی / تأیید ثبتی */
+  headBirthDate?: string;
+  /** کد پستی ده‌رقمی — کلید استعلام نشانی از سرویس پست */
+  postalCode?: string;
   contactPhone?: string;
   province?: string;
   county?: string;
@@ -214,6 +220,23 @@ export interface WebServiceResult {
   data: Record<string, string>;
   /** یادداشت وضعیت (مثلاً اطلاعات کافی برای استعلام وجود ندارد) */
   note?: string;
+  /**
+   * پیش‌تکمیل‌های قابل اعمال از نتیجه استعلام — داده مهاجرت/واکشی با حفظ منبع و تاریخ؛
+   * «پیش‌تکمیل» تأیید خودکار نیست و شرایط جاری جداگانه بررسی می‌شود (قاعده مهاجرت سند EM-MPI).
+   */
+  prefills?: PrefillPayload;
+}
+
+/** پیش‌تکمیل سریالی — فقط داده؛ اعمال آن با تأیید کاربر و ثبت در ممیزی انجام می‌شود */
+export interface PrefillPayload {
+  /** به‌روزرسانی مستقیم اطلاعات پایه (فیلدهای ملاک — پس از واکشی قفل می‌شوند) */
+  householdPatch?: Partial<Household>;
+  /** پیش‌فرض پاسخ شاخص‌ها (مثلاً پوشش بیمه هر عضو از استعلام بیمه) */
+  answerPrefills?: { key: string; value: AnswerValue; label: string }[];
+  /** به‌روزرسانی وضعیت اعضا (مثلاً وضعیت تحصیل از آموزش‌وپرورش) */
+  memberPrefills?: { memberId: string; patch: Partial<Member>; label: string }[];
+  /** ایجاد اعضای واکشی‌شده از سابقه ثبتی (ثبت احوال) */
+  memberCreates?: { firstName: string; relation: string; age?: number; gender?: "male" | "female"; fromRegistry?: boolean }[];
 }
 
 export interface Assessment {

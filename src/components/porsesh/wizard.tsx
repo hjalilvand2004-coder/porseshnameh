@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react";
 import { usePorsesh } from "@/lib/store";
 import { STEPS, groupsOfStep, QUESTION_GROUPS, REQUEST_TYPES, type Question, type QuestionGroup } from "@/lib/mpi/questions";
-import type { Assessment, Member } from "@/lib/mpi/types";
+import type { Assessment, Member, WebServiceResult } from "@/lib/mpi/types";
 import { indicatorLegacyBadge } from "@/lib/mpi/legacy-map";
 import { WEIGHTS } from "@/lib/mpi/rules";
 import type { IndicatorId } from "@/lib/mpi/types";
+import { simulateServiceFetch } from "@/lib/mpi/web-services";
 import { QuestionField } from "@/components/porsesh/fields";
 import { MemberManager, IncomeEditor } from "@/components/porsesh/editors";
 import { FlagsDialog, FlagsList } from "@/components/porsesh/flags";
@@ -18,14 +19,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { faNum, faPct } from "@/lib/mpi/format";
-import { CircleCheck, ChevronLeft, ChevronRight, History, Info, Lock, Siren, Save, CheckCircle2 } from "lucide-react";
+import { faNum, faPct, faDateTime } from "@/lib/mpi/format";
+import { CircleCheck, ChevronLeft, ChevronRight, History, Info, Lock, Siren, Save, CheckCircle2, Loader2, RefreshCw, Landmark, Fingerprint, MapPin, HeartPulse, Building2, BookOpenCheck, GraduationCap, ClipboardList, FileBadge2, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
 /**
  * جریان پرسشنامه — ۱۰ گام مطابق معماری پیشنهادی
- * ترتیب: معرفی ← فوریت ← اطلاعات پایه ← سلامت ← آموزش ← مسکن ← معیشت ← مراقبت ← کیفیت داده ← خلاصه
+ * ترتیب: هویت و واکشی ← فوریت ← اطلاعات پایه ← سلامت ← آموزش ← مسکن ← معیشت ← مراقبت ← کیفیت داده ← خلاصه
+ * گام ۱: با کد ملی + کد پستی + تاریخ تولد، هویت از ثبت احوال و نشانی از پست واکشی و ملاک می‌شود؛
+ * سایر مراجع متولی نیز با کد ملی استعلام و «پیش‌تکمیل» می‌شوند (تأیید خودکار نیست).
+ * «درخواست خانوار» در ابتدا گرفته نمی‌شود؛ در گام آخر به‌عنوان داده خدماتی ثبت می‌شود.
  * بررسی فوریت در آغاز انجام می‌شود و در همه گام‌ها در دسترس می‌ماند.
  */
 
@@ -232,7 +236,7 @@ function WeightBadge({ id }: { id: IndicatorId }) {
 
 function StepBody({ step, assessment }: { step: number; assessment: Assessment }) {
   switch (step) {
-    case 1: return <IntroStep assessment={assessment} />;
+    case 1: return <IdentityStep assessment={assessment} />;
     case 2: return <UrgencyStep assessment={assessment} />;
     case 3: return <BaseStep assessment={assessment} />;
     case 4: return <ScoredStep stepKey="health" assessment={assessment} />;
@@ -245,44 +249,301 @@ function StepBody({ step, assessment }: { step: number; assessment: Assessment }
   }
 }
 
-/* گام ۱ — معرفی، محرمانگی، درخواست */
-function IntroStep({ assessment }: { assessment: Assessment }) {
-  const updateRequest = usePorsesh((s) => s.updateRequest);
-  const [types, setTypes] = useState<string[]>(assessment.requestTypes);
+/* ---------------- ابزار گام هویت ---------------- */
 
-  const toggle = (t: string) => setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
+function delay(ms: number) { return new Promise<void>((res) => setTimeout(res, ms)); }
+
+/** نمایش کارت داده واکشی‌شده ملاک (قفل) */
+function FetchedCard({ title, icon: Icon, res }: { title: string; icon: React.ElementType; res: WebServiceResult }) {
+  return (
+    <div className="rounded-2xl border border-teal-strong/30 bg-teal-soft/30 p-4 space-y-2.5">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="grid place-items-center size-8 rounded-lg bg-teal-soft text-teal-strong"><Icon className="size-4.5" aria-hidden /></span>
+        <h4 className="text-sm font-semibold">{title}</h4>
+        <Badge className="ms-auto gap-1 bg-teal-strong text-white"><Lock className="size-3" aria-hidden /> ملاک ثبتی</Badge>
+      </div>
+      <dl className="rounded-xl border bg-background/70 p-3 space-y-1.5 text-xs">
+        {Object.entries(res.data).map(([k, v]) => (
+          <div key={k} className="flex flex-wrap gap-x-2 leading-5">
+            <dt className="text-muted-foreground">{k}:</dt>
+            <dd className="font-medium flex items-center gap-1">{v}<Lock className="inline size-3 text-muted-foreground" aria-hidden /></dd>
+          </div>
+        ))}
+      </dl>
+      <p className="text-[11px] text-muted-foreground leading-5">
+        دریافت شد در {faDateTime(res.fetchedAt)} — اصلاح فقط از مسیر درخواست به مرجع ثبتی.
+      </p>
+    </div>
+  );
+}
+
+const OTHER_SERVICES: { id: string; name: string; org: string; icon: React.ElementType; label: string }[] = [
+  { id: "insurance", name: "بیمه", org: "تأمین اجتماعی و صندوق‌ها", icon: HeartPulse, label: "پوشش پایه اعضا (A5)" },
+  { id: "property", name: "اموال و املاک", org: "سازمان اموال و املاک", icon: Building2, label: "سابقه سند مسکن (C3)" },
+  { id: "education_school", name: "آموزش‌وپرورش", org: "وزارت آموزش‌وپرورش", icon: BookOpenCheck, label: "ثبت‌نام اعضای در سن آموزش (B1/B2)" },
+  { id: "higher_edu", name: "علوم / دانشگاه آزاد", org: "وزارت علوم", icon: GraduationCap, label: "مدارک دانشگاهی (B3/B7)" },
+];
+
+/* گام ۱ — هویت، محرمانگی و واکشی از مراجع ثبتی */
+function IdentityStep({ assessment }: { assessment: Assessment }) {
+  const updateHousehold = usePorsesh((s) => s.updateHousehold);
+  const updateMember = usePorsesh((s) => s.updateMember);
+  const addMember = usePorsesh((s) => s.addMember);
+  const setAnswersBulk = usePorsesh((s) => s.setAnswersBulk);
+  const setWebService = usePorsesh((s) => s.setWebService);
+  const clearWebService = usePorsesh((s) => s.clearWebService);
+
+  const h = assessment.household;
+  const ws = assessment.webServices ?? {};
+  const civil = ws.civil_registry;
+  const post = ws.post;
+  const fetched = civil?.status === "ok" || post?.status === "ok";
+
+  const [nid, setNid] = useState(h.headNationalId ?? "");
+  const [birth, setBirth] = useState(h.headBirthDate ?? "");
+  const [postal, setPostal] = useState(h.postalCode ?? "");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [pendingFetch, setPendingFetch] = useState(false);
+
+  const nidOk = nid.replace(/[^\d]/g, "").length === 10;
+  const postalOk = postal.replace(/[^\d]/g, "").length === 10;
+
+  const saveInputs = (patch?: Partial<Assessment["household"]>) => {
+    updateHousehold(assessment.id, {
+      headNationalId: nid.trim(),
+      headBirthDate: birth.trim(),
+      postalCode: postal.trim(),
+      headNationalIdStatus: nid.trim() ? "has" : "missing",
+      ...patch,
+    });
+  };
+
+  /** نتیجه استعلام روی نسخه تازه ارزیابی با شناسه‌های فعلی اجرا می‌شود (بدون بستگی به prop کهنه) */
+  const freshAssessment = (): Assessment => ({
+    ...assessment,
+    household: { ...h, headNationalId: nid.trim(), headBirthDate: birth.trim(), postalCode: postal.trim() },
+  });
+
+  const fetchIdentity = async () => {
+    saveInputs();
+    setPendingFetch(true);
+    try {
+      const fa = freshAssessment();
+      setBusy("استعلام هویت و اعضای خانوار از ثبت احوال ...");
+      await delay(1100);
+      const r1 = simulateServiceFetch("civil_registry", fa);
+      setWebService(assessment.id, "civil_registry", r1);
+      if (r1.prefills?.householdPatch) updateHousehold(assessment.id, r1.prefills.householdPatch);
+
+      setBusy("استعلام نشانی و موقعیت جغرافیایی از پست (از کد پستی) ...");
+      await delay(950);
+      const r2 = simulateServiceFetch("post", fa);
+      setWebService(assessment.id, "post", r2);
+      if (r2.prefills?.householdPatch) updateHousehold(assessment.id, r2.prefills.householdPatch);
+
+      if (r1.status === "ok" && r2.status === "ok") {
+        toast({ title: "واکشی هویتی انجام شد", description: "نام سرپرست، اعضای سابقه ثبتی و نشانی از ثبت احوال و پست دریافت و ملاک شد." });
+      } else {
+        toast({ title: "واکشی با نقص انجام شد", description: r1.note ?? r2.note ?? "برخی داده‌ها دریافت نشد — مسیر دستی فعال است.", variant: "destructive" });
+      }
+    } finally {
+      setBusy(null);
+      setPendingFetch(false);
+    }
+  };
+
+  /** پیش‌تکمیل با تأیید کاربر — با حفظ منبع و تاریخ؛ تأیید خودکار شرایط جاری نیست */
+  const applyPrefills = (r: WebServiceResult) => {
+    if (r.prefills?.householdPatch) updateHousehold(assessment.id, r.prefills.householdPatch);
+    if (r.prefills?.answerPrefills?.length) {
+      setAnswersBulk(assessment.id, Object.fromEntries(r.prefills.answerPrefills.map((p) => [p.key, p.value])));
+    }
+    if (r.prefills?.memberPrefills?.length) {
+      for (const mp of r.prefills.memberPrefills) updateMember(assessment.id, mp.memberId, mp.patch);
+    }
+    toast({ title: "پیش‌تکمیل اعمال شد", description: "داده با حفظ منبع و تاریخ استعلام ثبت شد؛ شرایط جاری جداگانه بررسی می‌شود و تأیید خودکار نیست." });
+  };
+
+  const registryMembersAdded = assessment.members.some((m) => m.fromRegistry);
+  const registryCreates = civil?.prefills?.memberCreates ?? [];
+
+  const addRegistryMembers = () => {
+    for (const mc of registryCreates) {
+      addMember(assessment.id, { ...mc, isHead: false });
+    }
+    toast({ title: `${faNum(registryCreates.length)} عضو واکشی‌شده ثبت شد`, description: "با برچسب «واکشی از ثبت احوال» — ترکیب جاری خانوار را تأیید یا اصلاح کنید." });
+  };
+
+  const fetchOther = async (s: (typeof OTHER_SERVICES)[number]) => {
+    saveInputs();
+    setBusy(`استعلام از ${s.name} با کد ملی ...`);
+    try {
+      await delay(850);
+      const r = simulateServiceFetch(s.id, freshAssessment());
+      setWebService(assessment.id, s.id, r);
+      toast({
+        title: r.status === "error" ? `استعلام ${s.name} ناموفق` : `استعلام ${s.name} انجام شد`,
+        description: r.note ?? "نتیجه به‌عنوان پیش‌تکمیل ملاک قابل اعمال است.",
+        variant: r.status === "error" ? "destructive" : "default",
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
-    <div className="space-y-4 max-w-3xl">
-      <div className="rounded-2xl border bg-card p-5 space-y-3 leading-7 text-sm">
-        <h3 className="font-bold text-base">به پرسش‌نامه خانوار خوش آمدید</h3>
+    <div className="space-y-4 max-w-4xl">
+      {/* محرمانگی و هدف */}
+      <div className="rounded-2xl border bg-card p-4.5 space-y-2.5 leading-7 text-sm">
+        <h3 className="font-bold text-base flex items-center gap-2"><ShieldCheck className="size-5 text-teal-strong" aria-hidden /> به پرسش‌نامه خانوار خوش آمدید</h3>
         <p>
-          این پرسش‌نامه برای <b>شناخت نیازها و سطح‌بندی اولیه محرومیت</b> خانوار طراحی شده است، نه رد یا پذیرش درخواست شما.
-          پاسخ‌ها به<strong> محرمانگی کامل</strong> پردازش می‌شوند و فقط در اختیار کارشناسان مجاز قرار می‌گیرد. اطلاعات جمع‌آوری‌شده دو نقش دارد:
-          بخشی «اطلاعات پرونده‌ای» برای تشکیل پرونده است و بخشی «سنجش محرومیت» برای تصمیم‌گیری کارشناسان کمک می‌کند.
+          این پرسش‌نامه برای <b>سنجش عملیاتی محرومیت</b> خانوار طراحی شده است، نه رد یا پذیرش درخواست. پاسخ‌ها به <strong>محرمانگی کامل</strong> پردازش می‌شوند.
+          برای شروع، سه شناسه زیر را وارد کنید؛ اطلاعات تکمیلی هویتی به‌صورت خودکار از مراجع متولی واکشی می‌شود تا بار پر کردن فرم کمتر شود.
         </p>
         <ul className="list-disc ps-5 space-y-1 text-muted-foreground text-[13px]">
-          <li>پاسخ دادن به همه پرسش‌ها اجباری نیست؛ می‌توانید «نمی‌دانم» یا «مایل به پاسخ نیستم» را انتخاب کنید.</li>
-          <li>نبود کد ملی یا نشانی ثابت موجب رد درخواست نمی‌شود؛ مسیر بررسی تکمیلی فعال خواهد شد.</li>
-          <li>اگر وضعیت فوری یا خطرناکی دارید، همین حالا از دکمه «فوریت» استفاده کنید — نیازی به تکمیل بقیه فرم نیست.</li>
-          <li>در هر زمان می‌توانید تغییر شرایط خانوار را اعلام کنید و پیش‌نویس را بعداً ادامه دهید.</li>
+          <li>«درخواست شما» در ابتدا پرسیده نمی‌شود؛ در گام آخر به‌عنوان داده خدماتی (خارج از امتیاز) ثبت می‌شود.</li>
+          <li>اگر وضعیت فوری یا خطرناکی دارید، از دکمه «فوریت» در پایین صفحه استفاده کنید — نیازی به تکمیل بقیه فرم نیست.</li>
+          <li>نبود کد ملی یا کد پستی موجب رد درخواست نمی‌شود؛ مسیر دستی و بررسی میدانی فعال خواهد شد.</li>
+          <li>در هر زمان می‌توانید پیش‌نویس را ذخیره و بعداً ادامه دهید.</li>
         </ul>
       </div>
 
-      <div className="rounded-2xl border bg-card p-5">
-        <h3 className="font-semibold mb-1.5">نوع درخواست شما چیست؟ (چندانتخابی)</h3>
-        <p className="text-xs text-muted-foreground mb-3 leading-5">«درخواست» با «نیاز شناسایی‌شده» متفاوت است؛ نیازها در گام‌های بعدی ثبت می‌شوند.</p>
-        <div className="grid sm:grid-cols-2 gap-2">
-          {REQUEST_TYPES.map((t) => (
-            <label key={t} className={cn("flex items-center gap-2.5 rounded-lg border p-3 text-sm cursor-pointer min-h-11 transition-colors", types.includes(t) ? "border-teal-strong bg-teal-soft" : "bg-background hover:border-ring/50")}>
-              <Checkbox checked={types.includes(t)} onCheckedChange={() => toggle(t)} aria-label={t} />
-              {t}
-            </label>
-          ))}
+      {/* شناسه‌های واکشی */}
+      <div className="rounded-2xl border border-teal-strong/30 bg-teal-soft/30 p-4.5 space-y-3">
+        <h3 className="font-semibold flex items-center gap-2"><Fingerprint className="size-5 text-teal-strong" aria-hidden /> شروع با واکشی — سه شناسه</h3>
+        <p className="text-xs text-muted-foreground leading-5">
+          با این سه شناسه، هویت و اعضای خانوار از <b>ثبت احوال</b> و نشانی و موقعیت جغرافیایی از <b>پست</b> (از کد پستی) واکشی می‌شود؛
+          سپس سایر مراجع متولی (بیمه، املاک، آموزش‌وپرورش، علوم) نیز با کد ملی استعلام می‌شوند. داده واکشی‌شده <b>ملاک</b> است و در فرم فقط‌خواندنی می‌شود.
+        </p>
+        {fetched ? (
+          <div className="grid sm:grid-cols-3 gap-2.5">
+            {[
+              { label: "کد ملی سرپرست", value: h.headNationalId },
+              { label: "تاریخ تولد سرپرست", value: h.headBirthDate },
+              { label: "کد پستی", value: h.postalCode },
+            ].map((f) => (
+              <div key={f.label} className="space-y-1">
+                <Label className="text-xs">{f.label}</Label>
+                <div className="rounded-lg border bg-muted/50 px-3 py-2.5 text-sm flex items-center gap-1.5" aria-readonly>
+                  <Lock className="size-3.5 text-muted-foreground shrink-0" aria-hidden />
+                  <span dir="ltr" className="truncate">{f.value || "—"}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-3 gap-2.5">
+            <div className="space-y-1.5">
+              <Label htmlFor="id-nid">کد ملی سرپرست (۱۰ رقم)</Label>
+              <Input id="id-nid" dir="ltr" inputMode="numeric" value={nid} onChange={(e) => setNid(e.target.value)} placeholder="۱۰ رقم — بدون خط تیره" />
+              {nid.length > 0 && !nidOk && <p className="text-[11px] text-amber-700">کد ملی باید ۱۰ رقم باشد؛ اگر سرپرست فاقد مدرک است، خالی بگذارید.</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="id-birth">تاریخ تولد سرپرست</Label>
+              <Input id="id-birth" dir="ltr" value={birth} onChange={(e) => setBirth(e.target.value)} placeholder="مثلاً ۱۳۶۲/۰۵/۱۲" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="id-postal">کد پستی محل سکونت (۱۰ رقم)</Label>
+              <Input id="id-postal" dir="ltr" inputMode="numeric" value={postal} onChange={(e) => setPostal(e.target.value)} placeholder="۱۰ رقم — برای واکشی نشانی" />
+              {postal.length > 0 && !postalOk && <p className="text-[11px] text-amber-700">کد پستی باید ۱۰ رقم باشد؛ بی‌خانمان‌ها بدون کد پستی ثبت می‌شوند.</p>}
+            </div>
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2 items-center">
+          {fetched ? (
+            <>
+              <Button variant="outline" onClick={() => { clearWebService(assessment.id, "civil_registry"); clearWebService(assessment.id, "post"); toast({ title: "نتیجه واکشی حذف شد", description: "می‌توانید شناسه‌ها را اصلاح و دوباره واکشی کنید." }); }}>
+                <RefreshCw className="size-4" aria-hidden /> اصلاح شناسه‌ها و واکشی مجدد
+              </Button>
+              <span className="text-xs text-muted-foreground">داده هویتی و نشانی از مرجع ثبتی دریافت شده است.</span>
+            </>
+          ) : (
+            <Button onClick={fetchIdentity} disabled={pendingFetch}>
+              {pendingFetch ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Fingerprint className="size-4" aria-hidden />}
+              واکشی اطلاعات هویتی از ثبت احوال و پست
+            </Button>
+          )}
+          {busy && <span className="text-xs text-teal-strong flex items-center gap-1.5"><Loader2 className="size-3.5 animate-spin" aria-hidden /> {busy}</span>}
         </div>
-        <Button className="mt-4" variant="outline" onClick={() => { updateRequest(assessment.id, types); toast({ title: "نوع درخواست ذخیره شد" }); }}>
-          ذخیره درخواست
-        </Button>
+      </div>
+
+      {/* نتایج واکشی ملاک */}
+      {civil?.status === "ok" && <FetchedCard title="ثبت احوال — هویت سرپرست و سابقه اعضای خانوار" icon={Fingerprint} res={civil} />}
+      {civil && civil.status === "error" && (
+        <p className="text-sm rounded-xl border border-amber-200 bg-amber-50 p-3.5 leading-6">{civil.note}</p>
+      )}
+      {post?.status === "ok" && <FetchedCard title="پست — نشانی استاندارد و موقعیت جغرافیایی" icon={MapPin} res={post} />}
+      {post && post.status === "error" && (
+        <p className="text-sm rounded-xl border border-amber-200 bg-amber-50 p-3.5 leading-6">{post.note}</p>
+      )}
+
+      {/* ثبت اعضای واکشی‌شده */}
+      {registryCreates.length > 0 && (
+        <div className="rounded-2xl border bg-card p-4.5 flex flex-wrap items-center gap-3">
+          <span className="grid place-items-center size-9 rounded-xl bg-teal-soft text-teal-strong"><Fingerprint className="size-5" aria-hidden /></span>
+          <div className="min-w-56 flex-1">
+            <h4 className="text-sm font-semibold">اعضای واکشی‌شده از سابقه ثبتی — {faNum(registryCreates.length)} نفر</h4>
+            <p className="text-xs text-muted-foreground leading-5 mt-0.5">
+              {registryCreates.map((m) => `${m.firstName.split(" ")[0]} (${m.relation})`).join("، ")} — با برچسب منبع ثبت می‌شوند و ترکیب جاری خانوار جداگانه تأیید می‌شود.
+            </p>
+          </div>
+          {registryMembersAdded ? (
+            <Badge variant="outline" className="bg-teal-soft text-teal-strong border-teal-strong/30 gap-1"><CircleCheck className="size-3.5" aria-hidden /> ثبت شده‌اند</Badge>
+          ) : (
+            <Button variant="outline" onClick={addRegistryMembers}>ثبت اعضای واکشی‌شده</Button>
+          )}
+        </div>
+      )}
+
+      {/* استعلام سایر مراجع با کد ملی */}
+      <div className="rounded-2xl border bg-card p-4.5 space-y-3">
+        <h3 className="font-semibold flex items-center gap-2"><Landmark className="size-5 text-teal-strong" aria-hidden /> استعلام سایر مراجع متولی با کد ملی</h3>
+        <p className="text-xs text-muted-foreground leading-5">
+          با استفاده از کد ملی سرپرست، تا حد امکان اطلاعات مرتبط با پرسشنامه از سایر سازمان‌ها استعلام می‌شود.
+          نتیجه به‌صورت <b>«پیش‌تکمیل»</b> با حفظ منبع و تاریخ اعمال می‌شود — پیش‌تکمیل تأیید خودکار شرایط جاری نیست (قاعده مهاجرت داده).
+        </p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {OTHER_SERVICES.map((s) => {
+            const r = ws[s.id];
+            const prefillCount = (r?.prefills?.answerPrefills?.length ?? 0) + (r?.prefills?.memberPrefills?.length ?? 0) + (Object.keys(r?.prefills?.householdPatch ?? {}).length > 0 ? 1 : 0);
+            return (
+              <div key={s.id} className="rounded-xl border p-3.5 space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="grid place-items-center size-8 rounded-lg bg-teal-soft text-teal-strong"><s.icon className="size-4" aria-hidden /></span>
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold leading-5">{s.name}</div>
+                    <div className="text-[11px] text-muted-foreground">{s.org}</div>
+                  </div>
+                  {r?.status === "ok" && <Badge className="ms-auto bg-emerald-600 text-white gap-1"><CircleCheck className="size-3" aria-hidden /> دریافت شد</Badge>}
+                  {r?.status === "error" && <Badge variant="outline" className="ms-auto text-destructive border-destructive/40">ناموفق</Badge>}
+                </div>
+                <div className="text-[11px] text-muted-foreground">{s.label}</div>
+                {r && r.status !== "error" && (
+                  <dl className="rounded-lg border bg-muted/30 p-2.5 space-y-1 text-[11px] leading-4">
+                    {Object.entries(r.data).slice(0, 3).map(([k, v]) => (
+                      <div key={k} className="flex flex-wrap gap-x-1.5">
+                        <dt className="text-muted-foreground">{k}:</dt><dd className="font-medium">{v}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                {r?.note && <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 leading-4">{r.note}</p>}
+                <div className="flex gap-1.5 flex-wrap">
+                  <Button size="sm" variant="outline" onClick={() => fetchOther(s)} disabled={!!busy || pendingFetch || !nidOk}>
+                    {busy?.startsWith(`استعلام از ${s.name}`) ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : <RefreshCw className="size-3.5" aria-hidden />}
+                    {r ? "استعلام مجدد" : "استعلام با کد ملی"}
+                  </Button>
+                  {r && r.status !== "error" && !!r.prefills && prefillCount > 0 && (
+                    <Button size="sm" variant="secondary" onClick={() => applyPrefills(r)}>
+                      اعمال پیش‌تکمیل ({faNum(prefillCount)})
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {!nidOk && <p className="text-[11px] text-muted-foreground">برای استعلام سایر مراجع، ابتدا کد ملی ده‌رقمی سرپرست را وارد و واکشی کنید.</p>}
       </div>
     </div>
   );
@@ -365,14 +626,17 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
       <div className="rounded-2xl border bg-card p-4">
         <h3 className="font-semibold mb-1 flex items-center gap-2"><Info className="size-5 text-teal-strong" aria-hidden /> اطلاعات پایه و پرونده‌ای</h3>
         <p className="text-xs text-muted-foreground mb-4 leading-5">
-          این اطلاعات «شناخت خانوار» است و <b>بدون امتیاز مستقل</b>؛ فقط برای اجرای منطق نمایش و مراجعه. سرپرست و فرد پاسخ‌گو دو نقش مستقل‌اند.
-          فیلدهای دارای ملاک ثبتی پس از استعلام موفق فقط‌خواندنی می‌شوند.
+          این اطلاعات «شناخت خانوار» است و <b>بدون امتیاز مستقل</b>؛ فقط برای اجرای منطق نمایش و مراجعه.
+          کد ملی، کد پستی و تاریخ تولد در گام ۱ ثبت و واکشی می‌شوند؛ سرپرست و فرد پاسخ‌گو دو نقش مستقل‌اند.
+          فیلدهای دارای ملاک ثبتی پس از واکشی فقط‌خواندنی می‌شوند.
         </p>
         <div className="grid sm:grid-cols-2 gap-3">
           {field("responderName", "نام فرد پاسخ‌گو / مسئول پیگیری خانوار")}
           {field("responderRelation", "نسبت پاسخ‌گو با سرپرست", { placeholder: "مثلاً خود سرپرست، همسر، فرزند ..." })}
           {field("headName", "نام سرپرست خانوار", { locked: civilOk ? "وب‌سرویس ثبت احوال" : undefined })}
-          {field("headNationalId", "کد ملی سرپرست (اختیاری)", { dir: "ltr", locked: civilOk ? "وب‌سرویس ثبت احوال" : undefined })}
+          {field("headNationalId", "کد ملی سرپرست", { dir: "ltr", locked: civilOk ? "وب‌سرویس ثبت احوال" : undefined })}
+          {field("headBirthDate", "تاریخ تولد سرپرست", { dir: "ltr", placeholder: "مثلاً ۱۳۶۲/۰۵/۱۲", locked: civilOk ? "وب‌سرویس ثبت احوال" : undefined })}
+          {field("postalCode", "کد پستی (کلید واکشی نشانی از پست)", { dir: "ltr", locked: postAny ? "وب‌سرویس پست" : undefined })}
           {field("contactPhone", "تلفن تماس", { dir: "ltr" })}
           <div className="space-y-1.5">
             <Label htmlFor="hh-nidstatus">وضعیت مدرک هویتی سرپرست</Label>
@@ -640,12 +904,67 @@ function EvidenceGrid({ assessment }: { assessment: Assessment }) {
 function SummaryStep({ assessment }: { assessment: Assessment }) {
   const setView = usePorsesh((s) => s.setView);
   const addChangeStatement = usePorsesh((s) => s.addChangeStatement);
+  const updateRequest = usePorsesh((s) => s.updateRequest);
   const mode = usePorsesh((s) => s.mode);
   const [changeText, setChangeText] = useState("");
+  const [types, setTypes] = useState<string[]>(assessment.requestTypes ?? []);
+  const toggleReq = (t: string) => setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
+
+  // شناسنامه ارزیابی — فیلدهای کنترلی گروه «هویت ارزیابی و منشأ داده» (پشت پرسشنامه)
+  const ws = assessment.webServices ?? {};
+  const fetchedServices = Object.values(ws).filter((r) => r && r.status !== "error").length;
+  const openIssues = assessment.qualityIssues.filter((i) => i.status === "open").length;
+  const prefillAnswers = Object.values(ws).filter((r) => r?.prefills?.answerPrefills?.length).length;
 
   return (
     <div className="space-y-5">
       <ResultCard assessment={assessment} compact />
+
+      {/* درخواست خانوار — در ابتدا گرفته نمی‌شود؛ خروجی خدماتی جدا از نیاز شناسایی‌شده */}
+      <div className="rounded-2xl border bg-card p-5">
+        <h3 className="font-semibold mb-1 flex items-center gap-2"><ClipboardList className="size-5 text-teal-strong" aria-hidden /> درخواست خانوار (خدماتی — خارج از امتیاز)</h3>
+        <p className="text-xs text-muted-foreground mb-3 leading-5">
+          درخواست در ابتدای پرسشنامه پرسیده نمی‌شود تا از «نیاز شناسایی‌شده در سنجش» مخلوط نشود؛
+          درخواست خروجی خدماتی و مسیر ارجاع است و امتیاز مستقل ندارد. درخواست‌های قبلی پرونده با تاریخ و وضعیت حفظ می‌شوند.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-2">
+          {REQUEST_TYPES.map((t) => (
+            <label key={t} className={cn("flex items-center gap-2.5 rounded-lg border p-3 text-sm cursor-pointer min-h-11 transition-colors", types.includes(t) ? "border-teal-strong bg-teal-soft" : "bg-background hover:border-ring/50")}>
+              <Checkbox checked={types.includes(t)} onCheckedChange={() => toggleReq(t)} aria-label={t} />
+              {t}
+            </label>
+          ))}
+        </div>
+        <Button className="mt-4" variant="outline" onClick={() => { updateRequest(assessment.id, types); toast({ title: "درخواست خانوار ذخیره شد", description: "به‌عنوان داده خدماتی ثبت شد و در امتیاز اثری ندارد." }); }}>
+          ذخیره درخواست
+        </Button>
+      </div>
+
+      {/* شناسنامه ارزیابی — فیلدهای کنترلی پشت پرسشنامه */}
+      <div className="rounded-2xl border bg-card p-5">
+        <h3 className="font-semibold mb-1.5 flex items-center gap-2"><FileBadge2 className="size-5 text-teal-strong" aria-hidden /> شناسنامه ارزیابی (فیلدهای کنترلی)</h3>
+        <p className="text-xs text-muted-foreground mb-3 leading-5">
+          این فیلدها سؤال از خانوار نیستند؛ سامانه و کاربر سازمانی ثبت می‌کنند تا هر نتیجه قابل ممیزی، تکرارپذیر و بازنگری‌پذیر باشد.
+        </p>
+        <dl className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-sm">
+          {[
+            { k: "شناسه ارزیابی", v: assessment.id },
+            { k: "نسخه قواعد", v: assessment.ruleSetVersion },
+            { k: "وضعیت پرونده", v: assessment.status === "draft" ? "پیش‌نویس" : assessment.status === "submitted" ? "ثبت‌شده" : assessment.status },
+            { k: "تاریخ ایجاد", v: faDateTime(assessment.createdAt) },
+            { k: "آخرین به‌روزرسانی", v: faDateTime(assessment.updatedAt) },
+            { k: "منشأ داده — استعلام‌های ثبتی", v: `${faNum(fetchedServices)} سرویس دریافت شده` },
+            { k: "پیش‌تکمیل از استعلام (شاخص‌ها)", v: prefillAnswers > 0 ? `${faNum(prefillAnswers)} سرویس اعمال شده` : "—"},
+            { k: "موارد باز کیفیت داده", v: openIssues > 0 ? `${faNum(openIssues)} مورد` : "—"},
+            { k: "اصلاحات مستند", v: `${faNum(assessment.corrections.length)} مورد` },
+          ].map((r) => (
+            <div key={r.k} className="rounded-xl border bg-muted/20 px-3 py-2">
+              <dt className="text-[11px] text-muted-foreground">{r.k}</dt>
+              <dd className="font-medium leading-5 truncate" dir="auto">{r.v}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
 
       <div className="rounded-2xl border bg-card p-5">
         <h3 className="font-semibold mb-1.5">اعلام تغییر شرایط توسط خانوار</h3>

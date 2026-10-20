@@ -60,7 +60,7 @@ const TABLE1: Row[] = [
   { old: "دین", action: "remove", next: "در EM-MPI امتیاز ندارد؛ فقط در صورت ضرورت قانونی، جداگانه با دسترسی محدود", model: "خارج از امتیاز" },
   { old: "نیازمند مشاوره حقوقی و قضایی", action: "change", next: "نوع مانع، خدمت یا حق مسدودشده، شدت، مدت و فوریت؛ بدون جزئیات غیرضروری", model: "E4، R8" },
   { old: "نوع رسانه در اختیار", action: "change", next: "ابزار ارتباطی/آموزشی، قابلیت استفاده، اشتراک، اینترنت و نیاز واقعی برنامه آموزشی", model: "B5" },
-  { old: "نوع درخواست", action: "keep", next: "چندانتخابی؛ تفکیک «درخواست خانوار» از «نیاز شناسایی‌شده»؛ افزودن پاسخ اداری، مراقبت و رسیدگی فوری", model: "مدیریت درخواست" },
+  { old: "نوع درخواست", action: "keep", next: "چندانتخابی؛ در گام آخر ثبت می‌شود (در ابتدا پرسیده نمی‌شود) تا از «نیاز شناسایی‌شده» تفکیک بماند؛ درخواست خدماتی است و امتیاز ندارد", model: "مدیریت درخواست" },
   { old: "منبع درآمد خانوار", action: "change", next: "برای هر منبع: دریافت‌کننده، مبلغ، دوره، استمرار، قابلیت اتکا و وضعیت تأیید", model: "D3" },
   { old: "ارثیه", action: "split", next: "دریافت یک‌باره، دارایی یا درآمد مستمر؛ مطابق دستورالعمل واحد منابع — در درآمد ماهانه خودکار نیست", model: "داده مالی" },
   { old: "نیازسنجی آزاد", action: "keep", next: "نیازهای اولویت‌دار خانوار، شرح کوتاه اختیاری و تفکیک نیاز از درخواست", model: "ارجاع و برنامه خدمت" },
@@ -246,6 +246,99 @@ function WebServicesCatalog() {
   );
 }
 
+/* قواعد مهاجرت هر فیلد قدیمی (بند تکلیف داده قبلی) + سه مثال تعیین‌کننده */
+const MIGRATION_RULES = [
+  { cond: "هم‌معنا و دارای تاریخ معتبر", act: "انتقال یا پیش‌تکمیل با حفظ منشأ؛ کنترل شرایط جاری", ex: "نوع تصرف، مبلغ اجاره معتبر" },
+  { cond: "بخشی از مفهوم جدید را پوشش می‌دهد", act: "انتقال همان بخش و طرح سؤال‌های تکمیلی", ex: "بیمه دارد ← تکمیل اعتبار و دسترسی مؤثر" },
+  { cond: "عنوان کلی یا معنای مبهم دارد", act: "حفظ سابقه؛ توقف نگاشت تا روشن‌شدن معنا", ex: "ناسالم، معلولیت روانی، نگهداری کودک" },
+  { cond: "صرفاً سابقه خدمت است", act: "انتقال به سوابق خدمات، نه پاسخ شاخص", ex: "برنامه حمایت تغذیه، اکرام" },
+  { cond: "حساس و غیرضروری برای غربالگری است", act: "عدم نمایش در فرم عمومی؛ نگهداری/حذف طبق سیاست مصوب", ex: "عنوان جرم، دین" },
+  { cond: "اطلاعات جدید در داده قبلی وجود ندارد", act: "ثبت «نیازمند تکمیل» و جمع‌آوری هدفمند", ex: "تعداد اتاق، دفعات حذف وعده، شبکه حمایت" },
+];
+
+const MIGRATION_EXAMPLES = [
+  {
+    title: "مثال ۱ — بیمه",
+    old: "قدیم: بیمه پایه درمانی = بله",
+    lines: [
+      "وجود پوشش = پیش‌تکمیل «بله»، با تاریخ و منبع",
+      "اعتبار پوشش = نیازمند بررسی",
+      "کفایت پوشش و دسترسی = نیازمند تکمیل",
+      "ضریب A5 = تا تکمیل شواهد، تعیین‌نشده",
+    ],
+  },
+  {
+    title: "مثال ۲ — مسکن",
+    old: "قدیم: ملکی نیازمند تعمیر",
+    lines: [
+      "نوع حق تصرف = ملکی",
+      "سابقه نقص فیزیکی = نیازمند تعمیر در تاریخ قبلی",
+      "خطر و شدت نقص جاری = نیازمند بررسی",
+      "ضریب C2 = از عنوان قدیمی به‌تنهایی قابل تعیین نیست",
+    ],
+  },
+  {
+    title: "مثال ۳ — بیکاری",
+    old: "قدیم: غیرشاغل",
+    lines: [
+      "فعالیت درآمدزا در زمان ثبت قدیم = نداشته/نامشخص طبق تعریف کد",
+      "توان، امکان کار، آمادگی و جست‌وجوی کار = نیازمند تکمیل",
+      "واجد شرایط بودن برای D1 یا D2 = هنوز احراز نشده",
+      "ضریب = تعیین‌نشده",
+    ],
+  },
+];
+
+function MigrationRulesPanel() {
+  return (
+    <div className="space-y-3">
+      <div className="rounded-2xl border bg-card overflow-hidden">
+        <div className="px-5 py-3.5 border-b bg-muted/40">
+          <h3 className="font-semibold">قاعده پیشنهادی مهاجرت هر فیلد قدیمی — داده قبلی حذف یا بازنویسی نمی‌شود</h3>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-5">
+            داده قدیمی با منشأ و تاریخ حفظ می‌شود، بخش قابل استفاده در ارزیابی جدید «پیش‌تکمیل» می‌شود و فقط شکاف‌های واقعی از خانوار پرسیده می‌شود؛
+            نتیجه یک ارزیابی نسخه‌دار جدید است، نه تغییر نام داده‌های قدیمی به شاخص‌های جدید.
+          </p>
+        </div>
+        <div className="overflow-x-auto thin-scroll">
+          <table className="w-full text-sm min-w-[640px]">
+            <thead>
+              <tr className="text-xs text-muted-foreground border-b">
+                <th className="text-start py-2.5 px-4">وضعیت داده قبلی</th>
+                <th className="text-start py-2.5 px-4">اقدام صحیح</th>
+                <th className="text-start py-2.5 px-4">نمونه</th>
+              </tr>
+            </thead>
+            <tbody>
+              {MIGRATION_RULES.map((r, i) => (
+                <tr key={i} className="border-b last:border-0 align-top">
+                  <td className="py-2.5 px-4 font-medium">{r.cond}</td>
+                  <td className="py-2.5 px-4 leading-6">{r.act}</td>
+                  <td className="py-2.5 px-4 text-[13px] text-muted-foreground">{r.ex}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="grid md:grid-cols-3 gap-3">
+        {MIGRATION_EXAMPLES.map((e) => (
+          <div key={e.title} className="rounded-2xl border bg-card p-4 space-y-2">
+            <h4 className="font-semibold text-sm">{e.title}</h4>
+            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5">{e.old}</p>
+            <ul className="text-[13px] leading-6 space-y-1 list-none">
+              {e.lines.map((l, i) => <li key={i} className="border-b last:border-0 pb-1">{l}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground leading-6">
+        تبدیل ساختار داده ممکن است؛ تبدیل معتبر همه داده‌های قبلی به امتیاز EM-MPI ممکن نیست. برآورد یا حدس مدل هوش مصنوعی هم جای داده لازم برای امتیاز رسمی را نمی‌گیرد.
+      </p>
+    </div>
+  );
+}
+
 export function MigrationView() {
   const totalFields = TABLE1.length + TABLE2.length;
   const counts = legacySummary();
@@ -287,6 +380,8 @@ export function MigrationView() {
       </div>
 
       <IndicatorMapTable />
+
+      <MigrationRulesPanel />
 
       <MigrationTable title="جدول ۱ — اطلاعات خانوار، مسکن، درخواست و درآمد (نمای فیلدمحور قبلی)" rows={TABLE1} />
       <MigrationTable title="جدول ۲ — اطلاعات فردی، اجتماعی، اشتغال، بیمه، سلامت و تحصیل (نمای فیلدمحور قبلی)" rows={TABLE2} />

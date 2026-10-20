@@ -121,11 +121,11 @@ export function HomeView() {
       <section className="rounded-2xl border bg-card p-6 flex flex-wrap items-center gap-4">
         <Landmark className="size-6 text-teal-strong shrink-0" aria-hidden />
         <div className="min-w-64 flex-1">
-          <h2 className="font-bold text-lg">میراث پرسشنامه قبلی و منابع ثبتی</h2>
+          <h2 className="font-bold text-lg">شروع با واکشی و میراث پرسشنامه قبلی</h2>
           <p className="text-sm text-muted-foreground leading-6 mt-0.5">
-            بخشی از داده از وب‌سرویس سازمان‌های متولی (ثبت احوال، پست، بیمه، املاک، علوم، آموزش‌وپرورش) دریافت و
-            ملاک قرار می‌گیرد؛ در گام «اطلاعات پایه» قابل استعلام است. نگاشت فیلدهای قبلی به ۳۰ شاخص جدید هم
-            داخل فرم (برچسب میراث روی هر شاخص) و هم در نقشه مهاجرت قابل مشاهده است.
+            پرسشنامه فقط با سه شناسه (کد ملی، کد پستی، تاریخ تولد) شروع می‌شود؛ هویت و اعضا از ثبت احوال و نشانی از پست
+            واکشی و ملاک می‌شود و سایر مراجع (بیمه، املاک، علوم، آموزش‌وپرورش) با کد ملی استعلام و پیش‌تکمیل می‌شوند.
+            «درخواست خانوار» در گام آخر ثبت می‌شود و نگاشت فیلدهای قبلی به ۳۰ شاخص جدید هم داخل فرم (برچسب میراث) و هم در نقشه مهاجرت قابل مشاهده است.
           </p>
         </div>
         <Button variant="outline" onClick={() => usePorsesh.getState().setView("migration")}>
