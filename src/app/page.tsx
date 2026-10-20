@@ -62,6 +62,13 @@ export default function Page() {
     return () => clearTimeout(t);
   }, []);
 
+  // بارگذاری خودکار بانک داده نمونه در نخستین اجرا (وقتی بانک خالی است)
+  useEffect(() => {
+    if (!hydrated) return;
+    const st = usePorsesh.getState();
+    if (Object.keys(st.assessments).length === 0) st.seedDemoBank();
+  }, [hydrated]);
+
   if (!mounted || !hydrated) {
     return (
       <div className="min-h-screen grid place-items-center bg-background">

@@ -27,7 +27,10 @@ export function HomeView() {
   const createAssessment = usePorsesh((s) => s.createAssessment);
   const assessments = usePorsesh((s) => s.assessments);
   const importJson = usePorsesh((s) => s.importJson);
+  const seedDemoBank = usePorsesh((s) => s.seedDemoBank);
+  const clearDemoBank = usePorsesh((s) => s.clearDemoBank);
   const [file, setFile] = useState<File | null>(null);
+  const demoCount = useMemo(() => Object.values(assessments).filter((a) => a.demo).length, [assessments]);
 
   const onImport = () => {
     if (!file) return;
@@ -60,6 +63,9 @@ export function HomeView() {
           <div className="flex flex-wrap gap-2.5 pt-2">
             <Button size="lg" variant="secondary" onClick={() => createAssessment()}>
               شروع پرسشنامه جدید <ArrowLeft className="size-4" aria-hidden />
+            </Button>
+            <Button size="lg" variant="outline" className="bg-transparent text-white border-white/40 hover:bg-white/10 hover:text-white" onClick={() => usePorsesh.getState().setView("assessments")}>
+              <Layers className="size-4" aria-hidden /> بانک پرونده‌ها ({faNum(Object.keys(assessments).length)})
             </Button>
             <Button size="lg" variant="outline" className="bg-transparent text-white border-white/40 hover:bg-white/10 hover:text-white" onClick={() => usePorsesh.getState().setView("rules")}>
               <FlaskConical className="size-4" aria-hidden /> قواعد و خودآزمایی
@@ -103,6 +109,33 @@ export function HomeView() {
             </li>
           ))}
         </ol>
+      </section>
+
+      {/* بانک داده نمونه */}
+      <section className="rounded-2xl border bg-card p-6">
+        <div className="flex flex-wrap items-center gap-3 mb-1.5">
+          <Database className="size-5 text-teal-strong" aria-hidden />
+          <h2 className="font-bold text-lg">بانک داده نمونه — {faNum(demoCount)} پرونده آزمایشی</h2>
+          {demoCount > 0 && <Badge variant="outline" className="bg-teal-soft text-teal-strong">در بانک موجود است</Badge>}
+        </div>
+        <p className="text-sm text-muted-foreground leading-6 mb-4">
+          هشت خانوار ساختگی با شرایط مختلف (سطوح ۱ تا ۵ محرومیت، بی‌خانمان، سالمند تنها، کودک معلول،
+          اطلاعات ناقص، ارجاع‌شده و پرونده بسته) در بانک ذخیره شده تا رفتار موتور قواعد، پرچم‌های خطر،
+          ارجاع و داشبورد حرفه‌ای بدون ورود داده قابل آزمودن باشد. همه نام‌ها «(نمونه)» هستند.
+        </p>
+        <div className="flex flex-wrap gap-2.5">
+          <Button onClick={() => { seedDemoBank(true); toast({ title: "بانک داده نمونه بارگذاری شد", description: "۸ پرونده آزمایشی با شرایط مختلف در بانک ذخیره شد." }); }}>
+            <Database className="size-4" aria-hidden /> بارگذاری/بازنشانی ۸ پرونده نمونه
+          </Button>
+          {demoCount > 0 && (
+            <Button variant="outline" onClick={() => { clearDemoBank(); toast({ title: "پرونده‌های نمونه پاک شد" }); }}>
+              <Trash2 className="size-4" aria-hidden /> پاک‌کردن پرونده‌های نمونه
+            </Button>
+          )}
+          <Button variant="ghost" onClick={() => usePorsesh.getState().setView("assessments")}>
+            مشاهده بانک پرونده‌ها <ArrowLeft className="size-4" aria-hidden />
+          </Button>
+        </div>
       </section>
 
       {/* سناریوهای نمونه */}
@@ -183,7 +216,10 @@ export function AssessmentsView() {
             return (
               <div key={a.id} className="rounded-2xl border bg-card p-4.5 p-5 flex flex-wrap items-center gap-3">
                 <div className="min-w-52">
-                  <div className="font-semibold">{name}</div>
+                  <div className="font-semibold flex items-center gap-2">
+                    {name}
+                    {a.demo && <Badge variant="outline" className="text-[10px] bg-teal-soft text-teal-strong border-teal-strong/30">نمونه</Badge>}
+                  </div>
                   <div className="text-xs text-muted-foreground mt-0.5">
                     {faDateTime(a.updatedAt)} • {faNum(a.members.length)} عضو • نسخه قواعد {a.ruleSetVersion}
                   </div>

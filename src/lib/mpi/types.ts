@@ -208,6 +208,8 @@ export interface Assessment {
   /** نسخه قواعد مورد استفاده در محاسبه */
   ruleSetVersion: string;
   status: AssessmentStatus;
+  /** پرونده نمونه آزمایشی (بانک داده نمایشی) — در گزارش‌ها برچسب می‌گیرد */
+  demo?: boolean;
   /** نوع درخواست (چندانتخابی) — تفکیک از «نیاز شناسایی‌شده» */
   requestTypes: string[];
   requestNotes?: string;

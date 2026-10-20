@@ -18,6 +18,7 @@ import {
   type AnswerValue,
 } from "@/lib/mpi/types";
 import { FLAG_DEFS, RULE_SET } from "@/lib/mpi/rules";
+import { buildDemoBank } from "@/lib/mpi/demo-bank";
 import { nowIso, uid } from "@/lib/mpi/format";
 
 /**
@@ -83,6 +84,10 @@ export interface PorseshState {
   exportOne: (id: string) => string;
   importJson: (json: string) => { ok: boolean; message: string };
   removeAssessment: (id: string) => void;
+  /** بارگذاری بانک داده نمونه (۸ پرونده ساختگی) — force=true پرونده‌های نمونه قبلی را جایگزین می‌کند */
+  seedDemoBank: (force?: boolean) => void;
+  /** حذف همه پرونده‌های نمونه */
+  clearDemoBank: () => void;
   markHydrated: () => void;
 }
 
@@ -414,6 +419,41 @@ export const usePorsesh = create<PorseshState>()(
           const next = { ...st.assessments };
           delete next[id];
           return { assessments: next, activeId: st.activeId === id ? null : st.activeId };
+        }),
+
+      seedDemoBank: (force) =>
+        set((st) => {
+          const demos = buildDemoBank();
+          if (force) {
+            // حذف پرونده‌های نمونه قبلی و جایگزینی با نسخه تازه
+            const kept = Object.fromEntries(
+              Object.entries(st.assessments).filter(([, a]) => !a.demo),
+            );
+            const next: Record<string, Assessment> = { ...kept };
+            for (const d of demos) next[d.id] = d;
+            const activeIsDemo = st.activeId ? !!st.assessments[st.activeId]?.demo : false;
+            return {
+              assessments: next,
+              activeId: activeIsDemo ? demos[0].id : st.activeId,
+              view: st.view === "wizard" && activeIsDemo ? "assessments" : st.view,
+            };
+          }
+          const next: Record<string, Assessment> = { ...st.assessments };
+          for (const d of demos) next[d.id] = d;
+          return { assessments: next };
+        }),
+
+      clearDemoBank: () =>
+        set((st) => {
+          const next = Object.fromEntries(
+            Object.entries(st.assessments).filter(([, a]) => !a.demo),
+          );
+          const activeIsDemo = st.activeId ? !!st.assessments[st.activeId]?.demo : false;
+          return {
+            assessments: next,
+            activeId: activeIsDemo ? null : st.activeId,
+            view: activeIsDemo && (st.view === "wizard" || st.view === "professional") ? "assessments" : st.view,
+          };
         }),
 
       markHydrated: () => set({ hydrated: true }),
