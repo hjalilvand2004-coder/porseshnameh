@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { usePorsesh } from "@/lib/store";
 import { Shell } from "@/components/porsesh/shell";
 import { HomeView, AssessmentsView } from "@/components/porsesh/home";
@@ -54,6 +54,13 @@ export default function Page() {
     () => true,
     () => false,
   );
+
+  // ضامن اطمینان: اگر بازآوری ذخیره‌سازی (مثلاً file:// یا حافظه مسدود) به
+  // onRehydrateStorage نرسد، صفحه در حالت بارگذاری گیر نمی‌کند.
+  useEffect(() => {
+    const t = setTimeout(() => usePorsesh.getState().markHydrated(), 1200);
+    return () => clearTimeout(t);
+  }, []);
 
   if (!mounted || !hydrated) {
     return (
