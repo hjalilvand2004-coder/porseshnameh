@@ -33,3 +33,4 @@ agent-ctx/
 *.tsbuildinfo
 next-env.d.ts
 .eslintcache
+tool-results/
