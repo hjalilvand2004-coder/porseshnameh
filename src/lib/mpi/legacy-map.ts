@@ -258,6 +258,14 @@ export const WEB_SERVICES: WebServiceDef[] = [
     scope: "household",
   },
   {
+    id: "shaparak_bank",
+    name: "شاپرک و بانک‌ها — راستی‌آزمایی معیشت",
+    org: "شاپرک / بانک‌های عامل (با توافقنامه دسترسی)",
+    provides: ["وضعیت حساب با کد ملی", "گردش تجمیعی ۹۰ روز (بدون جزئیات خرید)", "تسهیلات و چک برگشتی"],
+    feeds: ["D1", "D2"],
+    scope: "household",
+  },
+  {
     id: "insurance",
     name: "بیمه — پوشش پایه درمانی",
     org: "تأمین اجتماعی و سایر صندوق‌ها",

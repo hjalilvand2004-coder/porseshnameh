@@ -1,5 +1,5 @@
 import type { Assessment, WebServiceResult, PrefillPayload } from "./types";
-import { faNum } from "./format";
+import { faNum, faDateTime } from "./format";
 
 /**
  * شبیه‌ساز پاسخ مراجع ثبتی (وب‌سرویس‌ها) برای نسخه نمایشی آفلاین.
@@ -149,6 +149,40 @@ export function simulateServiceFetch(serviceId: string, a: Assessment): WebServi
       });
     }
 
+    /* ===== استعلام حساب بانکی از شاپرک/بانک‌ها با کد ملی — اجرای توافقنامه دسترسی ===== */
+    case "shaparak_bank": {
+      if (nid.length !== 10) {
+        return result(serviceId, "error", {},
+          "برای استعلام بانکی با کد ملی، ابتدا کد ملی سرپرست را ثبت و واکشی کنید.");
+      }
+      if (!h.consents?.bankAccess) {
+        return result(serviceId, "error", {},
+          "توافقنامه دسترسی به اطلاعات بانکی در ثبت‌نام پذیرفته نشده است — بدون رضایت، استعلام بانکی انجام نمی‌شود و راستی‌آزمایی معیشت به مسیر مدارک مردمی منتقل می‌شود.");
+      }
+      const seed = hashStr("shp:" + nid);
+      const hasAccount = seed % 5 !== 0; // ۸۰٪ حساب فعال
+      if (!hasAccount) {
+        return result(serviceId, "ok", {
+          "حساب فعال با این کد ملی": "یافت نشد",
+          "اجراهای توافقنامه": `پذیرش رضایت در ${faDateTime(new Date(h.consents.agreedAt ?? new Date().toISOString()))}`,
+          "اثر بر سنجش": "نبود حساب به‌تنهایی امتیاز ندارد؛ منابع از سایر مسیرها (اعلامی + مدارک مردمی) سنجیده می‌شود (D1–D3)",
+        },
+        "حساب فعالی با این کد ملی در شبکه شاپرک یافت نشد — این پاسخ داده سنجش است و نباید به‌عنوان پیش‌داوری درباره درخواست تفسیر شود.");
+      }
+      const turn = 3 + (seed % 9); // ۳ تا ۱۱ تراکنش ماهانه (تجمیعی)
+      const loans = seed % 4 === 0 ? "یک تسهیلات کوچک فعال" : "تسهیلات فعال ثبت نشده";
+      const bounced = seed % 7 === 0 ? "یک مورد سابقه چک برگشتی (نیازمند بررسی زمینه)" : "سابقه چک برگشتی ثبت نشده";
+      return result(serviceId, "ok", {
+        "وضعیت حساب بانکی سرپرست": "حساب فعال — تطبیق با کد ملی انجام شد",
+        "گردش تجمیعی ۳ ماه اخیر": `${faNum(turn)} تراکنش در ماه (جزئیات خرید مشاهده نمی‌شود)`,
+        "وضعیت تسهیلات": loans,
+        "چک برگشتی": bounced,
+        "اجراهای توافقنامه": `پذیرش رضایت در ${faDateTime(new Date(h.consents.agreedAt ?? new Date().toISOString()))}`,
+        "اثر بر سنجش": "فقط راستی‌آزمایی معیشت (D) — داده بانکی لایه پرونده‌ای است و امتیاز مستقل ندارد",
+      },
+      "مطابق توافقنامه: مانده و گردش تجمیعی فقط برای تطبیق منابع اعلامی استفاده می‌شود؛ جزئیات خرید و محل خرج کردن دریافت نمی‌شود.");
+    }
+
     /* ===== استعلام پوشش بیمه با کد ملی — پیش‌تکمیل A5 ===== */
     case "insurance": {
       if (nid.length !== 10) {
@@ -262,6 +296,7 @@ export function simulateServiceFetch(serviceId: string, a: Assessment): WebServi
 export const LOCKED_FIELDS: Record<string, string[]> = {
   civil_registry: ["headName", "headNationalId", "headBirthDate"],
   post: ["province", "county", "address"],
+  shaparak_bank: [],
   property: [],
   insurance: [],
   education_school: [],

@@ -180,6 +180,14 @@ export interface Household {
   headBirthDate?: string;
   /** کد پستی ده‌رقمی — کلید استعلام نشانی از سرویس پست */
   postalCode?: string;
+  /** شماره موبایل سرپرست — از فرم ثبت‌نام (کد تأیید و پیگیری) */
+  headMobile?: string;
+  /** زمان ثبت‌نام در سامانه (فرم ثبت‌نام مودالی) */
+  registeredAt?: string;
+  /** هش رمز عبور — متن ساده هرگز ذخیره نمی‌شود (نسخه نمایشی) */
+  headPasswordHash?: string;
+  /** رضایت‌های ثبت‌شده در ثبت‌نام — توافقنامه دسترسی به اطلاعات بانکی */
+  consents?: { bankAccess?: boolean; agreedAt?: string };
   contactPhone?: string;
   province?: string;
   county?: string;
@@ -248,7 +256,9 @@ export interface Assessment {
   status: AssessmentStatus;
   /** پرونده نمونه آزمایشی (بانک داده نمایشی) — در گزارش‌ها برچسب می‌گیرد */
   demo?: boolean;
-  /** نوع درخواست (چندانتخابی) — تفکیک از «نیاز شناسایی‌شده» */
+  /** نوع ثبت‌نام — اعلام نیازمندی (خانوار) یا متقاضی ارائه خدمت (مددکار/خیریه)؛ از فرم ثبت‌نام */
+  registrationKind?: "need_service" | "provide_service";
+  /** نوع درخواست (چندانتخابی) — تفکیک از «نیاز شناسایی‌شده»؛ در ثبت‌نام مقدار اولیه می‌گیرد */
   requestTypes: string[];
   requestNotes?: string;
   household: Household;

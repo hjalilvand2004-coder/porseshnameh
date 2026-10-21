@@ -12,6 +12,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { faDateTime, faNum, faPct } from "@/lib/mpi/format";
+import { RegistrationModal } from "@/components/porsesh/registration-modal";
 import {
   ArrowLeft, ClipboardList, Database, FlaskConical, Layers, Lock, Sparkles, Trash2,
   TriangleAlert, Upload, Users2, ShieldCheck, Compass, BookOpenCheck, Landmark,
@@ -61,9 +62,12 @@ export function HomeView() {
             موتور قواعد قطعی و مستقل، ثبت نشانه‌های فوریت بدون انتظار برای تکمیل فرم، و بازبینی انسانی مددکار.
           </p>
           <div className="flex flex-wrap gap-2.5 pt-2">
-            <Button size="lg" variant="secondary" onClick={() => createAssessment()}>
-              شروع پرسشنامه جدید <ArrowLeft className="size-4" aria-hidden />
-            </Button>
+            {/* دکمه اصلی — فرم ثبت‌نام مودالی (الگوی امداد) ← واکشی خودکار مراجع ← پرسشنامه */}
+            <RegistrationModal>
+              <Button size="lg" variant="secondary">
+                ثبت‌نام و شروع پرسشنامه <ArrowLeft className="size-4" aria-hidden />
+              </Button>
+            </RegistrationModal>
             <Button size="lg" variant="outline" className="bg-transparent text-white border-white/40 hover:bg-white/10 hover:text-white" onClick={() => usePorsesh.getState().setView("assessments")}>
               <Layers className="size-4" aria-hidden /> بانک پرونده‌ها ({faNum(Object.keys(assessments).length)})
             </Button>
@@ -121,11 +125,12 @@ export function HomeView() {
       <section className="rounded-2xl border bg-card p-6 flex flex-wrap items-center gap-4">
         <Landmark className="size-6 text-teal-strong shrink-0" aria-hidden />
         <div className="min-w-64 flex-1">
-          <h2 className="font-bold text-lg">شروع با واکشی و میراث پرسشنامه قبلی</h2>
+          <h2 className="font-bold text-lg">ثبت‌نام، واکشی خودکار و میراث پرسشنامه قبلی</h2>
           <p className="text-sm text-muted-foreground leading-6 mt-0.5">
-            پرسشنامه فقط با سه شناسه (کد ملی، کد پستی، تاریخ تولد) شروع می‌شود؛ هویت و اعضا از ثبت احوال و نشانی از پست
-            واکشی و ملاک می‌شود و سایر مراجع (بیمه، املاک، علوم، آموزش‌وپرورش) با کد ملی استعلام و پیش‌تکمیل می‌شوند.
-            «درخواست خانوار» در گام آخر ثبت می‌شود و نگاشت فیلدهای قبلی به ۳۰ شاخص جدید هم داخل فرم (برچسب میراث) و هم در نقشه مهاجرت قابل مشاهده است.
+            پرسشنامه با فرم ثبت‌نام مودالی شروع می‌شود (کد ملی، موبایل، تاریخ تولد، کد پستی، رمز عبور، نوع درخواست و توافقنامه بانکی — الگوی سامانه امداد)؛
+            سپس هویت و اعضا از ثبت احوال، نشانی از پست، وضعیت حساب از شاپرک (اجرای توافقنامه) و بیمه/املاک/علوم/آموزش‌وپرورش با کلید کد ملی
+            به‌صورت خودکار واکشی و پیش‌تکمیل می‌شود و کاربر به پرسشنامه منتقل و فقط باقی‌مانده را مرحله‌به‌مرحله تکمیل می‌کند.
+            نگاشت فیلدهای قبلی به ۳۰ شاخص جدید هم داخل فرم (برچسب میراث) و هم در نقشه مهاجرت قابل مشاهده است.
           </p>
         </div>
         <Button variant="outline" onClick={() => usePorsesh.getState().setView("migration")}>

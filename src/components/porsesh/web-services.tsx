@@ -27,6 +27,7 @@ import { toast } from "@/hooks/use-toast";
 const SERVICE_ICON: Record<string, React.ElementType> = {
   civil_registry: Fingerprint,
   post: MapPin,
+  shaparak_bank: Landmark,
   insurance: HeartPulse,
   property: Building2,
   education_school: BookOpenCheck,

@@ -22,7 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { faNum, faPct, faDateTime } from "@/lib/mpi/format";
-import { CircleCheck, ChevronLeft, ChevronRight, History, Info, Lock, Siren, Save, CheckCircle2, Loader2, RefreshCw, Landmark, Fingerprint, MapPin, HeartPulse, Building2, BookOpenCheck, GraduationCap, ClipboardList, FileBadge2, ShieldCheck } from "lucide-react";
+import { CircleCheck, ChevronLeft, ChevronRight, History, Info, Lock, Siren, Save, CheckCircle2, Loader2, RefreshCw, Landmark, Fingerprint, MapPin, HeartPulse, Building2, BookOpenCheck, GraduationCap, ClipboardList, FileBadge2, ShieldCheck, UserCheck, Handshake } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -304,6 +304,7 @@ function FetchedCard({ title, icon: Icon, res }: { title: string; icon: React.El
 }
 
 const OTHER_SERVICES: { id: string; name: string; org: string; icon: React.ElementType; label: string }[] = [
+  { id: "shaparak_bank", name: "شاپرک / بانک‌ها", org: "شاپرک و بانک‌های عامل", icon: Landmark, label: "راستی‌آزمایی معیشت با توافقنامه (D1/D2)" },
   { id: "insurance", name: "بیمه", org: "تأمین اجتماعی و صندوق‌ها", icon: HeartPulse, label: "پوشش پایه اعضا (A5)" },
   { id: "property", name: "اموال و املاک", org: "سازمان اموال و املاک", icon: Building2, label: "سابقه سند مسکن (C3)" },
   { id: "education_school", name: "آموزش‌وپرورش", org: "وزارت آموزش‌وپرورش", icon: BookOpenCheck, label: "ثبت‌نام اعضای در سن آموزش (B1/B2)" },
@@ -447,11 +448,12 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
         <h3 className="font-bold text-base flex items-center gap-2"><ShieldCheck className="size-5 text-teal-strong" aria-hidden /> به پرسش‌نامه خانوار خوش آمدید</h3>
         <p>
           این پرسش‌نامه برای <b>سنجش عملیاتی محرومیت</b> خانوار طراحی شده است، نه رد یا پذیرش درخواست. پاسخ‌ها به <strong>محرمانگی کامل</strong> پردازش می‌شوند.
-          برای شروع، سه شناسه زیر را وارد کنید؛ اطلاعات تکمیلی هویتی به‌صورت خودکار از مراجع متولی واکشی می‌شود تا بار پر کردن فرم کمتر شود.
+          اگر از فرم ثبت‌نام آمده‌اید، شناسه‌ها و داده هویتی به‌صورت خودکار واکشی شده است؛ در غیر این صورت سه شناسه زیر را وارد کنید تا واکشی انجام شود.
         </p>
         <ul className="list-disc ps-5 space-y-1 text-muted-foreground text-[13px]">
-          <li><b className="text-foreground">کد ملی سرپرست اجباری است</b> — کلید شناسایی خانوار و مبنای استعلام همه مراجع (ثبت احوال، پست، تأمین اجتماعی، املاک، آموزش‌وپرورش، علوم). اگر سرپرست فاقد مدرک است، مسیر دریافت مدرک (R8) با همراهی مددکار فعال می‌شود.</li>
-          <li>«درخواست شما» در ابتدا پرسیده نمی‌شود؛ در گام آخر به‌عنوان داده خدماتی (خارج از امتیاز) ثبت می‌شود.</li>
+          <li><b className="text-foreground">کد ملی سرپرست اجباری است</b> — کلید شناسایی خانوار و مبنای استعلام همه مراجع (ثبت احوال، پست، شاپرک، تأمین اجتماعی، املاک، آموزش‌وپرورش، علوم). اگر سرپرست فاقد مدرک است، مسیر دریافت مدرک (R8) با همراهی مددکار فعال می‌شود.</li>
+          <li>نوع درخواست شما در <b>ثبت‌نام</b> انتخاب شده است؛ در گام آخر به‌عنوان داده خدماتی قابل تکمیل و اصلاح است.</li>
+          <li>شماره موبایل، رمز عبور (فقط هش) و توافقنامه بانکی نیز از ثبت‌نام منتقل شده‌اند.</li>
           <li>اگر وضعیت فوری یا خطرناکی دارید، از دکمه «فوریت» در پایین صفحه استفاده کنید — نیازی به تکمیل بقیه فرم نیست.</li>
           <li>کد پستی برای واکشی نشانی از پست است و برای بی‌خانمان‌ها اجباری نیست.</li>
           <li>در هر زمان می‌توانید پیش‌نویس را ذخیره و بعداً ادامه دهید.</li>
@@ -466,9 +468,10 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
           سپس سایر مراجع متولی (بیمه، املاک، آموزش‌وپرورش، علوم) نیز با همان کد ملی استعلام می‌شوند. داده واکشی‌شده <b>ملاک</b> است و در فرم فقط‌خواندنی می‌شود.
         </p>
         {fetched ? (
-          <div className="grid sm:grid-cols-3 gap-2.5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {[
               { label: "کد ملی سرپرست", value: h.headNationalId },
+              { label: "موبایل سرپرست (از ثبت‌نام)", value: h.headMobile },
               { label: "تاریخ تولد سرپرست", value: h.headBirthDate },
               { label: "کد پستی", value: h.postalCode },
             ].map((f) => (
@@ -523,6 +526,28 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
           {busy && <span className="text-xs text-teal-strong flex items-center gap-1.5"><Loader2 className="size-3.5 animate-spin" aria-hidden /> {busy}</span>}
         </div>
       </div>
+
+      {/* وضعیت ثبت‌نام — نوع درخواست، توافقنامه بانکی و زمان ثبت‌نام از فرم ثبت‌نام */}
+      {assessment.registrationKind && (
+        <div className="rounded-2xl border bg-card p-4 flex flex-wrap items-center gap-3">
+          <span className="grid place-items-center size-9 rounded-xl bg-teal-soft text-teal-strong shrink-0"><UserCheck className="size-5" aria-hidden /></span>
+          <div className="min-w-56 flex-1 space-y-0.5">
+            <h4 className="text-sm font-semibold">وضعیت ثبت‌نام — منتقل‌شده از فرم ثبت‌نام</h4>
+            <p className="text-xs text-muted-foreground leading-5">
+              نوع درخواست: <b className="text-foreground">{assessment.registrationKind === "need_service" ? "اعلام نیازمندی و دریافت خدمات" : "متقاضی ارائه خدمت به مددجویان و نیازمندان"}</b>
+              {assessment.household.consents?.bankAccess && (
+                <> • توافقنامه دسترسی به اطلاعات بانکی: <b className="text-foreground">پذیرفته شد</b> {assessment.household.consents.agreedAt ? `در ${faDateTime(assessment.household.consents.agreedAt)}` : ""}
+                  {ws.shaparak_bank ? " — استعلام شاپرک اجرا شد" : " — استعلام شاپرک از پنل مراجع قابل اجراست"}
+                </>
+              )}
+              {assessment.household.registeredAt && <> • زمان ثبت‌نام: {faDateTime(assessment.household.registeredAt)}</>}
+            </p>
+          </div>
+          <Badge variant="outline" className="bg-teal-soft text-teal-strong border-teal-strong/30 gap-1">
+            <Handshake className="size-3.5" aria-hidden /> ثبت‌نام انجام شد
+          </Badge>
+        </div>
+      )}
 
       {/* نتایج واکشی ملاک */}
       {civil?.status === "ok" && <FetchedCard title="ثبت احوال — هویت سرپرست و سابقه اعضای خانوار" icon={Fingerprint} res={civil} />}
@@ -979,11 +1004,11 @@ function SummaryStep({ assessment }: { assessment: Assessment }) {
     <div className="space-y-5">
       <ResultCard assessment={assessment} compact />
 
-      {/* درخواست خانوار — در ابتدا گرفته نمی‌شود؛ خروجی خدماتی جدا از نیاز شناسایی‌شده */}
+      {/* درخواست خانوار — در ثبت‌نام مقدار اولیه گرفته شد؛ خروجی خدماتی جدا از نیاز شناسایی‌شده */}
       <div className="rounded-2xl border bg-card p-5">
         <h3 className="font-semibold mb-1 flex items-center gap-2"><ClipboardList className="size-5 text-teal-strong" aria-hidden /> درخواست خانوار (خدماتی — خارج از امتیاز)</h3>
         <p className="text-xs text-muted-foreground mb-3 leading-5">
-          درخواست در ابتدای پرسشنامه پرسیده نمی‌شود تا از «نیاز شناسایی‌شده در سنجش» مخلوط نشود؛
+          نوع درخواست در ثبت‌نام انتخاب شده و به‌عنوان مقدار اولیه درج شده است؛ می‌توانید آن را تکمیل یا اصلاح کنید.
           درخواست خروجی خدماتی و مسیر ارجاع است و امتیاز مستقل ندارد. درخواست‌های قبلی پرونده با تاریخ و وضعیت حفظ می‌شوند.
         </p>
         <div className="grid sm:grid-cols-2 gap-2">
@@ -1008,6 +1033,8 @@ function SummaryStep({ assessment }: { assessment: Assessment }) {
         <dl className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-sm">
           {[
             { k: "کد ملی سرپرست (کلید پرونده)", v: assessment.household.headNationalId || "—" },
+            { k: "شماره موبایل سرپرست", v: assessment.household.headMobile || "—" },
+            { k: "ثبت‌نام در سامانه", v: assessment.household.registeredAt ? faDateTime(assessment.household.registeredAt) : "بدون ثبت‌نام (ورود مددکار)" },
             { k: "شناسه ارزیابی", v: assessment.id },
             { k: "نسخه قواعد", v: assessment.ruleSetVersion },
             { k: "وضعیت پرونده", v: assessment.status === "draft" ? "پیش‌نویس" : assessment.status === "submitted" ? "ثبت‌شده" : assessment.status },

@@ -45,7 +45,7 @@ export interface PorseshState {
   setActive: (id: string | null) => void;
   setWizardStep: (s: number) => void;
 
-  createAssessment: (init?: Partial<Assessment>) => string;
+  createAssessment: (init?: Partial<Assessment>, opts?: { silent?: boolean }) => string;
   updateHousehold: (id: string, patch: Partial<Assessment["household"]>) => void;
   updateRequest: (id: string, types: string[], notes?: string) => void;
   setStatus: (id: string, status: Assessment["status"]) => void;
@@ -121,7 +121,7 @@ export const usePorsesh = create<PorseshState>()(
       setActive: (id) => set({ activeId: id, wizardStep: 1 }),
       setWizardStep: (s) => set({ wizardStep: s }),
 
-      createAssessment: (init) => {
+      createAssessment: (init, opts) => {
         const id = uid("hh");
         const now = nowIso();
         const a: Assessment = {
@@ -147,7 +147,13 @@ export const usePorsesh = create<PorseshState>()(
           webServices: {},
           ...init,
         };
-        set((st) => ({ assessments: { ...st.assessments, [id]: a }, activeId: id, view: "wizard", wizardStep: 1 }));
+        /* silent=true: برای جریان ثبت‌نام مودالی — view عوض نمی‌شود تا مودال باز بماند؛ در پایان با تأیید کاربر به wizard می‌رویم */
+        set((st) => ({
+          assessments: { ...st.assessments, [id]: a },
+          activeId: id,
+          wizardStep: 1,
+          ...(opts?.silent ? {} : { view: "wizard" as const }),
+        }));
         return id;
       },
 
