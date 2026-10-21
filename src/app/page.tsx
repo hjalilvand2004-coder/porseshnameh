@@ -3,6 +3,7 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { usePorsesh } from "@/lib/store";
 import { Shell } from "@/components/porsesh/shell";
+import { AuthPage } from "@/components/porsesh/auth-page";
 import { HomeView, AssessmentsView } from "@/components/porsesh/home";
 import { Wizard } from "@/components/porsesh/wizard";
 import { ProfessionalDashboard } from "@/components/porsesh/dashboard";
@@ -48,6 +49,7 @@ function Router() {
 
 export default function Page() {
   const hydrated = usePorsesh((s) => s.hydrated);
+  const session = usePorsesh((s) => s.session);
   // تشخیص نصب‌شدگی سمت کلاینت بدون setState در اثر
   const mounted = useSyncExternalStore(
     subscribeNoop,
@@ -78,6 +80,11 @@ export default function Page() {
         </div>
       </div>
     );
+  }
+
+  /* گیت ورود: بدون نشست فعال، صفحه لاگین (الگوی امداد) نمایش داده می‌شود */
+  if (!session) {
+    return <AuthPage />;
   }
 
   return (

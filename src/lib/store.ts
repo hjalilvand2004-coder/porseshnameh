@@ -19,6 +19,8 @@ import {
 } from "@/lib/mpi/types";
 import { FLAG_DEFS, RULE_SET } from "@/lib/mpi/rules";
 import { buildDemoBank } from "@/lib/mpi/demo-bank";
+import { hashPassword } from "@/lib/mpi/registration";
+import { normalizeDigits } from "@/lib/mpi/national-id";
 import { nowIso, uid } from "@/lib/mpi/format";
 import type { WebServiceResult } from "@/lib/mpi/types";
 
@@ -31,6 +33,26 @@ import type { WebServiceResult } from "@/lib/mpi/types";
 
 export const DRAFT_EXPIRY_DAYS = 30;
 
+/** حساب ثبت‌نام‌شده — کلید = کد ملی (نسخه نمایشی: هش رمز فقط محلی) */
+export interface Account {
+  nationalId: string;
+  mobile: string;
+  name?: string;
+  kind: "need_service" | "provide_service";
+  passwordHash: string;
+  registeredAt: string;
+}
+
+/** نشست ورود — از صفحه لاگین یا ثبت‌نام */
+export interface Session {
+  nationalId: string;
+  name?: string;
+  kind: "need_service" | "provide_service";
+  /** ورود نمایشی بدون حساب (دکمه عبور نمونه) */
+  demo?: boolean;
+  at: string;
+}
+
 export interface PorseshState {
   assessments: Record<string, Assessment>;
   activeId: string | null;
@@ -39,6 +61,18 @@ export interface PorseshState {
   mode: "household" | "pro";
   wizardStep: number;
   hydrated: boolean;
+  /** حساب‌های ثبت‌نام‌شده — کلید = کد ملی */
+  accounts: Record<string, Account>;
+  /** نشست جاری — null یعنی صفحه ورود نمایش داده شود */
+  session: Session | null;
+
+  registerAccount: (acc: Account) => void;
+  /** ورود با کد ملی و رمز — بررسی هش محلی (نسخه نمایشی) */
+  login: (nid: string, pw: string) => { ok: boolean; message: string };
+  startSession: (nid: string) => void;
+  /** ورود نمایشی بدون حساب — فقط برای نسخه نمونه */
+  startDemoSession: () => void;
+  logout: () => void;
 
   setView: (v: View) => void;
   setMode: (m: "household" | "pro") => void;
@@ -115,6 +149,35 @@ export const usePorsesh = create<PorseshState>()(
       mode: "household",
       wizardStep: 1,
       hydrated: false,
+      accounts: {},
+      session: null,
+
+      registerAccount: (acc) =>
+        set((st) => ({ accounts: { ...st.accounts, [acc.nationalId]: acc } })),
+
+      login: (nid, pw) => {
+        const key = normalizeDigits(nid);
+        const acc = get().accounts[key];
+        if (!acc) {
+          return { ok: false, message: "حسابی با این کد ملی یافت نشد — ابتدا ثبت‌نام کنید." };
+        }
+        if (acc.passwordHash !== hashPassword(pw)) {
+          return { ok: false, message: "رمز عبور نادرست است — دوباره تلاش کنید." };
+        }
+        set({ session: { nationalId: acc.nationalId, name: acc.name, kind: acc.kind, at: nowIso() } });
+        return { ok: true, message: "ورود موفق" };
+      },
+
+      startSession: (nid) =>
+        set((st) => {
+          const acc = st.accounts[nid];
+          return acc ? { session: { nationalId: acc.nationalId, name: acc.name, kind: acc.kind, at: nowIso() } } : st;
+        }),
+
+      startDemoSession: () =>
+        set({ session: { nationalId: "0000000000", name: "کاربر نمایشی", kind: "need_service", demo: true, at: nowIso() } }),
+
+      logout: () => set({ session: null, view: "home", activeId: null, wizardStep: 1 }),
 
       setView: (v) => set({ view: v }),
       setMode: (m) => set({ mode: m }),

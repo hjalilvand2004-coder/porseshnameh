@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   TriangleAlert,
   BookOpenCheck,
+  UserRound,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const setView = usePorsesh((s) => s.setView);
   const mode = usePorsesh((s) => s.mode);
   const setMode = usePorsesh((s) => s.setMode);
+  const session = usePorsesh((s) => s.session);
+  const logout = usePorsesh((s) => s.logout);
 
   const nav: { key: Parameters<typeof setView>[0]; label: string; icon: React.ElementType }[] = [
     { key: "home", label: "خانه", icon: Home },
@@ -112,6 +116,27 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 نمای حرفه‌ای
               </button>
             </div>
+
+            {/* نشست کاربر — نام + خروج */}
+            {session && (
+              <div className="ms-2 flex items-center gap-2 ps-2 sm:ps-3 border-s border-white/20">
+                <span className="hidden sm:grid place-items-center size-8 rounded-full bg-white/10 border border-white/20" title={`کد ملی: ${session.nationalId}`}>
+                  <UserRound className="size-4" aria-hidden />
+                </span>
+                <span className="hidden md:block text-xs leading-4 max-w-36 truncate">
+                  <span className="block font-semibold">{session.name ?? (session.demo ? "کاربر نمایشی" : "کاربر")}</span>
+                  <span className="block text-primary-foreground/70">{session.demo ? "نشست نمونه" : "ورود با کد ملی"}</span>
+                </span>
+                <Button
+                  variant="ghost" size="sm" onClick={logout}
+                  className="text-primary-foreground hover:text-primary hover:bg-white/10 gap-1.5"
+                  title="خروج از نشست — بازگشت به صفحه ورود"
+                >
+                  <LogOut className="size-4" aria-hidden />
+                  خروج
+                </Button>
+              </div>
+            )}
           </nav>
         </div>
       </header>

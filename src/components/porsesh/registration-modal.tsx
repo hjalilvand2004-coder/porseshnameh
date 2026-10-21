@@ -145,9 +145,16 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
     setSteps(SERVICE_SEQUENCE.map((s) => ({ ...s, status: "pending" as const })));
     const st = usePorsesh.getState();
 
-    /* مسیر متقاضی ارائه خدمت: پرسشنامه محرومیت و واکشی مراجع ندارد — ثبت‌نام و هدایت به داشبورد حرفه‌ای */
+    /* مسیر متقاضی ارائه خدمت: پرسشنامه محرومیت و واکشی مراجع ندارد — ثبت حساب و هدایت به داشبورد حرفه‌ای */
     if (kind === "provide_service") {
       await delay(900);
+      st.registerAccount({
+        nationalId: nidNorm,
+        mobile: normalizeDigits(mobile),
+        kind: "provide_service",
+        passwordHash: hashPassword(pw),
+        registeredAt: nowIso(),
+      });
       setSummary({ aid: "", name: "", address: "", kind: "provide_service", results: [] });
       setPhase("done");
       return;
@@ -220,6 +227,15 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
       });
 
       const civilName = r1.data?.["نام و نام خانوادگی سرپرست"] ?? "";
+      /* ساخت حساب برای ورودهای بعدی + شروع نشست */
+      st.registerAccount({
+        nationalId: nidNorm,
+        mobile: normalizeDigits(mobile),
+        name: civilName,
+        kind: kind as RegistrationKind,
+        passwordHash: hashPassword(pw),
+        registeredAt: nowIso(),
+      });
       setSummary({ aid, name: civilName, address: lastAddress, kind: kind as RegistrationKind, results });
       setPhase("done");
     } catch {
@@ -230,6 +246,7 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
 
   const finishNeed = () => {
     if (summary) {
+      usePorsesh.getState().startSession(nidNorm);
       usePorsesh.getState().setActive(summary.aid);
       usePorsesh.getState().setView("wizard");
       usePorsesh.getState().setWizardStep(1);
@@ -237,17 +254,18 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
     setOpen(false);
     toast({
       title: "به پرسشنامه خوش آمدید",
-      description: "داده هویتی و نشانی واکشی و ملاک شده است؛ اطلاعات را گام‌به‌گام تکمیل و تأیید کنید.",
+      description: "حساب شما ساخته شد — از این پس با کد ملی و رمز عبور وارد شوید. داده واکشی‌شده ملاک است؛ باقی‌مانده را گام‌به‌گام تکمیل کنید.",
     });
   };
 
   const finishProvider = () => {
+    usePorsesh.getState().startSession(nidNorm);
     usePorsesh.getState().setMode("pro");
     usePorsesh.getState().setView("professional");
     setOpen(false);
     toast({
-      title: "ثبت‌نام به‌عنوان متقاضی ارائه خدمت ثبت شد",
-      description: "پرسشنامه محرومیت برای شما تکمیل نمی‌شود — داشبورد حرفه‌ای برای پرونده خانوارها فعال است.",
+      title: "ثبت‌نام به‌عنوان متقاضی ارائه خدمت انجام شد",
+      description: "حساب شما ساخته شد — از این پس با کد ملی و رمز عبور وارد شوید. داشبورد حرفه‌ای برای پرونده خانوارها فعال است.",
     });
   };
   const closeBlocked = phase === "fetching";

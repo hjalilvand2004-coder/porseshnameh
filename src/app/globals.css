@@ -200,3 +200,38 @@
     background: #fff;
   }
 }
+
+/* ---------- صفحه ورود (لاگین) — آورورا، گلس و انیمیشن‌ها ---------- */
+
+@keyframes authFloat1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(3rem, 2rem) scale(1.12); }
+}
+@keyframes authFloat2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-2.5rem, 3rem) scale(1.08); }
+}
+@keyframes authFloat3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(2rem, -2.5rem) scale(1.15); }
+}
+.auth-float-1 { animation: authFloat1 14s ease-in-out infinite; }
+.auth-float-2 { animation: authFloat2 18s ease-in-out infinite; }
+.auth-float-3 { animation: authFloat3 22s ease-in-out infinite; }
+
+@keyframes authGlow {
+  0%, 100% { box-shadow: 0 0 22px rgba(45, 212, 191, 0.35); }
+  50% { box-shadow: 0 0 40px rgba(45, 212, 191, 0.6); }
+}
+.auth-glow { animation: authGlow 4.5s ease-in-out infinite; }
+
+@keyframes authCardIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.auth-card { animation: authCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* سازگاری: در حالت print صفحه ورود چاپ نشود */
+@media print {
+  .auth-float-1, .auth-float-2, .auth-float-3, .auth-glow { animation: none; }
+}
