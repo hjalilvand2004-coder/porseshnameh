@@ -8,6 +8,8 @@ import { indicatorLegacyBadge } from "@/lib/mpi/legacy-map";
 import { WEIGHTS } from "@/lib/mpi/rules";
 import type { IndicatorId } from "@/lib/mpi/types";
 import { simulateServiceFetch } from "@/lib/mpi/web-services";
+import { isValidIranianNationalId, isValidPostalCode, nationalIdError, normalizeDigits } from "@/lib/mpi/national-id";
+import { SectionGuideDialog, IndicatorGuideButton } from "@/components/porsesh/section-guide";
 import { QuestionField } from "@/components/porsesh/fields";
 import { MemberManager, IncomeEditor } from "@/components/porsesh/editors";
 import { FlagsDialog, FlagsList } from "@/components/porsesh/flags";
@@ -109,6 +111,21 @@ export function Wizard({ assessment }: { assessment: Assessment }) {
   const stepDef = STEPS[step - 1];
   const progress = useMemo(() => computeProgress(assessment), [assessment]);
 
+  /* گیت کد ملی — کلید شناسایی خانوار اجباری است: بدون کد ملی معتبر نمی‌توان از گام ۱ گذشت */
+  const nidValid = isValidIranianNationalId(assessment.household.headNationalId ?? "");
+  const nidGateBlocked = step === 1 && !nidValid;
+  const guardLeaveStep1 = (target: number) => {
+    if (nidGateBlocked && target !== 1) {
+      toast({
+        title: "کد ملی اجباری است",
+        description: "کد ملی سرپرست کلید شناسایی خانوار و مبنای استعلام همه مراجع است — برای ادامه، کد ملی معتبر (۱۰ رقم با تطبیق الگوریتم ثبت احوال) وارد کنید.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setStep(target);
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-4">
       {/* نوار پیشرفت چسبان — تصویر کامل پیشرفت پرکردن پرسشنامه */}
@@ -136,7 +153,7 @@ export function Wizard({ assessment }: { assessment: Assessment }) {
           {STEPS.map((s) => (
             <li key={s.key}>
               <button
-                onClick={() => setStep(s.index)}
+                onClick={() => guardLeaveStep1(s.index)}
                 aria-current={s.index === step ? "step" : undefined}
                 className={cn(
                   "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs whitespace-nowrap transition-colors min-h-9",
@@ -153,12 +170,16 @@ export function Wizard({ assessment }: { assessment: Assessment }) {
         </ol>
       </div>
 
-      <div className="mb-4">
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <span className="grid place-items-center size-8 rounded-lg bg-teal-soft text-teal-strong text-sm font-bold">{faNum(stepDef.index)}</span>
-          {stepDef.title}
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1 leading-6 max-w-3xl">{stepDef.desc}</p>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <span className="grid place-items-center size-8 rounded-lg bg-teal-soft text-teal-strong text-sm font-bold">{faNum(stepDef.index)}</span>
+            {stepDef.title}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1 leading-6 max-w-3xl">{stepDef.desc}</p>
+        </div>
+        {/* دکمه راهنمای بخش — فلسفه، ارتباط با نسخه قبلی و سیاست مهاجرت */}
+        <SectionGuideDialog stepKey={stepDef.key} />
       </div>
 
       <StepBody step={step} assessment={assessment} />
@@ -178,7 +199,7 @@ export function Wizard({ assessment }: { assessment: Assessment }) {
             </Button>
           } />
           {step < 10 ? (
-            <Button onClick={() => setStep(step + 1)}>
+            <Button onClick={() => guardLeaveStep1(step + 1)} disabled={nidGateBlocked}>
               بعدی <ChevronLeft className="size-4" aria-hidden />
             </Button>
           ) : (
@@ -186,6 +207,11 @@ export function Wizard({ assessment }: { assessment: Assessment }) {
           )}
         </div>
       </div>
+      {nidGateBlocked && (
+        <p className="text-xs text-destructive mt-1.5 no-print" role="alert">
+          ادامه پرسشنامه بدون کد ملی معتبر سرپرست ممکن نیست — کد ملی کلید شناسایی خانوار و مبنای استعلام همه مراجع است.
+        </p>
+      )}
       {mode === "pro" && step >= 4 && step <= 8 && (
         <p className="text-xs text-muted-foreground mt-2">نمای حرفه‌ای: مبانی محاسبه در گام ۱۰ و در داشبورد قابل مشاهده است.</p>
       )}
@@ -292,6 +318,7 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
   const setAnswersBulk = usePorsesh((s) => s.setAnswersBulk);
   const setWebService = usePorsesh((s) => s.setWebService);
   const clearWebService = usePorsesh((s) => s.clearWebService);
+  const allAssessments = usePorsesh((s) => s.assessments);
 
   const h = assessment.household;
   const ws = assessment.webServices ?? {};
@@ -305,8 +332,9 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [pendingFetch, setPendingFetch] = useState(false);
 
-  const nidOk = nid.replace(/[^\d]/g, "").length === 10;
-  const postalOk = postal.replace(/[^\d]/g, "").length === 10;
+  const nidOk = isValidIranianNationalId(nid);
+  const nidErr = nationalIdError(nid);
+  const postalOk = isValidPostalCode(postal);
 
   const saveInputs = (patch?: Partial<Assessment["household"]>) => {
     updateHousehold(assessment.id, {
@@ -326,6 +354,27 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
 
   const fetchIdentity = async () => {
     saveInputs();
+    /* کد ملی کلید شناسایی است — بدون کد ملی معتبر واکشی ممنوع */
+    if (!isValidIranianNationalId(nid)) {
+      toast({
+        title: "کد ملی معتبر وارد نشده است",
+        description: "کد ملی سرپرست اجباری و کلید استعلام همه مراجع است؛ با تطبیق الگوریتم ثبت احوال بررسی و دوباره تلاش کنید.",
+        variant: "destructive",
+      });
+      return;
+    }
+    /* هشدار پرونده تکراری — کد ملی مبنای شناسایی است؛ ثبت هم‌کدملی باید آگاهانه باشد */
+    const nidNorm = normalizeDigits(nid);
+    const dups = Object.values(allAssessments).filter(
+      (x) => x.id !== assessment.id && !x.demo && normalizeDigits(x.household.headNationalId ?? "") === nidNorm,
+    );
+    if (dups.length > 0) {
+      toast({
+        title: `پرونده دیگری با همین کد ملی وجود دارد (${new Intl.NumberFormat("fa-IR").format(dups.length)} پرونده)`,
+        description: "اگر ادامه همان پرونده است، از «بانک پرونده‌ها» بازش کنید؛ ثبت جدید با کد ملی مشترک فقط به‌عنوان بررسی جدید و با آگاهی از تکرار درج می‌شود.",
+        variant: "destructive",
+      });
+    }
     setPendingFetch(true);
     try {
       const fa = freshAssessment();
@@ -401,9 +450,10 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
           برای شروع، سه شناسه زیر را وارد کنید؛ اطلاعات تکمیلی هویتی به‌صورت خودکار از مراجع متولی واکشی می‌شود تا بار پر کردن فرم کمتر شود.
         </p>
         <ul className="list-disc ps-5 space-y-1 text-muted-foreground text-[13px]">
+          <li><b className="text-foreground">کد ملی سرپرست اجباری است</b> — کلید شناسایی خانوار و مبنای استعلام همه مراجع (ثبت احوال، پست، تأمین اجتماعی، املاک، آموزش‌وپرورش، علوم). اگر سرپرست فاقد مدرک است، مسیر دریافت مدرک (R8) با همراهی مددکار فعال می‌شود.</li>
           <li>«درخواست شما» در ابتدا پرسیده نمی‌شود؛ در گام آخر به‌عنوان داده خدماتی (خارج از امتیاز) ثبت می‌شود.</li>
           <li>اگر وضعیت فوری یا خطرناکی دارید، از دکمه «فوریت» در پایین صفحه استفاده کنید — نیازی به تکمیل بقیه فرم نیست.</li>
-          <li>نبود کد ملی یا کد پستی موجب رد درخواست نمی‌شود؛ مسیر دستی و بررسی میدانی فعال خواهد شد.</li>
+          <li>کد پستی برای واکشی نشانی از پست است و برای بی‌خانمان‌ها اجباری نیست.</li>
           <li>در هر زمان می‌توانید پیش‌نویس را ذخیره و بعداً ادامه دهید.</li>
         </ul>
       </div>
@@ -412,8 +462,8 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
       <div className="rounded-2xl border border-teal-strong/30 bg-teal-soft/30 p-4.5 space-y-3">
         <h3 className="font-semibold flex items-center gap-2"><Fingerprint className="size-5 text-teal-strong" aria-hidden /> شروع با واکشی — سه شناسه</h3>
         <p className="text-xs text-muted-foreground leading-5">
-          با این سه شناسه، هویت و اعضای خانوار از <b>ثبت احوال</b> و نشانی و موقعیت جغرافیایی از <b>پست</b> (از کد پستی) واکشی می‌شود؛
-          سپس سایر مراجع متولی (بیمه، املاک، آموزش‌وپرورش، علوم) نیز با کد ملی استعلام می‌شوند. داده واکشی‌شده <b>ملاک</b> است و در فرم فقط‌خواندنی می‌شود.
+          <b>کد ملی کلید و مبنای شناسایی فرد است و اجباری:</b> هویت و اعضای خانوار از <b>ثبت احوال</b> و نشانی و موقعیت جغرافیایی از <b>پست</b> (از کد پستی) واکشی می‌شود؛
+          سپس سایر مراجع متولی (بیمه، املاک، آموزش‌وپرورش، علوم) نیز با همان کد ملی استعلام می‌شوند. داده واکشی‌شده <b>ملاک</b> است و در فرم فقط‌خواندنی می‌شود.
         </p>
         {fetched ? (
           <div className="grid sm:grid-cols-3 gap-2.5">
@@ -434,9 +484,15 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
         ) : (
           <div className="grid sm:grid-cols-3 gap-2.5">
             <div className="space-y-1.5">
-              <Label htmlFor="id-nid">کد ملی سرپرست (۱۰ رقم)</Label>
-              <Input id="id-nid" dir="ltr" inputMode="numeric" value={nid} onChange={(e) => setNid(e.target.value)} placeholder="۱۰ رقم — بدون خط تیره" />
-              {nid.length > 0 && !nidOk && <p className="text-[11px] text-amber-700">کد ملی باید ۱۰ رقم باشد؛ اگر سرپرست فاقد مدرک است، خالی بگذارید.</p>}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Label htmlFor="id-nid">کد ملی سرپرست (۱۰ رقم)</Label>
+                <Badge className="text-[10px] bg-red-100 text-destructive border border-destructive/30 hover:bg-red-100 gap-1">
+                  <Fingerprint className="size-3" aria-hidden /> اجباری — کلید شناسایی
+                </Badge>
+              </div>
+              <Input id="id-nid" dir="ltr" inputMode="numeric" value={nid} onChange={(e) => setNid(e.target.value)} placeholder="۱۰ رقم — بدون خط تیره" aria-required="true" aria-invalid={!nidOk && nid.length > 0} className={cn(nid.length > 0 && !nidOk && "border-destructive focus-visible:ring-destructive/30")} />
+              {nid.length > 0 && nidErr && <p className="text-[11px] text-destructive leading-4" role="alert">{nidErr}</p>}
+              {nidOk && <p className="text-[11px] text-emerald-700 flex items-center gap-1"><CircleCheck className="size-3.5" aria-hidden /> کد ملی معتبر است — کلید استعلام مراجع آماده است.</p>}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="id-birth">تاریخ تولد سرپرست</Label>
@@ -458,11 +514,12 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
               <span className="text-xs text-muted-foreground">داده هویتی و نشانی از مرجع ثبتی دریافت شده است.</span>
             </>
           ) : (
-            <Button onClick={fetchIdentity} disabled={pendingFetch}>
+            <Button onClick={fetchIdentity} disabled={pendingFetch || !nidOk} title={!nidOk ? "برای واکشی، ابتدا کد ملی معتبر سرپرست را وارد کنید" : undefined}>
               {pendingFetch ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Fingerprint className="size-4" aria-hidden />}
               واکشی اطلاعات هویتی از ثبت احوال و پست
             </Button>
           )}
+          {!nidOk && !fetched && <span className="text-xs text-muted-foreground">واکشی پس از ثبت کد ملی معتبر فعال می‌شود.</span>}
           {busy && <span className="text-xs text-teal-strong flex items-center gap-1.5"><Loader2 className="size-3.5 animate-spin" aria-hidden /> {busy}</span>}
         </div>
       </div>
@@ -529,7 +586,7 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
                 )}
                 {r?.note && <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 leading-4">{r.note}</p>}
                 <div className="flex gap-1.5 flex-wrap">
-                  <Button size="sm" variant="outline" onClick={() => fetchOther(s)} disabled={!!busy || pendingFetch || !nidOk}>
+                  <Button size="sm" variant="outline" onClick={() => fetchOther(s)} disabled={!!busy || pendingFetch || !nidOk} title={!nidOk ? "کد ملی معتبر سرپرست کلید استعلام است" : undefined}>
                     {busy?.startsWith(`استعلام از ${s.name}`) ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : <RefreshCw className="size-3.5" aria-hidden />}
                     {r ? "استعلام مجدد" : "استعلام با کد ملی"}
                   </Button>
@@ -543,7 +600,7 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
             );
           })}
         </div>
-        {!nidOk && <p className="text-[11px] text-muted-foreground">برای استعلام سایر مراجع، ابتدا کد ملی ده‌رقمی سرپرست را وارد و واکشی کنید.</p>}
+        {!nidOk && <p className="text-[11px] text-muted-foreground">استعلام سایر مراجع با کلید کد ملی انجام می‌شود — ابتدا کد ملی ده‌رقمی معتبر سرپرست را وارد و واکشی کنید.</p>}
       </div>
     </div>
   );
@@ -648,7 +705,7 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
                 <SelectItem value="in_progress">در جریان دریافت</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-[11px] text-muted-foreground">نبود کد ملی موجب رد درخواست نمی‌شود.</p>
+            <p className="text-[11px] text-muted-foreground">کد ملی سرپرست کلید پرونده و اجباری است؛ اگر مدرک ندارد، مسیر دریافت مدرک (R8) با مددکار پیگیری می‌شود.</p>
           </div>
           {field("province", "استان", { locked: postAny ? "وب‌سرویس پست" : undefined })}
           {field("county", "شهرستان", { locked: postAny ? "وب‌سرویس پست" : undefined })}
@@ -756,6 +813,7 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
                   <h3 className="font-semibold">{g.title}</h3>
                   <Badge variant="outline" className="font-mono">{g.indicator}</Badge>
                   <LegacyBadge id={g.indicator} />
+                  <IndicatorGuideButton id={g.indicator} />
                   <WeightBadge id={g.indicator} />
                   <span className="text-sm text-muted-foreground">— {m.firstName} {m.lastName ?? ""}</span>
                   {m.isMainProvider && <Badge className="bg-teal-strong">تأمین‌کننده اصلی</Badge>}
@@ -778,6 +836,7 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
                   <h3 className="font-semibold">{g.title}</h3>
                   <Badge variant="outline" className="font-mono">{g.indicator}</Badge>
                   <LegacyBadge id={g.indicator} />
+                  <IndicatorGuideButton id={g.indicator} />
                   <WeightBadge id={g.indicator} />
                   <span className="text-xs text-muted-foreground">سطح خانوار</span>
                 </div>
@@ -948,6 +1007,7 @@ function SummaryStep({ assessment }: { assessment: Assessment }) {
         </p>
         <dl className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5 text-sm">
           {[
+            { k: "کد ملی سرپرست (کلید پرونده)", v: assessment.household.headNationalId || "—" },
             { k: "شناسه ارزیابی", v: assessment.id },
             { k: "نسخه قواعد", v: assessment.ruleSetVersion },
             { k: "وضعیت پرونده", v: assessment.status === "draft" ? "پیش‌نویس" : assessment.status === "submitted" ? "ثبت‌شده" : assessment.status },
