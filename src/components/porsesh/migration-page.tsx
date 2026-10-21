@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { GitCompareArrows, ShieldAlert, Landmark, Layers3 } from "lucide-react";
+import { GitCompareArrows, ShieldAlert, Landmark, Layers3, BookOpen } from "lucide-react";
 import { faNum } from "@/lib/mpi/format";
 import {
   LEGACY_ACTION_META, LEGACY_INDICATOR_TABLE, legacySummary, WEB_SERVICES,
@@ -350,6 +350,11 @@ export function MigrationView() {
         </h1>
         <Badge variant="outline">{faNum(totalFields)} فیلد قدیمی بررسی‌شده</Badge>
         <Badge variant="outline">{faNum(30)} شاخص جدید نگاشت شده</Badge>
+        <a href="help.html#migration" target="_blank" rel="noopener" className="ms-auto" title="ماتریس کامل ملاحظات مهاجرت در راهنمای تصویری — در تب جدید باز می‌شود">
+          <Button variant="outline" size="sm" className="gap-2">
+            <BookOpen className="size-4" aria-hidden /> ملاحظات مهاجرت در راهنما
+          </Button>
+        </a>
       </header>
 
       {/* خلاصه اقدام‌ها */}
@@ -375,6 +380,7 @@ export function MigrationView() {
           <p className="mt-2 text-muted-foreground">
             برای هر فیلد در نسخه کامل مهاجرت این ستون‌ها تکمیل می‌شود: نام قدیمی، اقدام، نام جدید، تغییر معنا، شاخص مرتبط،
             تبدیل داده قدیمی، نیاز به جمع‌آوری مجدد، اثر امتیازی، حساسیت و دلیل تغییر. از داده تاریخی ناقص، ضریب شدت جدید ساخته نمی‌شود.
+            ماتریس‌های کامل تغییرات (خانوار، فردی، پوشش ۳۰ شاخص، فیلدهای کنترلی و موارد نیازمند تصویب) در <a href="help.html#migration" target="_blank" rel="noopener" className="underline decoration-dotted">بخش «ملاحظات مهاجرت» راهنمای تصویری</a> قرار دارد.
           </p>
         </div>
       </div>
