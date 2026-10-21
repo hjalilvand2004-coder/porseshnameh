@@ -130,3 +130,9 @@ Work Log:
 Stage Summary:
 - Release: https://github.com/hjalilvand2004-coder/porseshnameh/releases/tag/v0.5.0 (porseshnameh-static-v0.5.0.zip)
 - کد ملی = کلید شناسایی و اجباری؛ راهنمای مهاجرت سه‌پرسشی در سربرگ هر ۱۰ گام + کنار هر شاخص.
+
+انتشار (تکمیل Task 6):
+- push main (647ac6c) + تگ v0.5.0 موفق؛ push اول gh-pages با خطای سمت سرور گیت‌هاب مواجه شد و در تلاش دوم موفق شد (1efd3f7).
+- Release v0.5.0 با ZIP کامل ساخته شد؛ متن یادداشت اولیه ناقص بود و با scripts/patch-release-v050.py جایگزین متن کامل شد.
+- راستی‌آزمایی سایت زنده: صفحه اصلی رندر درست (h1/شروع/راهنما)، گام ۱: دکمه «راهنمای بخش» موجود، aria-required کد ملی، پیام گیت، «بعدی» قفل بدون کد ملی.
+- نکته: وجود next-error-h1 داخل index.html آرتیفکت prerender_NEXT است (در v0.4.1 هم بود) و رندر واقعی را خراب نمی‌کند.
