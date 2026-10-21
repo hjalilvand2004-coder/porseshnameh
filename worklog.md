@@ -136,3 +136,23 @@ Stage Summary:
 - Release v0.5.0 با ZIP کامل ساخته شد؛ متن یادداشت اولیه ناقص بود و با scripts/patch-release-v050.py جایگزین متن کامل شد.
 - راستی‌آزمایی سایت زنده: صفحه اصلی رندر درست (h1/شروع/راهنما)، گام ۱: دکمه «راهنمای بخش» موجود، aria-required کد ملی، پیام گیت، «بعدی» قفل بدون کد ملی.
 - نکته: وجود next-error-h1 داخل index.html آرتیفکت prerender_NEXT است (در v0.4.1 هم بود) و رندر واقعی را خراب نمی‌کند.
+
+---
+Task ID: 7
+Agent: main (Z.ai)
+Task: v0.6.0 (ثبت‌نام مودالی الگوی امداد + واکشی خودکار شاپرک) و v0.7.0 (صفحه ورود + حساب کاربری) + انتشار هر دو
+
+Work Log:
+- v0.6.0: src/lib/mpi/registration.ts (اعتبارسنجی موبایل ۰۹+۹رقم، تاریخ جلالی با سال کبیسه، رمز دقیقاً ۶ کاراکتر حروف انگلیسی+عدد بدون &<>"/;,*|=%، هش FNV، متن ۴بندی توافقنامه بانکی)؛ مودال ثبت‌نام سه‌فازی registration-modal.tsx (فرم ← واکشی خودکار ۷ مرجع ← خلاصه هویت ملاک)؛ وب‌سرویس shaparak_bank (اجرای توافقنامه: وضعیت حساب/گردش تجمیعی ۹۰روز/تسهیلات/چک برگشتی — بدون پذیرش توافقنامه استعلام نمی‌شود)؛ فیلدهای headMobile/consents/headPasswordHash/registeredAt در Household + registrationKind در Assessment؛ createAssessment با opts.silent تا مودال حین واکشی بسته نشود؛ مسیر «متقاضی ارائه خدمت» بدون ساخت پرونده → داشبورد حرفه‌ای؛ کارت «وضعیت ثبت‌نام» در گام ۱ + موبایل در شناسنامه گام ۱۰ + شاپرک در OTHER_SERVICES/WEB_SERVICES/help.html (کارت سرویس + ۳ سؤال FAQ).
+- رفع باگ یافت‌شده در تست: unmount شدن مودال هنگام تعویض view توسط createAssessment (silent fix)؛ پیام خطای فیلدهای خالی پس از submit؛ نمایش تاریخ تولد با ارقام فارسی.
+- v0.7.0: صفحه ورود auth-page.tsx (آورورا + اورب‌های انیمیشنی + شبکه + کارت گلس‌مورفیسم + پنل برند با ۳ کارت ویژگی) — الگوی جذاب‌شده soha.emdad.ir؛ store: accounts (کلید کد ملی) + session + login (تطبیق هش، پذیرش ارقام فارسی) + logout + startDemoSession + registerAccount؛ گیت ورود در page.tsx (بدون نشست فقط AuthPage)؛ هدر shell: نشان نشست + دکمه خروج؛ ورود مجدد پرونده باز همان کد ملی را ادامه می‌دهد؛ ثبت‌نام از صفحه ورود → حساب + نشست + ادامه مسیر؛ help.html (بخش شروع: صفحه ورود←ثبت‌نام←واکشی←پرسشنامه + FAQ فراموشی رمز) + README + section-guide (فلسفه گام ۱).
+- انیمیشن‌های CSS صفحه ورود در globals.css (authFloat1-3, authGlow, authCardIn) — بدون وابستگی جدید.
+- رستی‌آزمایی مرورگر: dev و file:// روی ZIP واقعی هر دو نسخه — ورود ناموفق (بدون حساب/رمز غلط)، ثبت‌نام کامل (شامل ارقام فارسی کدملی/تاریخ)، واکشی ۷ مرجع، ورود خودکار، خروج، ورود مجدد با ادامه پرونده، ورود نمایشی، موبایل iPhone 14 — بدون خطای کنسول. اسکرین‌شات صفحه ورود بررسی شد.
+- انتشار: v0.6.0 (commit f25be01 + tag + Release با ZIP) و v0.7.0 (commit 1752a36 + tag v0.7.0 + gh-pages db60ee1 + Release id 419324159 با porseshnameh-static-v0.7.0.zip) — هر دو با publish-v060.sh / publish-v070.sh و GH_TOKEN محیطی (remote پس از انتشار بدون توکن بازگشت). سایت زنده راستی‌آزمایی شد (صفحه ورود رندر می‌شود).
+- ZIPs در download/: porseshnameh-static-v0.6.0.zip و porseshnameh-static-v0.7.0.zip
+
+Stage Summary:
+- Release v0.7.0: github.com/hjalilvand2004-coder/porseshnameh/releases/tag/v0.7.0 (ZIP قابل حمل با START.bat)
+- سایت زنده: hjalilvand2004-coder.github.io/porseshnameh/ — صفحه ورود → ثبت‌نام/ورود → واکشی → پرسشنامه
+- جریان کامل: صفحه ورود (کدملی+رمز / ثبت‌نام) → واکشی خودکار ۷ مرجع با کلید کد ملی → پرسشنامه پیش‌پرشده → گام‌به‌گام
+- توکن گیت‌هاب پس از انتشار در remote باقی نماند؛ پیشنهاد revoke پس از پایان پروژه.
