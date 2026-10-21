@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>راهنمای سامانه پرسش‌نامه EM-MPI خانوار</title>
+<style>
+/* @font-face definitions are injected via a side CSS file (fonts.css) at render time. */
+
+@page { size: 794px 1123px; margin: 0; }
+
+:root{
+  /* — خانواده رنگی یکتا: فیروزه‌ای/سرمه‌ای برند سامانه (~۱۸۵°) — */
+  --ink:#16323a;            /* متن اصلی */
+  --muted:#557478;          /* متن ثانویه */
+  --teal:#12938d;           /* اکسنت XS */
+  --teal-d:#0e6f6a;         /* اکسنت تیره */
+  --teal-l:#35b5ae;         /* اکسنت روشن */
+  --teal-bg:#e7f3f2;        /* زمینه کارت L */
+  --teal-stripe:#f0f6f5;    /* ردیف جدول L */
+  --header-fill:#17565a;    /* سربرگ جدول M — پل به جلد تیره */
+  --border:#d5e2e1;         /* خطوط S */
+  --page-bg:#f5f8f8;        /* زمینه صفحه XL */
+  --cv-bg:#0b1d2c;          /* جلد/پایان تیره */
+  --cv-title:#eaf6f4;
+  --cv-muted:#93b1b4;
+  --cv-accent:#35b5ae;
+}
+
+html,body{ margin:0; padding:0; width:794px; background:var(--page-bg); color:var(--ink);
+  font-family:'Vazirmatn', sans-serif; font-size:15.5px; line-height:1.85;
+  line-break:strict; word-break:normal; overflow-wrap:break-word; }
+*{ box-sizing:border-box; }
+p,td,li{ text-align:justify; }
+b,strong{ font-weight:700; color:var(--ink); }
+
+@media screen{
+  html{ height:auto; display:flex; justify-content:center; background:#182225; }
+  body{ margin:24px auto; box-shadow:0 12px 48px rgba(0,0,0,.35); zoom:.85; }
+}
+
+/* ————— جلد ————— */
+.cover{ width:794px; height:1123px; break-after:page; overflow:hidden; position:relative;
+  background:var(--cv-bg); color:var(--cv-title); padding:110px 90px 150px;
+  display:flex; flex-direction:column; justify-content:center; }
+.cover .glow-layer{ position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(560px 560px at 96% 0%, rgba(53,181,174,.16), rgba(53,181,174,0) 68%),
+    radial-gradient(640px 640px at 2% 100%, rgba(53,181,174,.10), rgba(53,181,174,0) 66%); }
+.cover .frame{ position:absolute; inset:74px 56px; border:2px solid rgba(53,181,174,.55); pointer-events:none; }
+.cover .kicker{ color:var(--cv-accent); font-size:13px; font-weight:500; letter-spacing:6px; margin-bottom:26px; }
+.cover h1{ font-size:46px; line-height:1.5; font-weight:700; margin:0 0 10px; color:var(--cv-title);
+  text-shadow:0 0 34px rgba(53,181,174,.28); }
+.cover .sub{ font-size:21px; font-weight:600; color:var(--cv-accent); margin:0 0 30px; }
+.cover .summary{ font-size:14.5px; line-height:2; color:var(--cv-muted); max-width:560px; text-align:justify; margin:0 0 44px; }
+.cover .stats{ display:flex; flex-wrap:wrap; gap:12px; max-width:620px; margin-bottom:46px; }
+.cover .stat{ min-width:104px; flex:0 1 auto; border:1px solid rgba(53,181,174,.35); border-radius:10px; padding:12px 18px; }
+.cover .stat .n{ font-size:26px; font-weight:700; color:var(--cv-accent); line-height:1.2; }
+.cover .stat .t{ font-size:11.5px; color:var(--cv-muted); margin-top:2px; }
+.cover .org{ font-size:16px; font-weight:600; color:var(--cv-title); }
+.cover .org small{ display:block; font-size:12px; font-weight:400; color:var(--cv-muted); margin-top:6px; }
+.cover .edition{ position:absolute; bottom:104px; right:90px; left:90px; display:flex; justify-content:space-between; align-items:center;
+  border-top:1px solid rgba(53,181,174,.25); padding-top:16px; font-size:11.5px; color:var(--cv-muted); letter-spacing:1px; }
+.cover .edition .chip{ border:1px solid rgba(53,181,174,.45); color:var(--cv-accent); border-radius:999px; padding:4px 14px; font-size:11px; }
+
+/* ————— فهرست ————— */
+.toc{ width:794px; height:1123px; break-after:page; overflow:hidden; position:relative;
+  padding:88px 76px; background:var(--page-bg); display:flex; flex-direction:column; }
+.toc .k{ font-size:12px; letter-spacing:5px; color:var(--teal); font-weight:600; margin-bottom:10px; }
+.toc h2{ font-size:32px; font-weight:700; margin:0 0 8px; color:var(--ink); }
+.toc .lead{ color:var(--muted); font-size:13.5px; margin:0 0 34px; text-align:justify; }
+.toc .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 16px; }
+.toc .item{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px 18px; display:flex; gap:14px; align-items:flex-start; }
+.toc .num{ min-width:40px; height:40px; border-radius:10px; background:var(--teal-bg); color:var(--teal-d);
+  font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:center; }
+.toc .item .t{ font-weight:600; font-size:14.5px; color:var(--ink); line-height:1.5; }
+.toc .item .d{ font-size:12px; color:var(--muted); line-height:1.6; margin-top:3px; text-align:justify; }
+.toc .note{ margin-top:auto; border:1px dashed var(--border); border-radius:12px; padding:16px 20px; background:#fff;
+  font-size:12.5px; color:var(--muted); line-height:1.9; text-align:justify; }
+.toc .note b{ color:var(--teal-d); }
+
+/* ————— بدنه جریانی ————— */
+.main-content{ padding:58px 62px 46px; }
+.chapter{ break-after:avoid; break-inside:avoid; margin:30px 0 18px; }
+.chapter:first-child{ margin-top:0; }
+.chapter .tag{ display:inline-block; font-size:11.5px; font-weight:600; letter-spacing:3px; color:var(--teal-d);
+  background:var(--teal-bg); border-radius:999px; padding:4px 16px; margin-bottom:12px; }
+.chapter h2{ font-size:25px; font-weight:700; line-height:1.55; margin:0 0 8px; color:var(--ink); }
+.chapter .div{ width:64px; height:6px; border-radius:99px; background:linear-gradient(270deg, var(--teal), var(--teal-l)); }
+.intro{ color:var(--muted); font-size:14px; margin:0 0 16px; }
+
+h3.sec{ font-size:17px; font-weight:600; color:var(--teal-d); margin:20px 0 10px; break-after:avoid; }
+.body-text{ margin:0 0 12px; }
+
+.card{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:16px 20px; margin-bottom:12px; break-inside:avoid; }
+.card .ch{ display:flex; align-items:flex-start; gap:12px; }
+.card .cn{ min-width:34px; height:34px; border-radius:9px; background:var(--teal-bg); color:var(--teal-d);
+  font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center; margin-top:2px; }
+.card h4{ font-size:15px; font-weight:700; margin:0 0 6px; color:var(--ink); line-height:1.6; }
+.card p{ margin:0; font-size:13.5px; line-height:1.9; color:#33505a; }
+.card .meta{ font-size:11.5px; color:var(--teal-d); background:var(--teal-bg); border-radius:999px; padding:2px 12px; margin-right:10px; font-weight:600; white-space:nowrap; }
+
+.callout{ background:var(--teal-bg); border-right:4px solid var(--teal); border-radius:10px; padding:14px 18px; margin:14px 0; break-inside:avoid; }
+.callout .ct{ font-weight:700; font-size:13.5px; color:var(--teal-d); margin-bottom:4px; }
+.callout p{ margin:0; font-size:13px; line-height:1.9; color:#28505c; }
+.callout ul{ margin:6px 0 0; padding:0 18px 0 0; }
+.callout li{ font-size:13px; line-height:1.9; color:#28505c; margin-bottom:4px; text-align:right; }
+
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.grid2 .card{ margin-bottom:0; }
+
+/* جدول‌ها */
+table{ width:100%; border-collapse:collapse; margin:12px 0 16px; background:#fff; }
+thead{ display:table-header-group; }
+tr{ break-inside:avoid; }
+th{ background:var(--header-fill); color:#eaf6f4; font-size:12.5px; font-weight:600; padding:9px 12px; text-align:right; }
+td{ border-top:1px solid var(--border); font-size:12.5px; line-height:1.8; padding:8px 12px; vertical-align:top; }
+tbody tr:nth-child(odd) td{ background:var(--teal-stripe); }
+tbody tr:nth-child(even) td{ background:#fff; }
+td b{ color:var(--teal-d); }
+
+/* چیپ شاخص */
+.chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; max-width:100%; }
+.chip{ font-size:11px; color:var(--teal-d); background:var(--teal-bg); border:1px solid #cfe5e3; border-radius:999px; padding:2px 10px; white-space:nowrap; }
+
+/* پرچم‌ها */
+.flag{ border:1px solid var(--border); border-right:4px solid var(--teal); border-radius:10px; background:#fff; padding:12px 16px; break-inside:avoid; }
+.flag .fr{ display:flex; align-items:center; gap:10px; margin-bottom:4px; }
+.flag .fid{ min-width:34px; height:26px; border-radius:7px; background:var(--header-fill); color:#fff; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.flag h4{ font-size:13.5px; font-weight:700; margin:0; color:var(--ink); }
+.flag p{ margin:0; font-size:12.5px; color:#33505a; line-height:1.8; text-align:justify; }
+.flag .lnk{ font-size:11px; color:var(--teal-d); margin-top:6px; }
+
+/* نردبان تقدم */
+.ladder{ margin:12px 0 16px; }
+.lstep{ display:flex; gap:14px; align-items:flex-start; background:#fff; border:1px solid var(--border); border-radius:10px; padding:10px 16px; margin-bottom:8px; break-inside:avoid; }
+.lstep .ln{ min-width:30px; height:30px; border-radius:8px; background:var(--header-fill); color:#fff; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; }
+.lstep .lt{ font-weight:700; font-size:13.5px; color:var(--ink); }
+.lstep .ld{ font-size:12.5px; color:var(--muted); line-height:1.7; }
+
+/* دسته‌های مهاجرت — یک خانواده رنگی، شدت متفاوت */
+.leg{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0 16px; }
+.leg .li{ border-radius:10px; padding:10px 14px; break-inside:avoid; border:1px solid var(--border); background:#fff; }
+.leg .li b{ display:block; font-size:13px; color:var(--teal-d); margin-bottom:2px; }
+.leg .li span{ font-size:12px; color:var(--muted); line-height:1.7; display:block; text-align:justify; }
+
+/* پرسش و پاسخ */
+.qa{ border:1px solid var(--border); border-radius:12px; background:#fff; margin-bottom:10px; break-inside:avoid; overflow:hidden; }
+.qa .q{ background:var(--teal-stripe); padding:11px 18px; font-weight:700; font-size:13.5px; color:var(--ink); display:flex; gap:10px; align-items:flex-start; }
+.qa .q::before{ content:'؟'; flex:0 0 auto; width:24px; height:24px; border-radius:7px; background:var(--teal-bg); color:var(--teal-d);
+  font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+.qa .a{ padding:12px 18px; font-size:13px; line-height:1.95; color:#33505a; text-align:justify; }
+
+/* مثال */
+.example{ background:#fff; border:1px solid var(--border); border-radius:12px; padding:14px 18px; margin-bottom:10px; break-inside:avoid; }
+.example h4{ margin:0 0 8px; font-size:14px; color:var(--teal-d); font-weight:700; }
+.example .flow{ display:flex; flex-wrap:wrap; gap:8px; max-width:100%; }
+.example .step{ flex:1 1 auto; min-width:130px; max-width:100%; background:var(--teal-stripe); border:1px solid #d5e8e6; border-radius:9px; padding:8px 12px; font-size:11.5px; line-height:1.75; color:#28505c; overflow-wrap:break-word; }
+.example .step b{ display:block; color:var(--teal-d); font-size:11.5px; margin-bottom:2px; }
+
+/* ————— صفحه پایانی ————— */
+.ending{ width:794px; height:1123px; break-before:page; overflow:hidden; position:relative;
+  background:var(--cv-bg); color:var(--cv-title); padding:120px 90px;
+  display:flex; flex-direction:column; justify-content:center; }
+.ending .glow-layer{ position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(620px 620px at 2% 0%, rgba(53,181,174,.13), rgba(53,181,174,0) 68%),
+    radial-gradient(560px 560px at 98% 100%, rgba(53,181,174,.09), rgba(53,181,174,0) 66%); }
+.ending .frame{ position:absolute; inset:74px 56px; border:2px solid rgba(53,181,174,.5); pointer-events:none; }
+.ending .big{ font-size:34px; font-weight:700; line-height:1.7; color:var(--cv-title); margin:0 0 24px;
+  text-shadow:0 0 30px rgba(53,181,174,.25); }
+.ending .big em{ font-style:normal; color:var(--cv-accent); }
+.ending p{ color:var(--cv-muted); font-size:14px; line-height:2.1; text-align:justify; max-width:580px; }
+.ending .links{ margin-top:36px; border-top:1px solid rgba(53,181,174,.25); padding-top:22px; font-size:12.5px; color:var(--cv-muted); line-height:2.2; max-width:580px; }
+.ending .links b{ color:var(--cv-accent); font-weight:600; }
+.ending .ver{ position:absolute; bottom:104px; right:90px; left:90px; display:flex; justify-content:space-between;
+  border-top:1px solid rgba(53,181,174,.25); padding-top:16px; font-size:11.5px; color:var(--cv-muted); }
+</style>
+</head>
+<body>

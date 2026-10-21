@@ -156,3 +156,25 @@ Stage Summary:
 - سایت زنده: hjalilvand2004-coder.github.io/porseshnameh/ — صفحه ورود → ثبت‌نام/ورود → واکشی → پرسشنامه
 - جریان کامل: صفحه ورود (کدملی+رمز / ثبت‌نام) → واکشی خودکار ۷ مرجع با کلید کد ملی → پرسشنامه پیش‌پرشده → گام‌به‌گام
 - توکن گیت‌هاب پس از انتشار در remote باقی نماند؛ پیشنهاد revoke پس از پایان پروژه.
+
+---
+Task ID: 8
+Agent: main (Z.ai)
+Task: v0.7.1 — انتشار راهنمای سامانه به‌صورت PDF برداری زیبا + دکمه دانلود در help.html
+
+Work Log:
+- محتوای کامل public/help.html (۱۰۴۳ خط) استخراج شد (scripts/extract-help-text.py → scripts/help-content.txt) و سند PDF طبق اسکیل pdf (مسیر Creative Flow: HTML→Chromium برداری) طراحی و تولید شد.
+- ساختار سند (۱۶ صفحه): جلد تیره Crystal برند (قاب ۲px فیروزه‌ای + گلوهای شعاعی + نوار آمار ۳۰/۵/۱۰۰۰/۹/۷) ← فهرست بخش‌ها (گرید ۲×۵ + یادداشت) ← ۱۰ بخش جریانی (معماری، شروع کار، ۱۰ گام، ۵ بُعد با چیپ‌های شاخص، امتیازدهی و ۵ سطح، R1–R9، ۷ وب‌سرویس + نردبان تقدم، نگاشت نسخه‌ها + قواعد تکلیف + ۳ مثال، ملاحظات مهاجرت چکیده شش‌محوری + قاعده طلایی + ۱۱ تصویب + جمع‌بندی اجرایی، ۱۱ پرسش متداول) ← صفحه پایانی تیره با لینک‌ها.
+- طراحی: RTL با فونت وزیرمتن (۴ وزن base64 embed)، خانواده رنگی یکتای برند (~۱۸۵°: ink #16323a، teal #12938d، teal-bg #e7f3f2، header-fill #17565a، page-bg #f5f8f8)، @page 794×1123px margin 0، قواعد break (chapter break-after:avoid، کارت‌ها break-inside:avoid، thead table-header-group).
+- رفع باگ‌های حین تولید: (۱) false-positive اعتبارسنج روی @font-face → جداسازی به fonts.css تزریق‌شونده با --css؛ (۲) خط تزئینی ۴px بخش‌ها → ۶px تا از الگوی خط نازک خارج شود؛ (۳) اورب‌های offset منفی جلد → لایه glow inset:0 با radial-gradient؛ (۴) باگ ریشه‌ای: ۵ کارت بخش ۴ یک </div> کم داشتند → تو در تو شدن کارت‌ها + سرریز افقی ۹۴۰px + scale-to-fit و صفحه‌بندی خراب (کشف با پروب Playwright: scripts/probe-overflow.js)؛ (۵) Paged.js با RTL محتوا را می‌انداخت → --nopaged (صفحه‌بندی بومی Chromium).
+- QA: poster_validate (پس از رفع: PASS — جلد در隔离 هم Pass1/Pass2 پاک)، pdf_qa --no-tables (PASS، فقط warningهای آرتیفکت استخراج RTL برای «—»)، استخراج متن هر ۱۶ صفحه (بدون U+FFFD، بدون صفحه خالی)، بازبینی بصری PNG جلد/فهرست/گام‌ها/بُعدها/پرچم‌ها/جدول‌ها/مثال‌ها/FAQ/پایان.
+- شماره‌گذاری فارسی صفحات با pypdf+reportlab (وزیرمتن تبدیل‌شده به TTF): جلد/فهرست/پایان بدون شماره، بدنه ۱ تا ۱۳ با ارقام فارسی وسط‌چین پایین صفحه + متادیتای کامل (Title/Author/Subject/Creator/Keywords) — scripts/stamp-rahnama-pages.py.
+- تحویل: download/rahnama-emmpi-guide.pdf (۲.۱۷MB)، download/rahnama-emmpi-guide.html (سلف‌کانتینرد ۳۴۰KB)، download/rahnama-emmpi-cover-preview.png.
+- انتشار در سامانه: public/rahnama-emmpi.pdf + دکمه «دانلود نسخه PDF راهنما» در CTA ابتدای help.html + package.json 0.7.1 + یادداشت README + بیلد استاتیک (ممیزی حمل موفق) + ZIP v0.7.1 (شامل PDF) در download/.
+- پاک‌سازی مخزن: فایل زباله تصادفی کامیت‌شده قبلی («, d.get(browser_download_url,ERR))») از ایندکس حذف شد؛ .gitignore بازنویسی‌شده محیط از HEAD بازگردانده شد؛ core.fileMode=false برای نادیده‌گرفتن تغییرات mode محیطی.
+- انتشار: scripts/publish-v071.sh (push main + تگ v0.7.1 + gh-pages + Release با ZIP و PDF ضمیمه؛ توکن فقط در env، remote در پایان بدون توکن).
+
+Stage Summary:
+- PDF راهنما: download/rahnama-emmpi-guide.pdf + public/rahnama-emmpi.pdf (سایت: /porseshnameh/rahnama-emmpi.pdf)
+- Release v0.7.1: ZIP قابل حمل + PDF راهنما به‌عنوان asset
+- سورس سند برای ویرایش‌های بعدی: scripts/rahnama/00-head.html + 01/02/03 + scripts/build-rahnama-pdf.py (فونت‌ها خودکار embed)
