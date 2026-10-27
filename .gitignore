@@ -34,3 +34,5 @@ agent-ctx/
 next-env.d.ts
 .eslintcache
 tool-results/
+,*
+scripts/*.png
