@@ -10,6 +10,7 @@ import type { IndicatorId } from "@/lib/mpi/types";
 import { simulateServiceFetch } from "@/lib/mpi/web-services";
 import { isValidIranianNationalId, isValidPostalCode, nationalIdError, normalizeDigits } from "@/lib/mpi/national-id";
 import { SectionGuideDialog, IndicatorGuideButton } from "@/components/porsesh/section-guide";
+import { IndicatorCharterButton } from "@/components/porsesh/charter-modal";
 import { QuestionField } from "@/components/porsesh/fields";
 import { MemberManager, IncomeEditor } from "@/components/porsesh/editors";
 import { FlagsDialog, FlagsList } from "@/components/porsesh/flags";
@@ -838,6 +839,7 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
                   <h3 className="font-semibold">{g.title}</h3>
                   <Badge variant="outline" className="font-mono">{g.indicator}</Badge>
                   <LegacyBadge id={g.indicator} />
+                  <IndicatorCharterButton id={g.indicator} assessment={assessment} />
                   <IndicatorGuideButton id={g.indicator} />
                   <WeightBadge id={g.indicator} />
                   <span className="text-sm text-muted-foreground">— {m.firstName} {m.lastName ?? ""}</span>
@@ -861,6 +863,7 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
                   <h3 className="font-semibold">{g.title}</h3>
                   <Badge variant="outline" className="font-mono">{g.indicator}</Badge>
                   <LegacyBadge id={g.indicator} />
+                  <IndicatorCharterButton id={g.indicator} assessment={assessment} />
                   <IndicatorGuideButton id={g.indicator} />
                   <WeightBadge id={g.indicator} />
                   <span className="text-xs text-muted-foreground">سطح خانوار</span>

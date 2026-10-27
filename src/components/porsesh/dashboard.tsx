@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FlagsDialog, FlagsList } from "@/components/porsesh/flags";
+import { IndicatorCharterButton } from "@/components/porsesh/charter-modal";
 import { answerLabel } from "@/components/porsesh/fields";
 import { QUESTION_GROUPS } from "@/lib/mpi/questions";
 import { faNum, faPct, faScore, faDateTime, nowIso, uid } from "@/lib/mpi/format";
@@ -137,6 +138,7 @@ function IndicatorTable({ assessment }: { assessment: Assessment }) {
                     <div className="mt-1.5 text-xs text-muted-foreground leading-5 rounded-lg bg-muted/50 p-2.5 max-w-md">
                       {i.basis}
                       {i.pendingApproval && <span className="block mt-1 text-amber-700">آستانه این شاخص «نیازمند تصویب» است.</span>}
+                      <span className="block mt-2"><IndicatorCharterButton id={i.id} assessment={assessment} /></span>
                     </div>
                   )}
                 </td>
