@@ -21,7 +21,7 @@ export function normalizeDigits(s: string): string {
 /**
  * اعتبارسنجی کد ملی ۱۰ رقمی ایران — الگوریتم رقم کنترل:
  * ۹ رقم اول را در اوزان ۱۰ تا ۲ ضرب، جمع را mod ۱۱ می‌گیریم؛
- * اگر باقیمانده < ۵ باشد باید با رقم دهم برابر باشد، وگرنه ۱۱ منهای باقیمانده.
+ * اگر باقیمانده < ۲ باشد باید با رقم دهم برابر باشد، وگرنه ۱۱ منهای باقیمانده.
  */
 export function isValidIranianNationalId(input: string): boolean {
   const nid = normalizeDigits(input);
@@ -33,7 +33,7 @@ export function isValidIranianNationalId(input: string): boolean {
   let sum = 0;
   for (let i = 0; i < 9; i++) sum += digits[i] * (10 - i);
   const rem = sum % 11;
-  return rem < 5 ? check === rem : check === 11 - rem;
+  return rem < 2 ? check === rem : check === 11 - rem;
 }
 
 /** کد پستی ایران: ۱۰ رقم (برای واکشی نشانی از سرویس پست) */

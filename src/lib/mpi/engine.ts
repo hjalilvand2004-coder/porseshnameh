@@ -686,7 +686,9 @@ export function detectConflicts(hh: Assessment): string[] {
   const out: string[] = [];
   const a = hh.answers;
   const h = hh.household;
-  const nonresidential = h.dwellingType === "غیرمسکونی" || h.dwellingType === "خودرو/فضای عمومی";
+  const nonresidential =
+    h.dwellingType === "غیرمسکونی" || h.dwellingType === "خودرو/فضای عمومی" ||
+    get(a, "C1_place") === "nonresidential";
   if (nonresidential && get(a, "C1_place") === "stable") {
     out.push("نوع محل سکونت «غیرمسکونی» ثبت شده ولی وضعیت محل خواب «پایدار» است.");
   }

@@ -7,6 +7,7 @@ import {
   type AuditEvent,
   type DataCorrection,
   type DataQualityIssue,
+  type EvidenceDoc,
   type FlagCode,
   type IncomeSource,
   type Member,
@@ -115,6 +116,10 @@ export interface PorseshState {
   /** حذف نتیجه استعلام (فقط برای بازآزمایی در نسخه نمایشی) */
   clearWebService: (id: string, serviceId: string) => void;
 
+  /** مدارک مثبت — ثبت/حذف مدرک روی یک پرسش (شاهد‌محورسازی سنجش) */
+  addDocument: (id: string, doc: Omit<EvidenceDoc, "id" | "recordedAt">) => string;
+  removeDocument: (id: string, docId: string) => void;
+
   /** اصلاح مستند داده توسط مددکار — محاسبه مجدد و ثبت نسخه */
   correctData: (id: string, by: string, c: { answerKey: string; newValue: AnswerValue; reason: string; evidence?: string }) => void;
 
@@ -208,6 +213,7 @@ export const usePorsesh = create<PorseshState>()(
           ],
           changeStatements: [],
           webServices: {},
+          documents: [],
           ...init,
         };
         /* silent=true: برای جریان ثبت‌نام مودالی — view عوض نمی‌شود تا مودال باز بماند؛ در پایان با تأیید کاربر به wizard می‌رویم */
@@ -462,6 +468,30 @@ export const usePorsesh = create<PorseshState>()(
           const webServices = { ...(a.webServices ?? {}) };
           delete webServices[serviceId];
           const updated = { ...a, webServices, updatedAt: nowIso() };
+          return { assessments: { ...st.assessments, [id]: updated } };
+        }),
+
+      addDocument: (id, doc) => {
+        const docId = uid("doc");
+        const full: EvidenceDoc = { ...doc, id: docId, recordedAt: nowIso() };
+        set((st) => {
+          const a = st.assessments[id];
+          if (!a) return st;
+          const documents = [...(a.documents ?? []), full];
+          const updated = withAudit({ ...a, documents }, {
+            actor: "کاربر", role: "household", action: "ثبت مدرک مثبت", detail: `${full.title} — ${full.kind}`,
+          });
+          return { assessments: { ...st.assessments, [id]: updated } };
+        });
+        return docId;
+      },
+
+      removeDocument: (id, docId) =>
+        set((st) => {
+          const a = st.assessments[id];
+          if (!a) return st;
+          const documents = (a.documents ?? []).filter((d) => d.id !== docId);
+          const updated = { ...a, documents, updatedAt: nowIso() };
           return { assessments: { ...st.assessments, [id]: updated } };
         }),
 

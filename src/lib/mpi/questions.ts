@@ -11,6 +11,18 @@ import type { DimensionId, IndicatorId } from "./types";
 
 export type QuestionType = "single" | "multi" | "number" | "text" | "textarea" | "boolean";
 
+export type EvidenceKind = "medical" | "education" | "insurance" | "legal" | "administrative" | "photo" | "other";
+
+export const EVIDENCE_KINDS: { value: EvidenceKind; label: string }[] = [
+  { value: "medical", label: "مدرک درمانی (گواهی پزشک، نسخه، جواب آزمایش)" },
+  { value: "education", label: "مدرک آموزشی (گزارش مدرسه، کارت، ابلاغ)" },
+  { value: "insurance", label: "مدرک بیمه‌ای (کارت، پرینت سابقه)" },
+  { value: "legal", label: "مدرک حقوقی/قضایی (نامه، حکم، قرارداد)" },
+  { value: "administrative", label: "مدرک اداری (اخطار، قبض، فرم رسمی)" },
+  { value: "photo", label: "تصویر میدانی (عکس وضعیت)" },
+  { value: "other", label: "سایر" },
+];
+
 export interface Option {
   value: string;
   label: string;
@@ -38,6 +50,25 @@ export interface Question {
   /** آیا در محاسبه اثر دارد (اطلاع‌رسانی برای شفافیت) */
   scored?: boolean;
   placeholder?: string;
+  /**
+   * فالوآپ شرطی — بلافاصله پس از پاسخ شرطی/مثبت نمایش داده می‌شود تا مصداق عضو‌محور و
+   * شاهد/مدرک ثبت شود (یکسان‌سازی تفسیر ارزیابان — شاهد‌محور به‌جای برچسب‌محور).
+   */
+  followUp?: {
+    /** برای single: مقادیر محرک؛ برای boolean: ["true"]؛ برای multi: هر انتخاب غیر «none» */
+    trigger: string[];
+    /** عنوان بخش فالوآپ */
+    title: string;
+    help?: string;
+    /** انتخاب «کدام اعضا؟» — مستندسازی انتساب وضعیت به عضو */
+    members?: boolean;
+    /** فیلد توضیح تکمیلی (نوع بیماری، شرح مدرک و ...) */
+    detail?: { label: string; placeholder?: string };
+    /** کنترل ثبت مدرک مثبت */
+    evidence?: { suggested?: EvidenceKind; label?: string };
+  };
+  /** سرویس متولی که پاسخ این پرسش را با کد ملی استعلام می‌کند — پس از واکشی، پاسخ ملاک و غیرقابل ویرایش می‌شود */
+  service?: { id: string; org: string; label: string };
 }
 
 export interface QuestionGroup {
@@ -99,6 +130,9 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     questions: [
       { id: "A1_disease", title: "آیا این عضو بیماری مزمن یا جدی دارد؟", type: "single", level: "member", indicator: "A1", dimension: "A", scored: true,
         help: "بیماری‌هایی که بیش از ۳ ماه ادامه دارند و نیاز به پیگیری درمانی مستمر دارند.",
+        followUp: { trigger: ["controlled", "uncontrolled"], title: "مستندسازی بیماری این عضو", help: "برای ثبت دقیق و شاهد‌محور، نوع بیماری و مدرک مثبت آن ثبت شود.",
+          detail: { label: "نوع/نام بیماری و مدت آن", placeholder: "مثلاً دیابت نوع ۲ از ۴ سال پیش، صرعی از کودکی ..." },
+          evidence: { suggested: "medical", label: "مدرک مثبت (گواهی پزشک، نسخه، جواب آزمایش، کتابچه بیمار)" } },
         options: [
           { value: "none", label: "ندارد" },
           { value: "controlled", label: "دارد — تحت کنترل درمان" },
@@ -119,6 +153,7 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     questions: [
       { id: "A2_limit", title: "آیا محدودیت پایدار در حرکت، مراقبت شخصی، ارتباط یا یادگیری دارد؟", type: "single", level: "member", indicator: "A2", dimension: "A", scored: true,
         help: "محدودیتی که حداقل ۶ ماه ادامه داشته یا انتظار می‌رود ادامه یابد.",
+        followUp: { trigger: ["supported", "unmet"], title: "مستندسازی محدودیت این عضو", evidence: { suggested: "medical", label: "مدرک مثبت (گزارش توان‌بخشی، پروانه معلولیت، گواهی پزشک)" } },
         options: [
           { value: "none", label: "ندارد" },
           { value: "supported", label: "دارد — کمک/وسیله/توان‌بخشی لازم تأمین شده" },
@@ -133,6 +168,7 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     loop: true, memberFilter: "all",
     questions: [
       { id: "A3_treatment", title: "آیا درمان، دارو، آزمایش، جراحی یا توان‌بخشی ضروریِ انجام‌نشده دارد؟", type: "single", level: "member", indicator: "A3", dimension: "A", scored: true,
+        followUp: { trigger: ["scheduled", "no_access"], title: "مستندسازی درمان انجام‌نشده", evidence: { suggested: "medical", label: "مدرک مثبت (نسخه، برگه نوبت، گواهی پزشک، جواب آزمایش)" } },
         options: [
           { value: "none", label: "ندارد" },
           { value: "scheduled", label: "دارد — در نوبت یا با تأخیر برنامه‌ریزی‌شده" },
@@ -140,7 +176,8 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
           DK, REFUSE,
         ] },
       { id: "A3_urgent", title: "آیا نشانه فوریت پزشکی وجود دارد (خطر تأخیر برای سلامت یا زندگی)؟", type: "boolean", level: "member", indicator: "A3", dimension: "A",
-        help: "در صورت «بله»، نشانه خطر فوریتی ثبت می‌شود؛ رسیدگی فوری مستقل از تکمیل پرسشنامه است." },
+        help: "در صورت «بله»، نشانه خطر فوریتی ثبت می‌شود؛ رسیدگی فوری مستقل از تکمیل پرسشنامه است.",
+        followUp: { trigger: ["true"], title: "مستندسازی نشانه فوریت", evidence: { suggested: "medical", label: "مدرک مثبت (گواهی پزشک، مدارک بستری/اورژانس)" } } },
       { id: "A3_cause", title: "علت تأخیر و خطر احتمالی چیست؟", type: "textarea", level: "member", indicator: "A3", dimension: "A", placeholder: "مثلاً هزینه، نبود پزشک متخصص در منطقه، مدارک ..." },
     ],
   },
@@ -170,7 +207,8 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     loop: true, memberFilter: "all",
     questions: [
       { id: "A5_cover", title: "آیا این عضو پوشش بیمه پایه درمانی معتبر دارد و عملاً می‌تواند خدمت ضروری بگیرد؟", type: "single", level: "member", indicator: "A5", dimension: "A", scored: true,
-        help: "وجود بیمه به‌تنهایی کافی نیست؛ قابلیت استفاده واقعی (فرانشیز، فاصله، نوبت) بررسی می‌شود.",
+        help: "وجود بیمه به‌تنهایی کافی نیست؛ قابلیت استفاده واقعی (فرانشیز، فاصله، نوبت) بررسی می‌شود. پاسخ این پرسش با کد ملی از استعلام بیمه به‌صورت خودکار پر و ملاک می‌شود.",
+        service: { id: "insurance", org: "سازمان تأمین اجتماعی و صندوق‌های بیمه‌ای", label: "استعلام پوشش پایه اعضا با کد ملی" },
         options: [
           { value: "effective", label: "پوشش معتبر و استفاده مؤثر" },
           { value: "barriers", label: "پوشش هست ولی مانع استفاده واقعی وجود دارد" },
@@ -202,6 +240,8 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     questions: [
       { id: "A7_disrupt", title: "آیا مشکل روانی یا مصرف مواد، عملکرد و امنیت خانوار را مختل کرده است؟", type: "single", level: "household", indicator: "A7", dimension: "A", scored: true, sensitive: true,
         help: "این پاسخ محرمانه است و در نمای خانوار جزئیات آن نمایش داده نمی‌شود.",
+        followUp: { trigger: ["moderate", "severe"], title: "مستندسازی محرمانه — کدام اعضا؟", help: "مشخص کنید مشکل به کدام اعضا مربوط است؛ ثبت محرمانه می‌ماند و برای مسیر بررسی تخصصی استفاده می‌شود.",
+          members: true, evidence: { suggested: "medical", label: "مدرک مثبت (در صورت وجود — گواهی روان‌پزشک/روان‌شناس، پرونده درمان)" } },
         options: [
           { value: "none", label: "خیر" },
           { value: "moderate", label: "تا حدی" },
@@ -221,9 +261,11 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     key: "A_nutrition", title: "وضعیت تغذیه‌ای ویژه", indicator: "A6",
     loop: true, memberFilter: "all",
     questions: [
-      { id: "A_malnut", title: "آیا کودک این خانوار سوءتغذیه دارد (تشخیص‌شده یا مشکوک)؟", type: "boolean", level: "member", indicator: "A6", dimension: "A",
-        help: "سوءتغذیه نیازمند بررسی حرفه‌ای است؛ ثبت آن نشانه خطر ایجاد می‌کند." },
-      { id: "A_pregnant", title: "آیا این عضو مادر باردار یا شیرده با نیاز تغذیه/درمان ویژه است؟", type: "boolean", level: "member", indicator: "A6", dimension: "A" },
+      { id: "A_malnut", title: "آیا این عضو سوءتغذیه دارد (تشخیص‌شده یا مشکوک)؟", type: "boolean", level: "member", indicator: "A6", dimension: "A",
+        help: "سوءتغذیه نیازمند بررسی حرفه‌ای است؛ ثبت آن نشانه خطر ایجاد می‌کند.",
+        followUp: { trigger: ["true"], title: "مستندسازی وضعیت تغذیه‌ای", evidence: { suggested: "medical", label: "مدرک مثبت (کارت رشد، جواب آزمایش، گزارش مرکز بهداشت)" } } },
+      { id: "A_pregnant", title: "آیا این عضو مادر باردار یا شیرده با نیاز تغذیه/درمان ویژه است؟", type: "boolean", level: "member", indicator: "A6", dimension: "A",
+        followUp: { trigger: ["true"], title: "مستندسازی وضعیت بارداری/شیردهی", evidence: { suggested: "medical", label: "مدرک مثبت (کارت مراقبت مادر، گواهی پزشک)" } } },
     ],
   },
 
@@ -233,6 +275,9 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     loop: true, memberFilter: "schoolAge",
     questions: [
       { id: "B1_status", title: "وضعیت آموزش این عضو (در سن آموزش اجباری) چیست؟", type: "single", level: "member", indicator: "B1", dimension: "B", scored: true,
+        help: "وضعیت ثبت‌نام ثبتی این پرسش از استعلام آموزش‌وپرورش به‌صورت خودکار پر و ملاک می‌شود؛ حضور و غیبت جاری جداگانه بررسی می‌شود.",
+        service: { id: "education_school", org: "وزارت آموزش‌وپرورش", label: "استعلام سابقه ثبت‌نام اعضای در سن آموزش با کد ملی" },
+        followUp: { trigger: ["interrupted", "dropped", "never"], title: "مستندسازی وضعیت تحصیل", evidence: { suggested: "education", label: "مدرک مثبت (گزارش مدرسه، ابلاغ، گواهی انصراف/وقفه)" } },
         options: [
           { value: "attending", label: "ثبت‌نام و حضور فعال" },
           { value: "interrupted", label: "وقفه تحصیلی دارد" },
@@ -304,6 +349,7 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     loop: true, memberFilter: "all",
     questions: [
       { id: "B6_need", title: "آیا این عضو نیاز آموزشی ویژه دارد و خدمت متناسب دریافت می‌کند؟", type: "single", level: "member", indicator: "B6", dimension: "B", scored: true,
+        followUp: { trigger: ["needs_assessment", "unmet"], title: "مستندسازی نیاز آموزشی ویژه", evidence: { suggested: "medical", label: "مدرک مثبت (گزارش ارزیابی، پرونده آموزشی/درمانی)" } },
         options: [
           { value: "none", label: "نیاز ویژه ندارد" },
           { value: "served", label: "نیاز دارد و خدمت متناسب دریافت می‌کند" },
@@ -341,6 +387,7 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
           DK, REVIEW,
         ] },
       { id: "C1_eviction", title: "آیا اخطار تخلیه معتبر یا خطر قریب‌الوقوع ازدست‌دادن مسکن وجود دارد؟", type: "single", level: "household", indicator: "C1", dimension: "C", scored: true,
+        followUp: { trigger: ["credible", "imminent"], title: "مستندسازی خطر ازدست‌دادن مسکن", evidence: { suggested: "administrative", label: "مدرک مثبت (اخطار تخلیه، ابلاغ، نامه موجر/مرجع)" } },
         options: [
           { value: "no", label: "خیر" },
           { value: "credible", label: "اخطار/خطر جدی (در جریان)" },
@@ -353,6 +400,7 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     key: "C2", title: "ایمنی و قابلیت سکونت", indicator: "C2",
     questions: [
       { id: "C2_issues", title: "کدام نقص‌ها در مسکن فعلی وجود دارد؟ (چک‌لیست ایمنی)", type: "multi", level: "household", indicator: "C2", dimension: "C", scored: true,
+        followUp: { trigger: [], title: "مستندسازی نقص‌های مسکن", evidence: { suggested: "photo", label: "مدرک مثبت (تصویر وضعیت، گزارش کارشناسی، گزارش میدانی)" } },
         options: [
           { value: "structural", label: "خطر سقف/دیوار (ترک جدی، فروریختگی)" },
           { value: "wiring", label: "برق ناایمن" },
@@ -384,6 +432,7 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
       { id: "C4_rooms", title: "تعداد اتاق قابل سکونت (به‌جز آشپزخانه و سرویس)", type: "number", level: "household", indicator: "C4", dimension: "C", unit: "اتاق", min: 0, max: 30, scored: true },
       { id: "C4_area", title: "زیربنای قابل استفاده (اختیاری)", type: "number", level: "household", indicator: "C4", dimension: "C", unit: "متر مربع", min: 0 },
       { id: "C4_safesleep", title: "آیا برای همه اعضا فضای خواب ایمن و مناسب وجود دارد؟", type: "single", level: "household", indicator: "C4", dimension: "C", scored: true,
+        followUp: { trigger: ["partial", "none"], title: "کدام اعضا فضای خواب ایمن ندارند؟", help: "برای مستندسازی دقیق، مشخص کنید مشکل مربوط به کدام اعضاست.", members: true },
         options: [
           { value: "all", label: "بله برای همه" },
           { value: "partial", label: "جزئی — برخی اعضا مشکل دارند" },
@@ -457,6 +506,7 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     questions: [
       { id: "C8_arrears_severity", title: "وضعیت معوقات اجاره/شارژ/قبوض چیست؟", type: "single", level: "household", indicator: "C8", dimension: "C", scored: true,
         help: "مبلغ معوقه در اطلاعات پایه ثبت می‌شود. ودیعه جداگانه ثبت می‌شود و در هزینه ماهانه محاسبه نمی‌شود.",
+        followUp: { trigger: ["minor", "significant"], title: "مستندسازی معوقات", evidence: { suggested: "administrative", label: "مدرک مثبت (اخطار پرداخت، صورت‌حساب، قبض)" } },
         options: [
           { value: "none", label: "معوقه نداریم" },
           { value: "minor", label: "معوقه جزئی (کمتر از یک ماه)" },
@@ -544,6 +594,7 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     questions: [
       { id: "E2_support", title: "وضعیت مراقبت از اعضای نیازمند (کودک، سالمند، بیمار، معلول) چگونه است؟", type: "single", level: "household", indicator: "E2", dimension: "E", scored: true,
         help: "اعضای نیازمند مراقبت را در مدیریت اعضا علامت بزنید. مراقب اصلی و شدت بار و پشتیبانی اینجا ثبت می‌شود.",
+        followUp: { trigger: ["partial", "none"], title: "کدام اعضا نیازمند مراقبت‌اند؟", help: "با انتخاب هر عضو، نقش «نیازمند مراقبت» او در مدیریت اعضا نیز علامت می‌خورد.", members: true },
         options: [
           { value: "adequate", label: "مراقب موجود و پشتیبانی کافی" },
           { value: "partial", label: "بار سنگین با پشتیبانی ناکافی" },
@@ -571,6 +622,7 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     key: "E4", title: "مانع هویتی، حقوقی یا اداری", indicator: "E4",
     questions: [
       { id: "E4_barrier", title: "آیا مانع هویتی، حقوقی یا اداری، دسترسی خانوار به حق یا خدمت را مسدود کرده است؟", type: "single", level: "household", indicator: "E4", dimension: "E", scored: true,
+        followUp: { trigger: ["in_progress", "blocking"], title: "مستندسازی مانع", evidence: { suggested: "legal", label: "مدرک مثبت (نامه مرجع، رونوشت پرونده، فرم ثبت‌نام رد‌شده)" } },
         options: [
           { value: "none", label: "مانع مؤثر نداریم" },
           { value: "in_progress", label: "مانع وجود دارد ولی راه‌حل در جریان است" },

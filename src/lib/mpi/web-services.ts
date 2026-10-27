@@ -243,19 +243,23 @@ export function simulateServiceFetch(serviceId: string, a: Assessment): WebServi
           "عضوی در سن ۶ تا ۱۸ سال ثبت نشده است — شاخص‌های B1/B2 به‌طور صحیح صفر محاسبه می‌شوند.");
       }
       const memberPrefills: PrefillPayload["memberPrefills"] = [];
+      const answerPrefills: PrefillPayload["answerPrefills"] = [];
       const rows: string[] = [];
+      /* نگاشت وضعیت ثبتی به گزینه‌های پرسش B1_status — استعلام، پاسخ ملاک می‌شود */
+      const B1_MAP: Record<string, string> = { enrolled: "attending", interrupted: "interrupted", dropped: "dropped" };
       school.forEach((m, i) => {
         const s2 = hashStr("edu:" + nid + ":" + (m.nationalId || m.id));
         const st = pick(s2, EDU_STATUS, i);
         memberPrefills.push({ memberId: m.id, patch: { educationStatus: st.v as NonNullable<Assessment["members"][number]["educationStatus"]> }, label: `${m.firstName}: ${st.label}` });
+        answerPrefills.push({ key: `B1_status#${m.id}`, value: B1_MAP[st.v] ?? "interrupted", label: `${m.firstName}: ${st.label} (B1)` });
         rows.push(`${m.firstName}: ${st.label}`);
       });
       return result(serviceId, "ok", {
         "وضعیت ثبت‌نام اعضا در سن آموزش (سابقه ثبتی)": rows.join(" • "),
         "راستی‌آزمایی B1/B2": "با سابقه آموزش‌وپرورش تطبیق می‌شود؛ حضور فعال و غیبت جاری جداگانه بررسی می‌شود",
       },
-      "سابقه ثبتی «پیش‌تکمیل» است؛ «بله» حضور فعال را ثابت نمی‌کند و «وقفه» نیازمند بررسی جاری است.",
-      { memberPrefills });
+      "سابقه ثبتی «ملاک استعلام» است و به‌صورت خودکار در پرسشنامه اعمال می‌شود؛ «بله» حضور فعال را ثابت نمی‌کند و «وقفه» نیازمند بررسی جاری است.",
+      { memberPrefills, answerPrefills });
     }
 
     /* ===== استعلام مدارک دانشگاهی با کد ملی — داده زمینه‌ای B3/B7 ===== */

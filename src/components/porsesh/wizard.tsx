@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { usePorsesh } from "@/lib/store";
 import { STEPS, groupsOfStep, QUESTION_GROUPS, REQUEST_TYPES, type Question, type QuestionGroup } from "@/lib/mpi/questions";
-import type { Assessment, Member, WebServiceResult } from "@/lib/mpi/types";
+import type { Assessment, Member, WebServiceResult, EvidenceDoc } from "@/lib/mpi/types";
 import { indicatorLegacyBadge } from "@/lib/mpi/legacy-map";
 import { WEIGHTS } from "@/lib/mpi/rules";
 import type { IndicatorId } from "@/lib/mpi/types";
@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { faNum, faPct, faDateTime } from "@/lib/mpi/format";
-import { CircleCheck, ChevronLeft, ChevronRight, History, Info, Lock, Siren, Save, CheckCircle2, Loader2, RefreshCw, Landmark, Fingerprint, MapPin, HeartPulse, Building2, BookOpenCheck, GraduationCap, ClipboardList, FileBadge2, ShieldCheck, UserCheck, Handshake } from "lucide-react";
+import { CircleCheck, ChevronLeft, ChevronRight, History, Info, Lock, Siren, Save, CheckCircle2, Loader2, RefreshCw, Landmark, Fingerprint, MapPin, HeartPulse, Building2, BookOpenCheck, GraduationCap, ClipboardList, FileBadge2, ShieldCheck, UserCheck, Handshake, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -414,6 +414,7 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
     }
     toast({ title: "پیش‌تکمیل اعمال شد", description: "داده با حفظ منبع و تاریخ استعلام ثبت شد؛ شرایط جاری جداگانه بررسی می‌شود و تأیید خودکار نیست." });
   };
+  void applyPrefills; /* نگهداری برای بازآزمایی دستی — اعمال پیش‌فرض اکنون خودکار است */
 
   const registryMembersAdded = assessment.members.some((m) => m.fromRegistry);
   const registryCreates = civil?.prefills?.memberCreates ?? [];
@@ -432,9 +433,27 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
       await delay(850);
       const r = simulateServiceFetch(s.id, freshAssessment());
       setWebService(assessment.id, s.id, r);
+      /* اعمال خودکار پیش‌تکمیل — سرویس متولی ملاک است؛ جایگاه و مقدار پرسش‌ها حفظ می‌شود و ثبت دستی لازم نیست */
+      let applied = 0;
+      if (r.status !== "error" && r.prefills) {
+        if (r.prefills.householdPatch && Object.keys(r.prefills.householdPatch).length > 0) {
+          updateHousehold(assessment.id, r.prefills.householdPatch);
+          applied += 1;
+        }
+        if (r.prefills.answerPrefills?.length) {
+          setAnswersBulk(assessment.id, Object.fromEntries(r.prefills.answerPrefills.map((p) => [p.key, p.value])));
+          applied += r.prefills.answerPrefills.length;
+        }
+        if (r.prefills.memberPrefills?.length) {
+          for (const mp of r.prefills.memberPrefills) updateMember(assessment.id, mp.memberId, mp.patch);
+          applied += r.prefills.memberPrefills.length;
+        }
+      }
       toast({
         title: r.status === "error" ? `استعلام ${s.name} ناموفق` : `استعلام ${s.name} انجام شد`,
-        description: r.note ?? "نتیجه به‌عنوان پیش‌تکمیل ملاک قابل اعمال است.",
+        description: r.status === "error"
+          ? (r.note ?? "نتیجه‌ای دریافت نشد — مسیر دستی فعال است.")
+          : `${r.note ?? "نتیجه مرجع ثبت شد."}${applied > 0 ? ` ${faNum(applied)} مقدار به‌صورت خودکار در پرسش‌های مرتبط ثبت و ملاک شد.` : ""}`,
         variant: r.status === "error" ? "destructive" : "default",
       });
     } finally {
@@ -617,9 +636,9 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
                     {r ? "استعلام مجدد" : "استعلام با کد ملی"}
                   </Button>
                   {r && r.status !== "error" && !!r.prefills && prefillCount > 0 && (
-                    <Button size="sm" variant="secondary" onClick={() => applyPrefills(r)}>
-                      اعمال پیش‌تکمیل ({faNum(prefillCount)})
-                    </Button>
+                    <Badge variant="outline" className="bg-teal-soft text-teal-strong border-teal-strong/30 gap-1 text-[10px]">
+                      <CircleCheck className="size-3" aria-hidden /> اعمال خودکار در پرسشنامه ({faNum(prefillCount)})
+                    </Badge>
                   )}
                 </div>
               </div>
@@ -711,7 +730,7 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
         <p className="text-xs text-muted-foreground mb-4 leading-5">
           این اطلاعات «شناخت خانوار» است و <b>بدون امتیاز مستقل</b>؛ فقط برای اجرای منطق نمایش و مراجعه.
           کد ملی، کد پستی و تاریخ تولد در گام ۱ ثبت و واکشی می‌شوند؛ سرپرست و فرد پاسخ‌گو دو نقش مستقل‌اند.
-          فیلدهای دارای ملاک ثبتی پس از واکشی فقط‌خواندنی می‌شوند.
+          برای جلوگیری از پرسش تکراری، نوع محل سکونت و حق سکونت در گام «مسکن» (C1/C3) و تعداد اتاق/زیربنا در شاخص C4 ثبت می‌شود.
         </p>
         <div className="grid sm:grid-cols-2 gap-3">
           {field("responderName", "نام فرد پاسخ‌گو / مسئول پیگیری خانوار")}
@@ -720,7 +739,8 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
           {field("headNationalId", "کد ملی سرپرست", { dir: "ltr", locked: civilOk ? "وب‌سرویس ثبت احوال" : undefined })}
           {field("headBirthDate", "تاریخ تولد سرپرست", { dir: "ltr", placeholder: "مثلاً ۱۳۶۲/۰۵/۱۲", locked: civilOk ? "وب‌سرویس ثبت احوال" : undefined })}
           {field("postalCode", "کد پستی (کلید واکشی نشانی از پست)", { dir: "ltr", locked: postAny ? "وب‌سرویس پست" : undefined })}
-          {field("contactPhone", "تلفن تماس", { dir: "ltr" })}
+          {field("contactPhone", "تلفن تماس خانوار", { dir: "ltr" })}
+          {h.headMobile && field("headMobile", "موبایل سرپرست (از فرم ثبت‌نام)", { dir: "ltr", locked: "فرم ثبت‌نام" })}
           <div className="space-y-1.5">
             <Label htmlFor="hh-nidstatus">وضعیت مدرک هویتی سرپرست</Label>
             <Select value={h.headNationalIdStatus ?? "has"} onValueChange={(v) => set({ headNationalIdStatus: v as Assessment["household"]["headNationalIdStatus"] })}>
@@ -735,29 +755,6 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
           </div>
           {field("province", "استان", { locked: postAny ? "وب‌سرویس پست" : undefined })}
           {field("county", "شهرستان", { locked: postAny ? "وب‌سرویس پست" : undefined })}
-          <div className="space-y-1.5">
-            <Label htmlFor="hh-dwell">نوع محل سکونت</Label>
-            <Select value={h.dwellingType ?? "none"} onValueChange={(v) => set({ dwellingType: v === "none" ? undefined : v })}>
-              <SelectTrigger id="hh-dwell"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {["واحد مسکونی", "سکونت موقت", "مرکز نگهداری", "فضای غیرمسکونی", "آلونک/کپر", "خودرو/فضای عمومی", "سایر"].map((o) => (
-                  <SelectItem key={o} value={o}>{o}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="hh-tenure">نوع حق سکونت</Label>
-            <Select value={h.tenureType ?? "none"} onValueChange={(v) => set({ tenureType: v === "none" ? undefined : v })}>
-              <SelectTrigger id="hh-tenure"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {["مالک", "مستأجر", "رایگان سکونت دارد", "خدمتی", "وابسته به نهاد/فرد", "—"].map((o) => (
-                  <SelectItem key={o} value={o}>{o}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-[11px] text-muted-foreground">مستأجر بودن به‌تنهایی معیار محرومیت مسکن نیست.</p>
-          </div>
         </div>
         <div className="mt-3 space-y-2">
           {field("address", "نشانی قابل مراجعه (در صورت وجود)", { placeholder: "برای فرد بی‌خانمان اجباری نیست", locked: postFull ? "وب‌سرویس پست" : undefined })}
@@ -771,11 +768,12 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
       <MemberManager assessment={assessment} />
 
       <div className="rounded-2xl border bg-card p-4">
-        <h3 className="font-semibold mb-1">مشخصات مسکن و هزینه‌ها (داده‌های محاسبه C4 و C8)</h3>
-        <p className="text-xs text-muted-foreground mb-3 leading-5">وديعه جدا از هزینه ماهانه ثبت می‌شود و در محاسبه فشار هزینه مسکن لحاظ نمی‌گردد.</p>
+        <h3 className="font-semibold mb-1">هزینه‌های مسکن (داده‌های محاسبه C8)</h3>
+        <p className="text-xs text-muted-foreground mb-3 leading-5">
+          وديعة جدا از هزینه ماهانه ثبت می‌شود و در محاسبه فشار هزینه مسکن لحاظ نمی‌گردد.
+          تعداد اتاق و زیربنا — که در تراکم (C4) امتیاز دارند — فقط در گام «مسکن» و شاخص C4 پرسیده می‌شوند و اینجا تکرار نمی‌شوند.
+        </p>
         <div className="grid sm:grid-cols-3 gap-3">
-          {field("usableRooms", "تعداد اتاق قابل سکونت", { type: "number" })}
-          {field("usableArea", "زیربنای قابل استفاده (متر)", { type: "number" })}
           {field("monthlyRent", "اجاره ماهانه (تومان)", { type: "number" })}
           {field("deposit", "ودیعه (تومان) — جدا از اجاره", { type: "number" })}
           {field("monthlyCharge", "شارژ ماهانه (تومان)", { type: "number" })}
@@ -794,6 +792,18 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
   const groups = groupsOfStep(stepKey);
   const setAnswer = usePorsesh((s) => s.setAnswer);
   const provider = assessment.members.find((m) => m.isMainProvider);
+  const ws = assessment.webServices ?? {};
+  const h = assessment.household;
+
+  /** آیا پرسش با استعلام سرویس متولی پاسخ داده شده؟ → قفل ملاک */
+  const serviceLockFor = (q: Question, answerKey: string) => {
+    if (!q.service) return undefined;
+    const r = ws[q.service.id];
+    if (!r || r.status === "error") return undefined;
+    const prefill = r.prefills?.answerPrefills?.find((p) => p.key === answerKey);
+    if (!prefill) return undefined;
+    return { org: q.service.org, at: r.fetchedAt };
+  };
 
   const membersFor = (g: QuestionGroup): Member[] => {
     if (!g.loop) return [];
@@ -852,6 +862,10 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
                     idPrefix={m.id}
                     value={assessment.answers[`${q.id}#${m.id}`] ?? null}
                     onChange={(v) => setAnswer(assessment.id, `${q.id}#${m.id}`, v)}
+                    members={assessment.members}
+                    assessmentId={assessment.id}
+                    onKeyChange={(key, v) => setAnswer(assessment.id, key, v)}
+                    serviceLock={serviceLockFor(q, `${q.id}#${m.id}`)}
                   />
                 ))}
               </div>
@@ -868,12 +882,28 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
                   <WeightBadge id={g.indicator} />
                   <span className="text-xs text-muted-foreground">سطح خانوار</span>
                 </div>
+                {/* داده ثبتی سکونت — از اطلاعات پایه/استعلام املاک؛ برای جلوگیری از پرسش تکراری فقط نمایش داده می‌شود */}
+                {g.indicator === "C1" && h.dwellingType && (
+                  <p className="text-[11px] text-muted-foreground bg-muted/40 border rounded-lg px-3 py-2 leading-5">
+                    نوع محل سکونت ثبت‌شده (اطلاعات پایه): <b className="text-foreground">{h.dwellingType}</b> — این شاخص فقط پایداری و تهدید محل خواب را می‌سنجد و پرسش جداگانه‌ای درباره نوع سکونت ندارد.
+                  </p>
+                )}
+                {g.indicator === "C3" && h.tenureType && (
+                  <p className="text-[11px] text-muted-foreground bg-muted/40 border rounded-lg px-3 py-2 leading-5">
+                    نوع تصرف ثبت‌شده: <b className="text-foreground">{h.tenureType}</b>
+                    {ws.property?.status === "ok" && ws.property.prefills?.householdPatch?.tenureType ? " — از استعلام املاک (ملاک ثبتی)" : ""} — این شاخص پایداری و خطر حق سکونت را می‌سنجد.
+                  </p>
+                )}
                 {g.questions.filter((q) => q.level === "household").map((q) => (
                   <QuestionField
                     key={q.id}
                     q={q}
                     value={assessment.answers[q.id] ?? null}
                     onChange={(v) => setAnswer(assessment.id, q.id, v)}
+                    members={assessment.members}
+                    assessmentId={assessment.id}
+                    onKeyChange={(key, v) => setAnswer(assessment.id, key, v)}
+                    serviceLock={serviceLockFor(q, q.id)}
                   />
                 ))}
               </div>
@@ -940,8 +970,70 @@ function QualityStep({ assessment }: { assessment: Assessment }) {
     <div className="space-y-4">
       <QualityPanel assessment={assessment} />
       <EvidenceGrid assessment={assessment} />
+      <DocumentsSummary assessment={assessment} />
     </div>
   );
+}
+
+/* خلاصه مدارک مثبت ثبت‌شده روی پرسش‌ها — شاهد‌محوری سنجش */
+function DocumentsSummary({ assessment }: { assessment: Assessment }) {
+  const documents = assessment.documents ?? [];
+  const removeDocument = usePorsesh((s) => s.removeDocument);
+  const memberName = (key: string) => {
+    const mid = key.split("#")[1];
+    const m = assessment.members.find((x) => x.id === mid);
+    return m ? `${m.firstName} ${m.lastName ?? ""}` : undefined;
+  };
+  const qTitle = (key: string) => {
+    const qid = key.split("#")[0].split("__")[0];
+    for (const g of QUESTION_GROUPS) {
+      const q = g.questions.find((x) => x.id === qid);
+      if (q) return q.title;
+    }
+    return qid;
+  };
+
+  return (
+    <div className="rounded-2xl border bg-card p-5">
+      <h3 className="font-semibold mb-1.5 flex items-center gap-2"><FileBadge2 className="size-5 text-teal-strong" aria-hidden /> مدارک مثبت ثبت‌شده ({faNum(documents.length)} مورد)</h3>
+      <p className="text-xs text-muted-foreground mb-3.5 leading-5">
+        مدارکی که در طول پرسشنامه روی پرسش‌های شاخص‌ها ثبت شده‌اند — هر مدرک به پرسش مبدا (و در سطح عضو، به عضو مشخص) متصل است و در بازبینی انسانی استفاده می‌شود.
+      </p>
+      {documents.length === 0 ? (
+        <p className="text-xs text-muted-foreground rounded-xl border bg-muted/30 p-3.5">هنوز مدرکی ثبت نشده است — در پرسش‌های دارای شرط، پس از پاسخ مثبت، کنترل «ثبت مدرک مثبت» باز می‌شود.</p>
+      ) : (
+        <ul className="space-y-2">
+          {documents.map((d) => {
+            const who = memberName(d.forKey);
+            return (
+              <li key={d.id} className="rounded-xl border p-3 flex flex-wrap items-center gap-2 text-sm">
+                <FileBadge2 className="size-4 text-teal-strong shrink-0" aria-hidden />
+                <span className="font-medium">{d.title}</span>
+                <Badge variant="outline" className="text-[10px] whitespace-nowrap">{evidenceKindShort(d.kind)}</Badge>
+                <span className="text-[11px] text-muted-foreground truncate">برای پرسش: «{qTitle(d.forKey)}»{who ? ` — عضو: ${who}` : ""}</span>
+                {d.reference && <span className="text-[11px] text-muted-foreground">مرجع: {d.reference}</span>}
+                {d.fileName && (
+                  d.dataUrl ? <a href={d.dataUrl} target="_blank" rel="noreferrer" className="text-xs text-teal-strong underline underline-offset-2">فایل مدرک</a> : <span className="text-[11px] text-muted-foreground">{d.fileName}</span>
+                )}
+                <span className="text-[10px] text-muted-foreground ms-auto whitespace-nowrap">{faDateTime(d.recordedAt)}</span>
+                <button type="button" onClick={() => removeDocument(assessment.id, d.id)} className="text-destructive/70 hover:text-destructive" aria-label={`حذف مدرک ${d.title}`}>
+                  <Trash2 className="size-4" aria-hidden />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function evidenceKindShort(k: EvidenceDoc["kind"]): string {
+  const map: Record<string, string> = {
+    medical: "درمانی", education: "آموزشی", insurance: "بیمه‌ای", legal: "حقوقی",
+    administrative: "اداری", photo: "تصویر", other: "سایر",
+  };
+  return map[k] ?? "سایر";
 }
 
 const EVIDENCE_OPTIONS = [

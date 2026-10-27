@@ -83,6 +83,29 @@ export interface PovertyLine {
   status: "invalid" | "unverified" | "verified";
 }
 
+/**
+ * مدرک مثبت ثبت‌شده روی یک پرسش/شاخص — مستندسازی شاهد‌محور.
+ * فایل‌های کوچک (≤ ۴۰۰KB) با dataUrl در همین پرونده نگهداری می‌شوند؛ فایل‌های بزرگ‌تر
+ * فقط با مشخصات و مرجع ثبت می‌شوند تا حافظه محلی پر نشود.
+ */
+export interface EvidenceDoc {
+  id: string;
+  /** کلید پرسش مرتبط — سطح خانوار: "A7_disrupt"؛ سطح عضو: "A1_disease#memberId" */
+  forKey: string;
+  /** عنوان نمایشی مدرک (مثلاً "گواهی پزشک معالج") */
+  title: string;
+  kind: "medical" | "education" | "insurance" | "legal" | "administrative" | "photo" | "other";
+  /** شماره/مرجع مدرک (مثلاً شماره نامه، کد پیگیری) */
+  reference?: string;
+  note?: string;
+  fileName?: string;
+  fileType?: string;
+  fileSize?: number;
+  /** محتوای فایل برای فایل‌های کوچک (پیش‌نمایش آفلاین) */
+  dataUrl?: string;
+  recordedAt: string;
+}
+
 /** نشانه خطر (R1 تا R9) — امتیاز افزایشی ندارد؛ فقط هشدار و مسیر رسیدگی */
 export type FlagCode = "R1" | "R2" | "R3" | "R4" | "R5" | "R6" | "R7" | "R8" | "R9";
 
@@ -275,6 +298,8 @@ export interface Assessment {
   changeStatements?: { at: string; text: string }[];
   /** نتایج استعلام مراجع ثبتی (وب‌سرویس‌ها) — کلید = شناسه خدمت */
   webServices?: Record<string, WebServiceResult>;
+  /** مدارک مثبت ثبت‌شده روی پرسش‌ها (شاهد‌محورسازی سنجش) */
+  documents?: EvidenceDoc[];
 }
 
 /** وضعیت هر شاخص پس از حل */
