@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { faNum, faPct, faDateTime } from "@/lib/mpi/format";
-import { CircleCheck, ChevronLeft, ChevronRight, Info, Lock, Siren, Save, CheckCircle2, Loader2, RefreshCw, Landmark, Fingerprint, MapPin, HeartPulse, Building2, BookOpenCheck, GraduationCap, ClipboardList, FileBadge2, ShieldCheck, UserCheck, Handshake, Trash2 } from "lucide-react";
+import { CircleCheck, ChevronLeft, ChevronRight, Info, Lock, Siren, Save, CheckCircle2, Loader2, RefreshCw, Landmark, Fingerprint, MapPin, HeartPulse, Building2, BookOpenCheck, GraduationCap, ClipboardList, FileBadge2, ShieldCheck, UserCheck, Handshake, Trash2, CircleAlert, Database, Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -655,6 +655,8 @@ function UrgencyStep({ assessment }: { assessment: Assessment }) {
 /* گام ۳ — اطلاعات پایه */
 function BaseStep({ assessment }: { assessment: Assessment }) {
   const updateHousehold = usePorsesh((s) => s.updateHousehold);
+  const setWebService = usePorsesh((s) => s.setWebService);
+  const [samPending, setSamPending] = useState(false);
   const h = assessment.household;
   const set = (patch: Partial<Assessment["household"]>) => updateHousehold(assessment.id, patch);
 
@@ -663,6 +665,33 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
   const civilOk = ws.civil_registry?.status === "ok";
   const postAny = ws.post?.status === "ok" || ws.post?.status === "partial";
   const postFull = ws.post?.status === "ok";
+
+  /* زمینه پرونده و سابقه خدمات — فقط از واکشی بانک سامانه؛ ورود دستی مجاز نیست */
+  const samaneh = ws.samaneh_bank;
+  const samanehOk = samaneh?.status === "ok";
+  const samanehData = samanehOk && !!(h.supportSince || h.priorServices);
+  const samPlaceholder = !samaneh
+    ? "صرفاً از واکشی بانک سامانه تکمیل می‌شود"
+    : samaneh.status === "error"
+      ? "پس از اصلاح شناسه‌ها، استعلام را تکرار کنید"
+      : "سابقه‌ای در بانک سامانه ثبت نشده است";
+
+  const fetchSamaneh = () => {
+    setSamPending(true);
+    setTimeout(() => {
+      const r = simulateServiceFetch("samaneh_bank", assessment);
+      setWebService(assessment.id, "samaneh_bank", r);
+      if (r.status !== "error" && r.prefills?.householdPatch && Object.keys(r.prefills.householdPatch).length > 0) {
+        updateHousehold(assessment.id, r.prefills.householdPatch);
+      }
+      setSamPending(false);
+      toast({
+        title: r.status === "error" ? "استعلام بانک سامانه ناموفق" : "استعلام بانک سامانه انجام شد",
+        description: r.note ?? "داده ملاک ثبت شد؛ فیلدهای زمینه‌ای فقط‌خواندنی شدند.",
+        variant: r.status === "error" ? "destructive" : "default",
+      });
+    }, 900);
+  };
 
   const field = (key: keyof Assessment["household"], label: string, opts?: { dir?: "ltr" | "rtl"; type?: "text" | "number"; placeholder?: string; locked?: string }) => {
     const val = (h[key] as string | number | undefined) ?? "";
@@ -749,15 +778,64 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
 
       <MemberManager assessment={assessment} />
 
+      {/* زمینه پرونده و سابقه خدمات — صرفاً از واکشی بانک سامانه؛ ورود دستی مجاز نیست */}
       <div className="rounded-2xl border bg-card p-4">
-        <h3 className="font-semibold mb-1">زمینه پرونده و سابقه خدمات</h3>
+        <h3 className="font-semibold mb-1 flex items-center gap-2"><Database className="size-5 text-teal-strong" aria-hidden /> زمینه پرونده و سابقه خدمات</h3>
         <p className="text-xs text-muted-foreground mb-3 leading-5">
-          شروع دوره حمایت و خدمات حمایتی قبلی — داده زمینه‌ای برای پیگیری مددکاری؛ هزینه‌های ماهانه مسکن (اجاره، ودیعه، شارژ، قبوض، معوقه) به گام «مسکن» (C8) منتقل شده و متناسب با نوع تصرف گرفته می‌شود.
+          این داده‌ها <b>صرفاً از واکشی بانک سامانه</b> ثبت می‌شود و ورود دستی مجاز نیست — داده زمینه‌ای برای پیگیری مددکاری و خارج از امتیاز. هزینه‌های ماهانه مسکن (اجاره، ودیعه، شارژ، قبوض، معوقه) به گام «مسکن» (C8) منتقل شده و متناسب با نوع تصرف گرفته می‌شود.
         </p>
         <div className="grid sm:grid-cols-2 gap-3">
-          {field("supportSince", "شروع دوره حمایت (اختیاری)", { placeholder: "مثلاً ۱۴۰۲" })}
-          {field("priorServices", "خدمات/برنامه‌های حمایتی قبلی", { placeholder: "مثلاً اکرام، تغذیه، شهریه ..." })}
+          {samanehData ? (
+            <div className="space-y-1.5">
+              <Label className="flex items-center flex-wrap gap-1.5">
+                شروع دوره حمایت
+                <Badge variant="outline" className="text-[10px] gap-1 bg-teal-soft text-teal-strong border-teal-strong/30">
+                  <Lock className="size-3" aria-hidden /> بانک سامانه — ملاک، غیرقابل ویرایش
+                </Badge>
+              </Label>
+              <div className="rounded-lg border bg-muted/50 px-3 py-2.5 text-sm min-h-9 text-foreground/90" aria-readonly>{h.supportSince || "—"}</div>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <Label htmlFor="hh-supportSince">شروع دوره حمایت</Label>
+              <Input id="hh-supportSince" disabled value={h.supportSince ?? ""} placeholder={samPlaceholder} />
+            </div>
+          )}
+          {samanehData ? (
+            <div className="space-y-1.5">
+              <Label className="flex items-center flex-wrap gap-1.5">
+                خدمات/برنامه‌های حمایتی قبلی
+                <Badge variant="outline" className="text-[10px] gap-1 bg-teal-soft text-teal-strong border-teal-strong/30">
+                  <Lock className="size-3" aria-hidden /> بانک سامانه — ملاک، غیرقابل ویرایش
+                </Badge>
+              </Label>
+              <div className="rounded-lg border bg-muted/50 px-3 py-2.5 text-sm min-h-9 text-foreground/90 leading-6" aria-readonly>{h.priorServices || "—"}</div>
+            </div>
+          ) : (
+            <div className="space-y-1.5">
+              <Label htmlFor="hh-priorServices">خدمات/برنامه‌های حمایتی قبلی</Label>
+              <Input id="hh-priorServices" disabled value={h.priorServices ?? ""} placeholder={samPlaceholder} />
+            </div>
+          )}
         </div>
+        {/* وضعیت استعلام + عملیات واکشی */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {!samaneh ? (
+            <Badge variant="outline" className="gap-1 text-muted-foreground"><Ban className="size-3.5" aria-hidden /> ورود دستی غیرمجاز — صرفاً از واکشی بانک سامانه</Badge>
+          ) : samaneh.status === "error" ? (
+            <Badge variant="outline" className="gap-1 text-destructive border-destructive/40"><CircleAlert className="size-3.5" aria-hidden /> استعلام ناموفق</Badge>
+          ) : (
+            <Badge className="gap-1 bg-emerald-600 text-white"><CircleCheck className="size-3.5" aria-hidden /> {samanehData ? "دریافت شد — ملاک" : "دریافت شد — بدون سابقه حمایتی"}</Badge>
+          )}
+          {samaneh && <span className="text-[11px] text-muted-foreground">آخرین استعلام: {faDateTime(samaneh.fetchedAt)}</span>}
+          <Button size="sm" variant={samanehOk ? "outline" : "default"} onClick={fetchSamaneh} disabled={samPending} className="ms-auto">
+            {samPending ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : <RefreshCw className="size-3.5" aria-hidden />}
+            {samaneh ? "استعلام مجدد از بانک سامانه" : "استعلام از بانک سامانه"}
+          </Button>
+        </div>
+        {samaneh?.status === "error" && (
+          <p className="mt-2 text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5 leading-5">{samaneh.note}</p>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import type { Assessment, WebServiceResult, PrefillPayload } from "./types";
-import { faNum, faDateTime } from "./format";
+import { faNum, faDateTime, faStr } from "./format";
 
 /**
  * شبیه‌ساز پاسخ مراجع ثبتی (وب‌سرویس‌ها) برای نسخه نمایشی آفلاین.
@@ -56,6 +56,7 @@ const EDU_STATUS: { v: string; label: string }[] = [
   { v: "dropped", label: "ترک تحصیل" },
 ];
 const DEGREES = ["کارشناسی", "دیپلم", "کارشناسی ارشد", "کاردانی"] as const;
+const SUPPORT_SERVICES = ["اکرام اطعام", "کمک تغذیه", "کمک شهریه دانش‌آموزی", "بسته معیشتی ماهانه", "کمک اجاره مسکن", "خدمات بهداشتی و درمانی حمایتی", "وام اشتغال‌زای کوچک", "بسته آموزشی دانش‌آموزان"] as const;
 
 function result(
   serviceId: string,
@@ -291,6 +292,37 @@ export function simulateServiceFetch(serviceId: string, a: Assessment): WebServi
       memberPrefills.length ? { memberPrefills } : undefined);
     }
 
+    /* ===== واکشی سابقه پرونده حمایتی از بانک سامانه — داده زمینه‌ای؛ ورود دستی مجاز نیست ===== */
+    case "samaneh_bank": {
+      if (nid.length !== 10) {
+        return result(serviceId, "error", {},
+          "برای استعلام پرونده از بانک سامانه، ابتدا کد ملی ده‌رقمی سرپرست را ثبت و واکشی کنید — ورود دستی این فیلدها مجاز نیست.");
+      }
+      const seed = hashStr("sam:" + nid);
+      const hasCase = seed % 4 !== 0; // ۷۵٪ سابقه پرونده فعال
+      if (!hasCase) {
+        return result(serviceId, "ok", {
+          "سابقه پرونده در بانک سامانه": "یافت نشد",
+          "اثر بر فرم": "فیلدهای «شروع دوره حمایت» و «خدمات حمایتی قبلی» خالی می‌مانند؛ در صورت شروع خدمات، با استعلام مجدد تکمیل می‌شود.",
+        },
+        "سابقه حمایتی برای این خانوار در بانک سامانه ثبت نشده است؛ داده زمینه‌ای است و نبود سابقه تأثیری در امتیاز محرومیت ندارد.");
+      }
+      const startYear = 1395 + (seed % 8); // ۱۳۹۵ تا ۱۴۰۲
+      const startMonth = 1 + ((seed >>> 7) % 12);
+      const supportSince = faStr(`${startYear}/${String(startMonth).padStart(2, "0")}`);
+      const svcCount = 2 + (seed % 2); // ۲ یا ۳ خدمت
+      const services: string[] = [];
+      for (let i = 0; i < svcCount; i++) services.push(pick(seed, SUPPORT_SERVICES, i + 1));
+      const priorServices = services.join("، ");
+      return result(serviceId, "ok", {
+        "شروع دوره حمایت (سابقه سامانه)": supportSince,
+        "خدمات/برنامه‌های حمایتی قبلی": priorServices,
+        "اثر بر سنجش": "داده زمینه‌ای برای پیگیری مددکاری — خارج از امتیاز محرومیت",
+      },
+      "این فیلدها صرفاً از واکشی بانک سامانه ثبت می‌شود و ورود دستی مجاز نیست؛ اصلاح فقط با درخواست به مرجع داده امکان‌پذیر است.",
+      { householdPatch: { supportSince, priorServices } });
+    }
+
     default:
       return result(serviceId, "error", {}, "سرویس شناسایی نشد.");
   }
@@ -305,4 +337,5 @@ export const LOCKED_FIELDS: Record<string, string[]> = {
   insurance: [],
   education_school: [],
   higher_edu: [],
+  samaneh_bank: ["supportSince", "priorServices"],
 };

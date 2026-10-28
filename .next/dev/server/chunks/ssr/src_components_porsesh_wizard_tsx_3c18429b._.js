@@ -54,6 +54,9 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2d$check$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__UserCheck$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/user-check.js [app-ssr] (ecmascript) <export default as UserCheck>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$handshake$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Handshake$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/handshake.js [app-ssr] (ecmascript) <export default as Handshake>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trash$2d$2$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Trash2$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/trash-2.js [app-ssr] (ecmascript) <export default as Trash2>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__CircleAlert$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/circle-alert.js [app-ssr] (ecmascript) <export default as CircleAlert>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$database$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Database$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/database.js [app-ssr] (ecmascript) <export default as Database>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$ban$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Ban$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/ban.js [app-ssr] (ecmascript) <export default as Ban>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/utils.ts [app-ssr] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/hooks/use-toast.ts [app-ssr] (ecmascript)");
 "use client";
@@ -1985,6 +1988,8 @@ const OTHER_SERVICES = [
 }
 /* گام ۳ — اطلاعات پایه */ function BaseStep({ assessment }) {
     const updateHousehold = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["usePorsesh"])((s)=>s.updateHousehold);
+    const setWebService = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["usePorsesh"])((s)=>s.setWebService);
+    const [samPending, setSamPending] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const h = assessment.household;
     const set = (patch)=>updateHousehold(assessment.id, patch);
     // قفل فیلدهای ملاک ثبتی: پس از استعلام موفق، مقدار مرجع غیرقابل ویرایش است
@@ -1992,6 +1997,26 @@ const OTHER_SERVICES = [
     const civilOk = ws.civil_registry?.status === "ok";
     const postAny = ws.post?.status === "ok" || ws.post?.status === "partial";
     const postFull = ws.post?.status === "ok";
+    /* زمینه پرونده و سابقه خدمات — فقط از واکشی بانک سامانه؛ ورود دستی مجاز نیست */ const samaneh = ws.samaneh_bank;
+    const samanehOk = samaneh?.status === "ok";
+    const samanehData = samanehOk && !!(h.supportSince || h.priorServices);
+    const samPlaceholder = !samaneh ? "صرفاً از واکشی بانک سامانه تکمیل می‌شود" : samaneh.status === "error" ? "پس از اصلاح شناسه‌ها، استعلام را تکرار کنید" : "سابقه‌ای در بانک سامانه ثبت نشده است";
+    const fetchSamaneh = ()=>{
+        setSamPending(true);
+        setTimeout(()=>{
+            const r = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$web$2d$services$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["simulateServiceFetch"])("samaneh_bank", assessment);
+            setWebService(assessment.id, "samaneh_bank", r);
+            if (r.status !== "error" && r.prefills?.householdPatch && Object.keys(r.prefills.householdPatch).length > 0) {
+                updateHousehold(assessment.id, r.prefills.householdPatch);
+            }
+            setSamPending(false);
+            (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["toast"])({
+                title: r.status === "error" ? "استعلام بانک سامانه ناموفق" : "استعلام بانک سامانه انجام شد",
+                description: r.note ?? "داده ملاک ثبت شد؛ فیلدهای زمینه‌ای فقط‌خواندنی شدند.",
+                variant: r.status === "error" ? "destructive" : "default"
+            });
+        }, 900);
+    };
     const field = (key, label, opts)=>{
         const val = h[key] ?? "";
         if (opts?.locked) {
@@ -2012,7 +2037,7 @@ const OTHER_SERVICES = [
                                         "aria-hidden": true
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 675,
+                                        lineNumber: 704,
                                         columnNumber: 15
                                     }, this),
                                     " ",
@@ -2021,13 +2046,13 @@ const OTHER_SERVICES = [
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 674,
+                                lineNumber: 703,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 672,
+                        lineNumber: 701,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2036,13 +2061,13 @@ const OTHER_SERVICES = [
                         children: String(val || "—")
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 678,
+                        lineNumber: 707,
                         columnNumber: 11
                     }, this)
                 ]
             }, `hh-${String(key)}`, true, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 671,
+                lineNumber: 700,
                 columnNumber: 9
             }, this);
         }
@@ -2054,7 +2079,7 @@ const OTHER_SERVICES = [
                     children: label
                 }, void 0, false, {
                     fileName: "[project]/src/components/porsesh/wizard.tsx",
-                    lineNumber: 686,
+                    lineNumber: 715,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -2068,13 +2093,13 @@ const OTHER_SERVICES = [
                     placeholder: opts?.placeholder
                 }, void 0, false, {
                     fileName: "[project]/src/components/porsesh/wizard.tsx",
-                    lineNumber: 687,
+                    lineNumber: 716,
                     columnNumber: 9
                 }, this)
             ]
         }, `hh-${String(key)}`, true, {
             fileName: "[project]/src/components/porsesh/wizard.tsx",
-            lineNumber: 685,
+            lineNumber: 714,
             columnNumber: 7
         }, this);
     };
@@ -2088,14 +2113,14 @@ const OTHER_SERVICES = [
                 hint: "شناخت خانوار بدون امتیاز مستقل — قواعد قفل ملاک وب‌سرویس‌ها در راهنمای این صفحه؛ هزینه‌های مسکن در گام «مسکن» (C8) گرفته می‌شود."
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 702,
+                lineNumber: 731,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$web$2d$services$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["WebServiceStatusStrip"], {
                 assessment: assessment
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 710,
+                lineNumber: 739,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2109,14 +2134,14 @@ const OTHER_SERVICES = [
                                 "aria-hidden": true
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 713,
+                                lineNumber: 742,
                                 columnNumber: 68
                             }, this),
                             " اطلاعات پایه و پرونده‌ای"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 713,
+                        lineNumber: 742,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2124,7 +2149,7 @@ const OTHER_SERVICES = [
                         children: "شناخت خانوار بدون امتیاز مستقل؛ سرپرست و پاسخ‌گو دو نقش مستقل‌اند — فیلدهای ملاک پس از واکشی قفل می‌شوند."
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 714,
+                        lineNumber: 743,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2165,7 +2190,7 @@ const OTHER_SERVICES = [
                                         children: "وضعیت مدرک هویتی سرپرست"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 727,
+                                        lineNumber: 756,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
@@ -2178,12 +2203,12 @@ const OTHER_SERVICES = [
                                                 id: "hh-nidstatus",
                                                 children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectValue"], {}, void 0, false, {
                                                     fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                    lineNumber: 729,
+                                                    lineNumber: 758,
                                                     columnNumber: 48
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 729,
+                                                lineNumber: 758,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -2193,7 +2218,7 @@ const OTHER_SERVICES = [
                                                         children: "دارد"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                        lineNumber: 731,
+                                                        lineNumber: 760,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -2201,7 +2226,7 @@ const OTHER_SERVICES = [
                                                         children: "فاقد مدرک / نیازمند بررسی"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                        lineNumber: 732,
+                                                        lineNumber: 761,
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -2209,19 +2234,19 @@ const OTHER_SERVICES = [
                                                         children: "در جریان دریافت"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                        lineNumber: 733,
+                                                        lineNumber: 762,
                                                         columnNumber: 17
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 730,
+                                                lineNumber: 759,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 728,
+                                        lineNumber: 757,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2229,13 +2254,13 @@ const OTHER_SERVICES = [
                                         children: "کد ملی سرپرست کلید پرونده و اجباری است؛ اگر مدرک ندارد، مسیر دریافت مدرک (R8) با مددکار پیگیری می‌شود."
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 736,
+                                        lineNumber: 765,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 726,
+                                lineNumber: 755,
                                 columnNumber: 11
                             }, this),
                             field("province", "استان", {
@@ -2247,7 +2272,7 @@ const OTHER_SERVICES = [
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 717,
+                        lineNumber: 746,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2268,7 +2293,7 @@ const OTHER_SERVICES = [
                                         "aria-label": "فاقد نشانی ثابت"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 744,
+                                        lineNumber: 773,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2278,85 +2303,357 @@ const OTHER_SERVICES = [
                                                 children: "فاقد نشانی ثابت"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 745,
+                                                lineNumber: 774,
                                                 columnNumber: 26
                                             }, this),
                                             " است — مسیر بررسی میدانی فعال شود"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 745,
+                                        lineNumber: 774,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 743,
+                                lineNumber: 772,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 741,
+                        lineNumber: 770,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 712,
+                lineNumber: 741,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$editors$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["MemberManager"], {
                 assessment: assessment
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 750,
+                lineNumber: 779,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "rounded-2xl border bg-card p-4",
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                        className: "font-semibold mb-1",
-                        children: "زمینه پرونده و سابقه خدمات"
-                    }, void 0, false, {
+                        className: "font-semibold mb-1 flex items-center gap-2",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$database$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Database$3e$__["Database"], {
+                                className: "size-5 text-teal-strong",
+                                "aria-hidden": true
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 783,
+                                columnNumber: 68
+                            }, this),
+                            " زمینه پرونده و سابقه خدمات"
+                        ]
+                    }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 753,
+                        lineNumber: 783,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                         className: "text-xs text-muted-foreground mb-3 leading-5",
-                        children: "شروع دوره حمایت و خدمات حمایتی قبلی — داده زمینه‌ای برای پیگیری مددکاری؛ هزینه‌های ماهانه مسکن (اجاره، ودیعه، شارژ، قبوض، معوقه) به گام «مسکن» (C8) منتقل شده و متناسب با نوع تصرف گرفته می‌شود."
-                    }, void 0, false, {
+                        children: [
+                            "این داده‌ها ",
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                children: "صرفاً از واکشی بانک سامانه"
+                            }, void 0, false, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 785,
+                                columnNumber: 23
+                            }, this),
+                            " ثبت می‌شود و ورود دستی مجاز نیست — داده زمینه‌ای برای پیگیری مددکاری و خارج از امتیاز. هزینه‌های ماهانه مسکن (اجاره، ودیعه، شارژ، قبوض، معوقه) به گام «مسکن» (C8) منتقل شده و متناسب با نوع تصرف گرفته می‌شود."
+                        ]
+                    }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 754,
+                        lineNumber: 784,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "grid sm:grid-cols-2 gap-3",
                         children: [
-                            field("supportSince", "شروع دوره حمایت (اختیاری)", {
-                                placeholder: "مثلاً ۱۴۰۲"
-                            }),
-                            field("priorServices", "خدمات/برنامه‌های حمایتی قبلی", {
-                                placeholder: "مثلاً اکرام، تغذیه، شهریه ..."
-                            })
+                            samanehData ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "space-y-1.5",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                        className: "flex items-center flex-wrap gap-1.5",
+                                        children: [
+                                            "شروع دوره حمایت",
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
+                                                variant: "outline",
+                                                className: "text-[10px] gap-1 bg-teal-soft text-teal-strong border-teal-strong/30",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$lock$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Lock$3e$__["Lock"], {
+                                                        className: "size-3",
+                                                        "aria-hidden": true
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                                        lineNumber: 793,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    " بانک سامانه — ملاک، غیرقابل ویرایش"
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                                lineNumber: 792,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 790,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "rounded-lg border bg-muted/50 px-3 py-2.5 text-sm min-h-9 text-foreground/90",
+                                        "aria-readonly": true,
+                                        children: h.supportSince || "—"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 796,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 789,
+                                columnNumber: 13
+                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "space-y-1.5",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                        htmlFor: "hh-supportSince",
+                                        children: "شروع دوره حمایت"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 800,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                        id: "hh-supportSince",
+                                        disabled: true,
+                                        value: h.supportSince ?? "",
+                                        placeholder: samPlaceholder
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 801,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 799,
+                                columnNumber: 13
+                            }, this),
+                            samanehData ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "space-y-1.5",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                        className: "flex items-center flex-wrap gap-1.5",
+                                        children: [
+                                            "خدمات/برنامه‌های حمایتی قبلی",
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
+                                                variant: "outline",
+                                                className: "text-[10px] gap-1 bg-teal-soft text-teal-strong border-teal-strong/30",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$lock$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Lock$3e$__["Lock"], {
+                                                        className: "size-3",
+                                                        "aria-hidden": true
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                                        lineNumber: 809,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    " بانک سامانه — ملاک، غیرقابل ویرایش"
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                                lineNumber: 808,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 806,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "rounded-lg border bg-muted/50 px-3 py-2.5 text-sm min-h-9 text-foreground/90 leading-6",
+                                        "aria-readonly": true,
+                                        children: h.priorServices || "—"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 812,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 805,
+                                columnNumber: 13
+                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "space-y-1.5",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$label$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Label"], {
+                                        htmlFor: "hh-priorServices",
+                                        children: "خدمات/برنامه‌های حمایتی قبلی"
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 816,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
+                                        id: "hh-priorServices",
+                                        disabled: true,
+                                        value: h.priorServices ?? "",
+                                        placeholder: samPlaceholder
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 817,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 815,
+                                columnNumber: 13
+                            }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 757,
+                        lineNumber: 787,
                         columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "mt-3 flex flex-wrap items-center gap-2",
+                        children: [
+                            !samaneh ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
+                                variant: "outline",
+                                className: "gap-1 text-muted-foreground",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$ban$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Ban$3e$__["Ban"], {
+                                        className: "size-3.5",
+                                        "aria-hidden": true
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 824,
+                                        columnNumber: 78
+                                    }, this),
+                                    " ورود دستی غیرمجاز — صرفاً از واکشی بانک سامانه"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 824,
+                                columnNumber: 13
+                            }, this) : samaneh.status === "error" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
+                                variant: "outline",
+                                className: "gap-1 text-destructive border-destructive/40",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$alert$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__CircleAlert$3e$__["CircleAlert"], {
+                                        className: "size-3.5",
+                                        "aria-hidden": true
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 826,
+                                        columnNumber: 95
+                                    }, this),
+                                    " استعلام ناموفق"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 826,
+                                columnNumber: 13
+                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
+                                className: "gap-1 bg-emerald-600 text-white",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$circle$2d$check$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__CircleCheck$3e$__["CircleCheck"], {
+                                        className: "size-3.5",
+                                        "aria-hidden": true
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 828,
+                                        columnNumber: 64
+                                    }, this),
+                                    " ",
+                                    samanehData ? "دریافت شد — ملاک" : "دریافت شد — بدون سابقه حمایتی"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 828,
+                                columnNumber: 13
+                            }, this),
+                            samaneh && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                className: "text-[11px] text-muted-foreground",
+                                children: [
+                                    "آخرین استعلام: ",
+                                    (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$format$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["faDateTime"])(samaneh.fetchedAt)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 830,
+                                columnNumber: 23
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
+                                size: "sm",
+                                variant: samanehOk ? "outline" : "default",
+                                onClick: fetchSamaneh,
+                                disabled: samPending,
+                                className: "ms-auto",
+                                children: [
+                                    samPending ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$loader$2d$circle$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__Loader2$3e$__["Loader2"], {
+                                        className: "size-3.5 animate-spin",
+                                        "aria-hidden": true
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 832,
+                                        columnNumber: 27
+                                    }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__["RefreshCw"], {
+                                        className: "size-3.5",
+                                        "aria-hidden": true
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                        lineNumber: 832,
+                                        columnNumber: 87
+                                    }, this),
+                                    samaneh ? "استعلام مجدد از بانک سامانه" : "استعلام از بانک سامانه"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/components/porsesh/wizard.tsx",
+                                lineNumber: 831,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                        lineNumber: 822,
+                        columnNumber: 9
+                    }, this),
+                    samaneh?.status === "error" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "mt-2 text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5 leading-5",
+                        children: samaneh.note
+                    }, void 0, false, {
+                        fileName: "[project]/src/components/porsesh/wizard.tsx",
+                        lineNumber: 837,
+                        columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 752,
+                lineNumber: 782,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/wizard.tsx",
-        lineNumber: 700,
+        lineNumber: 729,
         columnNumber: 5
     }, this);
 }
@@ -2406,7 +2703,7 @@ function ScoredStep({ stepKey, assessment }) {
                 children: "برای پاسخ به پرسش‌های این بخش، ابتدا در گام «اطلاعات پایه» اعضای خانوار را ثبت کنید."
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 801,
+                lineNumber: 879,
                 columnNumber: 9
             }, this),
             groups.map((g)=>{
@@ -2417,7 +2714,7 @@ function ScoredStep({ stepKey, assessment }) {
                         cfg: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$member$2d$matrix$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["MATRIX_CFG"][g.key]
                     }, g.key, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 809,
+                        lineNumber: 887,
                         columnNumber: 18
                     }, this);
                 }
@@ -2429,14 +2726,14 @@ function ScoredStep({ stepKey, assessment }) {
                             assessment: assessment
                         }, void 0, false, {
                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                            lineNumber: 814,
+                            lineNumber: 892,
                             columnNumber: 32
                         }, this),
                         g.key === "poverty" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(PovertyEditor, {
                             assessment: assessment
                         }, void 0, false, {
                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                            lineNumber: 815,
+                            lineNumber: 893,
                             columnNumber: 37
                         }, this),
                         g.key === "D1m" && !provider && assessment.members.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2444,7 +2741,7 @@ function ScoredStep({ stepKey, assessment }) {
                             children: "تأمین‌کننده اصلی در مدیریت اعضا مشخص نشده است؛ برای ثبت وضعیت اشتغال (D1)، در گام اطلاعات پایه نقش «تأمین‌کننده اصلی» را به عضو مناسب بدهید."
                         }, void 0, false, {
                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                            lineNumber: 817,
+                            lineNumber: 895,
                             columnNumber: 15
                         }, this),
                         rel.length === 0 && g.loop && g.memberFilter === "schoolAge" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2457,14 +2754,14 @@ function ScoredStep({ stepKey, assessment }) {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                    lineNumber: 823,
+                                    lineNumber: 901,
                                     columnNumber: 17
                                 }, this),
                                 " عضو در سن آموزش اجباری ثبت نشده است — این شاخص به‌طور صحیح صفر محاسبه می‌شود."
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                            lineNumber: 822,
+                            lineNumber: 900,
                             columnNumber: 15
                         }, this),
                         rel.map((m)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2478,7 +2775,7 @@ function ScoredStep({ stepKey, assessment }) {
                                                 children: g.title
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 830,
+                                                lineNumber: 908,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -2487,14 +2784,14 @@ function ScoredStep({ stepKey, assessment }) {
                                                 children: g.indicator
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 831,
+                                                lineNumber: 909,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$member$2d$matrix$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["LegacyBadge"], {
                                                 id: g.indicator
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 832,
+                                                lineNumber: 910,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$charter$2d$modal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["IndicatorCharterButton"], {
@@ -2502,21 +2799,21 @@ function ScoredStep({ stepKey, assessment }) {
                                                 assessment: assessment
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 833,
+                                                lineNumber: 911,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$section$2d$guide$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["IndicatorGuideButton"], {
                                                 id: g.indicator
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 834,
+                                                lineNumber: 912,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$member$2d$matrix$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["WeightBadge"], {
                                                 id: g.indicator
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 835,
+                                                lineNumber: 913,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2529,7 +2826,7 @@ function ScoredStep({ stepKey, assessment }) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 836,
+                                                lineNumber: 914,
                                                 columnNumber: 19
                                             }, this),
                                             m.isMainProvider && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -2537,13 +2834,13 @@ function ScoredStep({ stepKey, assessment }) {
                                                 children: "تأمین‌کننده اصلی"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 837,
+                                                lineNumber: 915,
                                                 columnNumber: 40
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 829,
+                                        lineNumber: 907,
                                         columnNumber: 17
                                     }, this),
                                     g.questions.filter((q)=>q.level === "member").map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$fields$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["QuestionField"], {
@@ -2557,13 +2854,13 @@ function ScoredStep({ stepKey, assessment }) {
                                             serviceLock: serviceLockFor(q, `${q.id}#${m.id}`)
                                         }, q.id, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 840,
+                                            lineNumber: 918,
                                             columnNumber: 19
                                         }, this))
                                 ]
                             }, `${g.key}-${m.id}`, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 828,
+                                lineNumber: 906,
                                 columnNumber: 15
                             }, this)),
                         !g.loop && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2577,7 +2874,7 @@ function ScoredStep({ stepKey, assessment }) {
                                             children: g.title
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 858,
+                                            lineNumber: 936,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -2586,14 +2883,14 @@ function ScoredStep({ stepKey, assessment }) {
                                             children: g.indicator
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 859,
+                                            lineNumber: 937,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$member$2d$matrix$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["LegacyBadge"], {
                                             id: g.indicator
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 860,
+                                            lineNumber: 938,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$charter$2d$modal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["IndicatorCharterButton"], {
@@ -2601,21 +2898,21 @@ function ScoredStep({ stepKey, assessment }) {
                                             assessment: assessment
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 861,
+                                            lineNumber: 939,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$section$2d$guide$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["IndicatorGuideButton"], {
                                             id: g.indicator
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 862,
+                                            lineNumber: 940,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$member$2d$matrix$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["WeightBadge"], {
                                             id: g.indicator
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 863,
+                                            lineNumber: 941,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2623,13 +2920,13 @@ function ScoredStep({ stepKey, assessment }) {
                                             children: "سطح خانوار"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 864,
+                                            lineNumber: 942,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                    lineNumber: 857,
+                                    lineNumber: 935,
                                     columnNumber: 17
                                 }, this),
                                 g.indicator === "C1" && h.dwellingType && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2641,21 +2938,21 @@ function ScoredStep({ stepKey, assessment }) {
                                             children: h.dwellingType
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 869,
+                                            lineNumber: 947,
                                             columnNumber: 59
                                         }, this),
                                         " — این شاخص فقط پایداری و تهدید محل خواب را می‌سنجد و پرسش جداگانه‌ای درباره نوع سکونت ندارد."
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                    lineNumber: 868,
+                                    lineNumber: 946,
                                     columnNumber: 19
                                 }, this),
                                 g.indicator === "C8" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$editors$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["HousingCostFields"], {
                                     assessment: assessment
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                    lineNumber: 873,
+                                    lineNumber: 951,
                                     columnNumber: 42
                                 }, this),
                                 g.indicator === "C3" && h.tenureType && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2667,7 +2964,7 @@ function ScoredStep({ stepKey, assessment }) {
                                             children: h.tenureType
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 876,
+                                            lineNumber: 954,
                                             columnNumber: 39
                                         }, this),
                                         ws.property?.status === "ok" && ws.property.prefills?.householdPatch?.tenureType ? " — از استعلام املاک (ملاک ثبتی)" : "",
@@ -2675,7 +2972,7 @@ function ScoredStep({ stepKey, assessment }) {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                    lineNumber: 875,
+                                    lineNumber: 953,
                                     columnNumber: 19
                                 }, this),
                                 g.questions.filter((q)=>q.level === "household").map((q)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$fields$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["QuestionField"], {
@@ -2688,26 +2985,26 @@ function ScoredStep({ stepKey, assessment }) {
                                         serviceLock: serviceLockFor(q, q.id)
                                     }, q.id, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 881,
+                                        lineNumber: 959,
                                         columnNumber: 19
                                     }, this))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                            lineNumber: 856,
+                            lineNumber: 934,
                             columnNumber: 15
                         }, this)
                     ]
                 }, g.key, true, {
                     fileName: "[project]/src/components/porsesh/wizard.tsx",
-                    lineNumber: 813,
+                    lineNumber: 891,
                     columnNumber: 11
                 }, this);
             })
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/wizard.tsx",
-        lineNumber: 799,
+        lineNumber: 877,
         columnNumber: 5
     }, this);
 }
@@ -2733,7 +3030,7 @@ function PovertyEditor({ assessment }) {
                         children: "خط فقر منطقه‌ای"
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 909,
+                        lineNumber: 987,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -2742,7 +3039,7 @@ function PovertyEditor({ assessment }) {
                         children: "D3"
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 910,
+                        lineNumber: 988,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -2751,13 +3048,13 @@ function PovertyEditor({ assessment }) {
                         children: "نیازمند تصویب مرجع"
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 911,
+                        lineNumber: 989,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 908,
+                lineNumber: 986,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2765,7 +3062,7 @@ function PovertyEditor({ assessment }) {
                 children: "کفایت منابع (D3) با خط فقر معتبر منطقه‌ای سنجیده می‌شود. بدون مبلغ، منبع و وضعیت اعتبار، نتیجه D3 «غیرنهایی» می‌ماند. هزینه‌های منظورشده در خط فقر دوباره از D3 کسر نمی‌شود و ودیعه اجاره ماهانه محسوب نمی‌شود."
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 913,
+                lineNumber: 991,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2779,7 +3076,7 @@ function PovertyEditor({ assessment }) {
                                 children: "خط فقر سرانه ماهانه (تومان)"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 919,
+                                lineNumber: 997,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -2793,13 +3090,13 @@ function PovertyEditor({ assessment }) {
                                     })
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 920,
+                                lineNumber: 998,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 918,
+                        lineNumber: 996,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2810,7 +3107,7 @@ function PovertyEditor({ assessment }) {
                                 children: "منطقه"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 923,
+                                lineNumber: 1001,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -2822,13 +3119,13 @@ function PovertyEditor({ assessment }) {
                                 placeholder: "مثلاً استان تهران — مناطق شهری"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 924,
+                                lineNumber: 1002,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 922,
+                        lineNumber: 1000,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2839,7 +3136,7 @@ function PovertyEditor({ assessment }) {
                                 children: "منبع"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 927,
+                                lineNumber: 1005,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -2851,13 +3148,13 @@ function PovertyEditor({ assessment }) {
                                 placeholder: "مثلاً گزارش رسمی مرجع — نسخه ۱۴۰۴"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 928,
+                                lineNumber: 1006,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 926,
+                        lineNumber: 1004,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2868,7 +3165,7 @@ function PovertyEditor({ assessment }) {
                                 children: "تاریخ اعتبار"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 931,
+                                lineNumber: 1009,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Input"], {
@@ -2880,13 +3177,13 @@ function PovertyEditor({ assessment }) {
                                 placeholder: "مثلاً ۱۴۰۴/۰۶"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 932,
+                                lineNumber: 1010,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 930,
+                        lineNumber: 1008,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2897,7 +3194,7 @@ function PovertyEditor({ assessment }) {
                                 children: "وضعیت اعتبارسنجی"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 935,
+                                lineNumber: 1013,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
@@ -2910,12 +3207,12 @@ function PovertyEditor({ assessment }) {
                                         id: "pl-status",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectValue"], {}, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 937,
+                                            lineNumber: 1015,
                                             columnNumber: 43
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 937,
+                                        lineNumber: 1015,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -2925,7 +3222,7 @@ function PovertyEditor({ assessment }) {
                                                 children: "تأییدنشده (نیازمند بررسی مرجع)"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 939,
+                                                lineNumber: 1017,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -2933,7 +3230,7 @@ function PovertyEditor({ assessment }) {
                                                 children: "تأییدشده توسط مرجع"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 940,
+                                                lineNumber: 1018,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -2941,37 +3238,37 @@ function PovertyEditor({ assessment }) {
                                                 children: "نامعتبر"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 941,
+                                                lineNumber: 1019,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 938,
+                                        lineNumber: 1016,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 936,
+                                lineNumber: 1014,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 934,
+                        lineNumber: 1012,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 917,
+                lineNumber: 995,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/wizard.tsx",
-        lineNumber: 907,
+        lineNumber: 985,
         columnNumber: 5
     }, this);
 }
@@ -2983,27 +3280,27 @@ function PovertyEditor({ assessment }) {
                 assessment: assessment
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 954,
+                lineNumber: 1032,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(EvidenceGrid, {
                 assessment: assessment
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 955,
+                lineNumber: 1033,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(DocumentsSummary, {
                 assessment: assessment
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 956,
+                lineNumber: 1034,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/wizard.tsx",
-        lineNumber: 953,
+        lineNumber: 1031,
         columnNumber: 5
     }, this);
 }
@@ -3036,7 +3333,7 @@ function PovertyEditor({ assessment }) {
                         "aria-hidden": true
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 984,
+                        lineNumber: 1062,
                         columnNumber: 68
                     }, this),
                     " مدارک مثبت ثبت‌شده (",
@@ -3045,7 +3342,7 @@ function PovertyEditor({ assessment }) {
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 984,
+                lineNumber: 1062,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3053,7 +3350,7 @@ function PovertyEditor({ assessment }) {
                 children: "مدارکی که در طول پرسشنامه روی پرسش‌های شاخص‌ها ثبت شده‌اند — هر مدرک به پرسش مبدا (و در سطح عضو، به عضو مشخص) متصل است و در بازبینی انسانی استفاده می‌شود."
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 985,
+                lineNumber: 1063,
                 columnNumber: 7
             }, this),
             documents.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3061,7 +3358,7 @@ function PovertyEditor({ assessment }) {
                 children: "هنوز مدرکی ثبت نشده است — در پرسش‌های دارای شرط، پس از پاسخ مثبت، کنترل «ثبت مدرک مثبت» باز می‌شود."
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 989,
+                lineNumber: 1067,
                 columnNumber: 9
             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
                 className: "space-y-2",
@@ -3075,7 +3372,7 @@ function PovertyEditor({ assessment }) {
                                 "aria-hidden": true
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 996,
+                                lineNumber: 1074,
                                 columnNumber: 17
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3083,7 +3380,7 @@ function PovertyEditor({ assessment }) {
                                 children: d.title
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 997,
+                                lineNumber: 1075,
                                 columnNumber: 17
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Badge"], {
@@ -3092,7 +3389,7 @@ function PovertyEditor({ assessment }) {
                                 children: evidenceKindShort(d.kind)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 998,
+                                lineNumber: 1076,
                                 columnNumber: 17
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3105,7 +3402,7 @@ function PovertyEditor({ assessment }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 999,
+                                lineNumber: 1077,
                                 columnNumber: 17
                             }, this),
                             d.reference && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3116,7 +3413,7 @@ function PovertyEditor({ assessment }) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1000,
+                                lineNumber: 1078,
                                 columnNumber: 33
                             }, this),
                             d.fileName && (d.dataUrl ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -3127,14 +3424,14 @@ function PovertyEditor({ assessment }) {
                                 children: "فایل مدرک"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1002,
+                                lineNumber: 1080,
                                 columnNumber: 31
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 className: "text-[11px] text-muted-foreground",
                                 children: d.fileName
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1002,
+                                lineNumber: 1080,
                                 columnNumber: 166
                             }, this)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3142,7 +3439,7 @@ function PovertyEditor({ assessment }) {
                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$format$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["faDateTime"])(d.recordedAt)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1004,
+                                lineNumber: 1082,
                                 columnNumber: 17
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3155,30 +3452,30 @@ function PovertyEditor({ assessment }) {
                                     "aria-hidden": true
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                    lineNumber: 1006,
+                                    lineNumber: 1084,
                                     columnNumber: 19
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1005,
+                                lineNumber: 1083,
                                 columnNumber: 17
                             }, this)
                         ]
                     }, d.id, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 995,
+                        lineNumber: 1073,
                         columnNumber: 15
                     }, this);
                 })
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 991,
+                lineNumber: 1069,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/wizard.tsx",
-        lineNumber: 983,
+        lineNumber: 1061,
         columnNumber: 5
     }, this);
 }
@@ -3232,7 +3529,7 @@ function EvidenceGrid({ assessment }) {
                 children: "منبع/کیفیت شواهد هر شاخص"
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 1043,
+                lineNumber: 1121,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3240,7 +3537,7 @@ function EvidenceGrid({ assessment }) {
                 children: "این فیلدهای مشترک پشت هر شاخص عمدتاً برای کاربر سازمانی نمایش داده می‌شوند، نه الزام خانوار. منبع داده، کفایت و نیاز راستی‌آزمایی را ثبت کنید."
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 1044,
+                lineNumber: 1122,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3259,7 +3556,7 @@ function EvidenceGrid({ assessment }) {
                                         children: id
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 1053,
+                                        lineNumber: 1131,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3267,13 +3564,13 @@ function EvidenceGrid({ assessment }) {
                                         children: title
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 1054,
+                                        lineNumber: 1132,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1052,
+                                lineNumber: 1130,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Select"], {
@@ -3284,12 +3581,12 @@ function EvidenceGrid({ assessment }) {
                                         className: "h-8 text-xs",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectValue"], {}, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                            lineNumber: 1057,
+                                            lineNumber: 1135,
                                             columnNumber: 56
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 1057,
+                                        lineNumber: 1135,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -3298,36 +3595,36 @@ function EvidenceGrid({ assessment }) {
                                                 children: o.label
                                             }, o.value, false, {
                                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                                lineNumber: 1058,
+                                                lineNumber: 1136,
                                                 columnNumber: 61
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 1058,
+                                        lineNumber: 1136,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1056,
+                                lineNumber: 1134,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, id, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1051,
+                        lineNumber: 1129,
                         columnNumber: 13
                     }, this);
                 })
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 1047,
+                lineNumber: 1125,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/wizard.tsx",
-        lineNumber: 1042,
+        lineNumber: 1120,
         columnNumber: 5
     }, this);
 }
@@ -3355,7 +3652,7 @@ function EvidenceGrid({ assessment }) {
                 compact: true
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 1086,
+                lineNumber: 1164,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3369,14 +3666,14 @@ function EvidenceGrid({ assessment }) {
                                 "aria-hidden": true
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1090,
+                                lineNumber: 1168,
                                 columnNumber: 68
                             }, this),
                             " درخواست خانوار (خدماتی — خارج از امتیاز)"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1090,
+                        lineNumber: 1168,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3384,7 +3681,7 @@ function EvidenceGrid({ assessment }) {
                         children: "نوع درخواست در ثبت‌نام انتخاب شده و به‌عنوان مقدار اولیه درج شده است؛ می‌توانید آن را تکمیل یا اصلاح کنید. درخواست خروجی خدماتی و مسیر ارجاع است و امتیاز مستقل ندارد. درخواست‌های قبلی پرونده با تاریخ و وضعیت حفظ می‌شوند."
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1091,
+                        lineNumber: 1169,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3398,19 +3695,19 @@ function EvidenceGrid({ assessment }) {
                                         "aria-label": t
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 1098,
+                                        lineNumber: 1176,
                                         columnNumber: 15
                                     }, this),
                                     t
                                 ]
                             }, t, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1097,
+                                lineNumber: 1175,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1095,
+                        lineNumber: 1173,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -3426,13 +3723,13 @@ function EvidenceGrid({ assessment }) {
                         children: "ذخیره درخواست"
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1103,
+                        lineNumber: 1181,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 1089,
+                lineNumber: 1167,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3446,14 +3743,14 @@ function EvidenceGrid({ assessment }) {
                                 "aria-hidden": true
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1110,
+                                lineNumber: 1188,
                                 columnNumber: 70
                             }, this),
                             " شناسنامه ارزیابی (فیلدهای کنترلی)"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1110,
+                        lineNumber: 1188,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3461,7 +3758,7 @@ function EvidenceGrid({ assessment }) {
                         children: "این فیلدها سؤال از خانوار نیستند؛ سامانه و کاربر سازمانی ثبت می‌کنند تا هر نتیجه قابل ممیزی، تکرارپذیر و بازنگری‌پذیر باشد."
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1111,
+                        lineNumber: 1189,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("dl", {
@@ -3523,7 +3820,7 @@ function EvidenceGrid({ assessment }) {
                                         children: r.k
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 1130,
+                                        lineNumber: 1208,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("dd", {
@@ -3532,24 +3829,24 @@ function EvidenceGrid({ assessment }) {
                                         children: r.v
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                        lineNumber: 1131,
+                                        lineNumber: 1209,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, r.k, true, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1129,
+                                lineNumber: 1207,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1114,
+                        lineNumber: 1192,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 1109,
+                lineNumber: 1187,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3560,7 +3857,7 @@ function EvidenceGrid({ assessment }) {
                         children: "اعلام تغییر شرایط توسط خانوار"
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1138,
+                        lineNumber: 1216,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3568,7 +3865,7 @@ function EvidenceGrid({ assessment }) {
                         children: "هر زمان که وضعیت خانوار تغییر کرد، می‌توانید اینجا ثبت کنید؛ ثبت، داده پیش‌تکمیل‌شده را باطل نمی‌کند و در بازبینی انسانی بررسی می‌شود."
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1139,
+                        lineNumber: 1217,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3581,7 +3878,7 @@ function EvidenceGrid({ assessment }) {
                                 className: "max-w-xl"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1141,
+                                lineNumber: 1219,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Button"], {
@@ -3597,13 +3894,13 @@ function EvidenceGrid({ assessment }) {
                                 children: "ثبت"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1142,
+                                lineNumber: 1220,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1140,
+                        lineNumber: 1218,
                         columnNumber: 9
                     }, this),
                     (assessment.changeStatements?.length ?? 0) > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -3613,18 +3910,18 @@ function EvidenceGrid({ assessment }) {
                                 children: c.text
                             }, i, false, {
                                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                                lineNumber: 1152,
+                                lineNumber: 1230,
                                 columnNumber: 15
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1150,
+                        lineNumber: 1228,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 1137,
+                lineNumber: 1215,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3635,7 +3932,7 @@ function EvidenceGrid({ assessment }) {
                         children: "بازبینی انسانی و ارجاع"
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1159,
+                        lineNumber: 1237,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3643,7 +3940,7 @@ function EvidenceGrid({ assessment }) {
                         children: "ثبت نهایی پرسشنامه، درخواست را برای بازبینی مددکار خانواده آماده می‌کند. تصمیم‌های تخصصی، مسیر خدمت و ارجاع در نمای حرفه‌ای مدیریت می‌شود. پیشنهاد همیار جایگزین تصمیم تخصصی مددکار نیست و مالکیت حرفه‌ای پرونده تا پذیرش مسئولیت مقصد حفظ می‌شود."
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1160,
+                        lineNumber: 1238,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3653,31 +3950,31 @@ function EvidenceGrid({ assessment }) {
                             children: "مشاهده داشبورد حرفه‌ای و ارجاع"
                         }, void 0, false, {
                             fileName: "[project]/src/components/porsesh/wizard.tsx",
-                            lineNumber: 1165,
+                            lineNumber: 1243,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/wizard.tsx",
-                        lineNumber: 1164,
+                        lineNumber: 1242,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 1158,
+                lineNumber: 1236,
                 columnNumber: 7
             }, this),
             mode === "pro" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$porsesh$2f$dashboard$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__["ReferralPanel"], {
                 assessment: assessment
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/wizard.tsx",
-                lineNumber: 1169,
+                lineNumber: 1247,
                 columnNumber: 26
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/wizard.tsx",
-        lineNumber: 1085,
+        lineNumber: 1163,
         columnNumber: 5
     }, this);
 }

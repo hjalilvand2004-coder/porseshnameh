@@ -14,7 +14,7 @@ import {
 import {
   Fingerprint, MapPin, HeartPulse, Building2, GraduationCap, BookOpenCheck,
   Landmark, Lock, RefreshCw, Loader2, CircleCheck, CircleAlert, CircleMinus, Info,
-  Satellite, ChevronLeft,
+  Satellite, ChevronLeft, Database,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
@@ -36,6 +36,7 @@ const SERVICE_ICON: Record<string, React.ElementType> = {
   property: Building2,
   education_school: BookOpenCheck,
   higher_edu: GraduationCap,
+  samaneh_bank: Database,
 };
 
 const PRIORITY_TONE: Record<string, string> = {
@@ -97,6 +98,9 @@ function StatusBadge({ status }: { status: "ok" | "partial" | "error" | "pending
 function ServiceCard({ service, assessment }: { service: (typeof WEB_SERVICES)[number]; assessment: Assessment }) {
   const setWebService = usePorsesh((s) => s.setWebService);
   const clearWebService = usePorsesh((s) => s.clearWebService);
+  const updateHousehold = usePorsesh((s) => s.updateHousehold);
+  const setAnswersBulk = usePorsesh((s) => s.setAnswersBulk);
+  const updateMember = usePorsesh((s) => s.updateMember);
   const res = assessment.webServices?.[service.id];
   const [pending, setPending] = useState(false);
   const Icon = SERVICE_ICON[service.id] ?? Landmark;
@@ -107,6 +111,19 @@ function ServiceCard({ service, assessment }: { service: (typeof WEB_SERVICES)[n
     setTimeout(() => {
       const r = simulateServiceFetch(service.id, assessment);
       setWebService(assessment.id, service.id, r);
+      /* اعمال خودکار پیش‌تکمیل ملاک — همانند واکشی گام ۱؛
+         اعضای جدید سابقه ثبتی (memberCreates) صرفاً با تأیید صریح مددکار در گام ۳ اضافه می‌شوند */
+      if (r.status !== "error" && r.prefills) {
+        if (r.prefills.householdPatch && Object.keys(r.prefills.householdPatch).length > 0) {
+          updateHousehold(assessment.id, r.prefills.householdPatch);
+        }
+        if (r.prefills.answerPrefills?.length) {
+          setAnswersBulk(assessment.id, Object.fromEntries(r.prefills.answerPrefills.map((p) => [p.key, p.value])));
+        }
+        if (r.prefills.memberPrefills?.length) {
+          for (const mp of r.prefills.memberPrefills) updateMember(assessment.id, mp.memberId, mp.patch);
+        }
+      }
       setPending(false);
       toast({
         title: r.status === "error" ? "استعلام ناموفق" : r.status === "partial" ? "استعلام جزئی" : "استعلام موفق",
@@ -171,7 +188,7 @@ function ServiceCard({ service, assessment }: { service: (typeof WEB_SERVICES)[n
             استعلام از سامانه متولی
           </Button>
           <p className="text-[11px] text-muted-foreground leading-5">
-            شاخص‌های مرتبط: {service.feeds.join("، ")}
+            {service.feeds.length ? `شاخص‌های مرتبط: ${service.feeds.join("، ")}` : "داده زمینه‌ای پرونده — خارج از امتیاز محرومیت"}
           </p>
         </div>
       )}
@@ -188,7 +205,7 @@ export function WebServicePanel({ assessment }: { assessment: Assessment }) {
           <h3 className="font-bold">استعلام از مراجع ثبتی — داده‌ای که در فرم قابل تغییر نیست</h3>
           <p className="mt-1 text-[13px]">
             بخشی از اطلاعات پرسشنامه از <b>وب‌سرویس سازمان‌های متولی</b> (ثبت احوال، پست، بیمه‌ها، اموال و املاک،
-            علوم و دانشگاه آزاد، آموزش‌وپرورش) دریافت می‌شود. طبق قاعده تقدم منابع، این داده <b>ملاک است</b>؛
+            علوم و دانشگاه آزاد، آموزش‌وپرورش، بانک سامانه) دریافت می‌شود. طبق قاعده تقدم منابع، این داده <b>ملاک است</b>؛
             پس از دریافت، فیلد مرتبط فقط‌خواندنی می‌شود و اصلاح آن فقط از مسیر درخواست به مرجع ثبتی امکان‌پذیر است.
           </p>
           <p className="mt-1.5 text-[12px] text-muted-foreground flex items-center gap-1.5">
@@ -208,7 +225,7 @@ export function WebServicePanel({ assessment }: { assessment: Assessment }) {
 /**
  * نوار فشرده «آخرین وضعیت واکشی سرویس‌ها» — جای پنل بلند روی فرم گام ۳.
  *
- * کل پنل استعلام (مقدمه + کارت هر ۷ مرجع با استعلام مجدد / بازگرداندن به حالت دستی)
+ * کل پنل استعلام (مقدمه + کارت هر ۸ مرجع با استعلام مجدد / بازگرداندن به حالت دستی)
  * به یک مودال منتقل شده است؛ روی فرم فقط یک خط خلاصه با نقطه‌های وضعیت هر سرویس می‌ماند.
  */
 export function WebServiceStatusStrip({ assessment }: { assessment: Assessment }) {
@@ -238,7 +255,7 @@ export function WebServiceStatusStrip({ assessment }: { assessment: Assessment }
             <span className="block text-sm font-bold">وضعیت واکشی از مراجع ثبتی</span>
             <span className="block text-xs text-muted-foreground leading-5 mt-0.5">{summary}</span>
           </span>
-          {/* نقطه‌های وضعیت هر ۷ مرجع */}
+          {/* نقطه‌های وضعیت هر ۸ مرجع */}
           <span className="flex items-center gap-1.5" aria-hidden>
             {WEB_SERVICES.map((s) => {
               const st = ws[s.id]?.status ?? "none";

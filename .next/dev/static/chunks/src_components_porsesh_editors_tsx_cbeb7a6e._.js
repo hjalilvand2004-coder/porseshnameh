@@ -125,7 +125,7 @@ function MemberTypeBadge({ m, className }) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
             variant: "outline",
             className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])("gap-1 bg-teal-soft text-teal-strong border-teal-strong/30", className),
-            title: m.fromRegistry ? "این عضو از واکشی سابقه ثبتی ثبت احوال آمده است (ملاک) — ترکیب جاری خانوار جداگانه تأیید می‌شود." : "به‌عنوان عضو خانوار ثبت‌شده در سابقه ثبتی ثبت احوال اعلام شده است.",
+            title: m.fromRegistry ? "این عضو از واکشی سابقه ثبتی ثبت احوال آمده است (ملاک) — ترکیب جاری خانوار جداگانه تأیید می‌شود." : "به‌عنوان عضو خانواده ثبت‌شده در سابقه ثبتی ثبت احوال اعلام شده است.",
             children: [
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$fingerprint$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Fingerprint$3e$__["Fingerprint"], {
                     className: "size-3.5",
@@ -135,7 +135,7 @@ function MemberTypeBadge({ m, className }) {
                     lineNumber: 58,
                     columnNumber: 9
                 }, this),
-                "عضو خانوار — ثبت احوال"
+                "عضو خانواده — ثبت احوال"
             ]
         }, void 0, true, {
             fileName: "[project]/src/components/porsesh/editors.tsx",
@@ -146,7 +146,7 @@ function MemberTypeBadge({ m, className }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
         variant: "outline",
         className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])("gap-1 border-violet-300 bg-violet-50 text-violet-700", className),
-        title: "همسفره: همراهِ ساکن با خانوار که در سابقه ثبتی ثبت احوال به‌عنوان عضو خانوار ثبت نشده است (مهمان، هم‌سکون موقت، ...).",
+        title: "همسفره: همراهِ ساکن با خانوار که در سابقه ثبتی ثبت احوال به‌عنوان عضو خانواده ثبت نشده است (مهمان، هم‌سکون موقت، ...).",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$user$2d$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__UserPlus$3e$__["UserPlus"], {
                 className: "size-3.5",
@@ -253,7 +253,7 @@ function MemberManager({ assessment, editable = true }) {
                                     (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$format$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["faNum"])(assessment.members.length),
                                     " نفر — ",
                                     (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$format$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["faNum"])(registryCount),
-                                    " عضو ثبت احوال • ",
+                                    " عضو خانواده (ثبت احوال) • ",
                                     (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$format$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["faNum"])(companionCount),
                                     " همسفره"
                                 ]
@@ -629,7 +629,7 @@ function MemberManager({ assessment, editable = true }) {
                                 lineNumber: 202,
                                 columnNumber: 11
                             }, this),
-                            " «عضو خانوار» = ثبت‌شده در سابقه ثبتی ثبت احوال (مبنای واکشی)؛ «همسفره» = همراهِ ساکن با خانوار که در سابقه ثبتی ثبت نشده است (مهمان، هم‌سکون موقت، ...) — ترکیب جاری خانوار جداگانه تأیید می‌شود."
+                            " «عضو خانواده» = ثبت‌شده در سابقه ثبتی ثبت احوال (مبنای واکشی)؛ «همسفره» = همراهِ ساکن با خانوار که در سابقه ثبتی ثبت نشده است (مهمان، هم‌سکون موقت، ...) — ترکیب جاری خانوار جداگانه تأیید می‌شود."
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/editors.tsx",
@@ -859,7 +859,7 @@ function MemberManager({ assessment, editable = true }) {
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                    children: "عضو خانوار — واکشی‌شده از سابقه ثبتی ثبت احوال (ملاک؛ نوع از منبع ثبتی می‌آید)"
+                                                    children: "عضو خانواده — واکشی‌شده از سابقه ثبتی ثبت احوال (ملاک؛ نوع از منبع ثبتی می‌آید)"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/components/porsesh/editors.tsx",
                                                     lineNumber: 244,
@@ -900,7 +900,7 @@ function MemberManager({ assessment, editable = true }) {
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
                                                             value: "registry",
-                                                            children: "عضو خانوار — ثبت‌شده در سابقه ثبتی"
+                                                            children: "عضو خانواده — ثبت‌شده در سابقه ثبتی"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/components/porsesh/editors.tsx",
                                                             lineNumber: 251,
@@ -920,7 +920,7 @@ function MemberManager({ assessment, editable = true }) {
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                             className: "text-[11px] text-muted-foreground leading-5",
-                                            children: "همسفره کسی است که با خانوار سکونت دارد اما در سابقه ثبتی ثبت احوال به‌عنوان عضو خانوار ثبت نشده است؛ برای شمارش ترکیب خانوار و پرسش‌های عضومحور ثبت می‌شود."
+                                            children: "همسفره کسی است که با خانوار سکونت دارد اما در سابقه ثبتی ثبت احوال به‌عنوان عضو خانواده ثبت نشده است؛ برای شمارش ترکیب خانوار و پرسش‌های عضومحور ثبت می‌شود."
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/editors.tsx",
                                             lineNumber: 255,

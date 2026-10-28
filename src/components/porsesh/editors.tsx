@@ -53,10 +53,10 @@ export function MemberTypeBadge({ m, className }: { m: Member; className?: strin
         className={cn("gap-1 bg-teal-soft text-teal-strong border-teal-strong/30", className)}
         title={m.fromRegistry
           ? "این عضو از واکشی سابقه ثبتی ثبت احوال آمده است (ملاک) — ترکیب جاری خانوار جداگانه تأیید می‌شود."
-          : "به‌عنوان عضو خانوار ثبت‌شده در سابقه ثبتی ثبت احوال اعلام شده است."}
+          : "به‌عنوان عضو خانواده ثبت‌شده در سابقه ثبتی ثبت احوال اعلام شده است."}
       >
         <Fingerprint className="size-3.5" aria-hidden />
-        عضو خانوار — ثبت احوال
+        عضو خانواده — ثبت احوال
       </Badge>
     );
   }
@@ -64,7 +64,7 @@ export function MemberTypeBadge({ m, className }: { m: Member; className?: strin
     <Badge
       variant="outline"
       className={cn("gap-1 border-violet-300 bg-violet-50 text-violet-700", className)}
-      title="همسفره: همراهِ ساکن با خانوار که در سابقه ثبتی ثبت احوال به‌عنوان عضو خانوار ثبت نشده است (مهمان، هم‌سکون موقت، ...)."
+      title="همسفره: همراهِ ساکن با خانوار که در سابقه ثبتی ثبت احوال به‌عنوان عضو خانواده ثبت نشده است (مهمان، هم‌سکون موقت، ...)."
     >
       <UserPlus className="size-3.5" aria-hidden />
       همسفره
@@ -115,7 +115,7 @@ export function MemberManager({ assessment, editable = true }: { assessment: Ass
         <div className="min-w-40">
           <h3 className="font-semibold text-sm">اعضای خانوار</h3>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            {faNum(assessment.members.length)} نفر — {faNum(registryCount)} عضو ثبت احوال • {faNum(companionCount)} همسفره
+            {faNum(assessment.members.length)} نفر — {faNum(registryCount)} عضو خانواده (ثبت احوال) • {faNum(companionCount)} همسفره
           </p>
         </div>
         {editable && (
@@ -199,7 +199,7 @@ export function MemberManager({ assessment, editable = true }: { assessment: Ass
       <p className="px-4 py-2.5 text-[11px] text-muted-foreground leading-5 border-t bg-muted/30 flex items-start gap-1.5">
         <Info className="size-3.5 shrink-0 mt-0.5" aria-hidden />
         <span>
-          <b>نوع عضو:</b> «عضو خانوار» = ثبت‌شده در سابقه ثبتی ثبت احوال (مبنای واکشی)؛ «همسفره» = همراهِ ساکن با خانوار که در سابقه ثبتی ثبت نشده است (مهمان، هم‌سکون موقت، ...) — ترکیب جاری خانوار جداگانه تأیید می‌شود.
+          <b>نوع عضو:</b> «عضو خانواده» = ثبت‌شده در سابقه ثبتی ثبت احوال (مبنای واکشی)؛ «همسفره» = همراهِ ساکن با خانوار که در سابقه ثبتی ثبت نشده است (مهمان، هم‌سکون موقت، ...) — ترکیب جاری خانوار جداگانه تأیید می‌شود.
         </span>
       </p>
 
@@ -241,19 +241,19 @@ export function MemberManager({ assessment, editable = true }: { assessment: Ass
               {form.fromRegistry ? (
                 <div id="m-type" className="rounded-lg border border-teal-strong/30 bg-teal-soft/40 px-3 py-2.5 text-sm flex items-center gap-2" aria-readonly>
                   <Lock className="size-4 text-teal-strong" aria-hidden />
-                  <span>عضو خانوار — واکشی‌شده از سابقه ثبتی ثبت احوال (ملاک؛ نوع از منبع ثبتی می‌آید)</span>
+                  <span>عضو خانواده — واکشی‌شده از سابقه ثبتی ثبت احوال (ملاک؛ نوع از منبع ثبتی می‌آید)</span>
                 </div>
               ) : (
                 <Select value={form.memberType ?? "companion"} onValueChange={(v) => set({ memberType: v as Member["memberType"] })}>
                   <SelectTrigger id="m-type"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="companion">همسفره — همراه ساکن، خارج از سابقه ثبتی</SelectItem>
-                    <SelectItem value="registry">عضو خانوار — ثبت‌شده در سابقه ثبتی</SelectItem>
+                    <SelectItem value="registry">عضو خانواده — ثبت‌شده در سابقه ثبتی</SelectItem>
                   </SelectContent>
                 </Select>
               )}
               <p className="text-[11px] text-muted-foreground leading-5">
-                همسفره کسی است که با خانوار سکونت دارد اما در سابقه ثبتی ثبت احوال به‌عنوان عضو خانوار ثبت نشده است؛ برای شمارش ترکیب خانوار و پرسش‌های عضومحور ثبت می‌شود.
+                همسفره کسی است که با خانوار سکونت دارد اما در سابقه ثبتی ثبت احوال به‌عنوان عضو خانواده ثبت نشده است؛ برای شمارش ترکیب خانوار و پرسش‌های عضومحور ثبت می‌شود.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">

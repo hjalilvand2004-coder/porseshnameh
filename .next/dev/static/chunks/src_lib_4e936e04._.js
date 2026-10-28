@@ -604,7 +604,7 @@ function base(status, ageDays) {
 }
 function member(a, m) {
     const id = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$format$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["uid"])("m");
-    /* خانوارهای نمونه از منظر سابقه ثبتی «عضو خانوار ثبت‌شده»اند؛ همسفره با memberType: "companion" صریح می‌شود */ a.members.push({
+    /* خانوارهای نمونه از منظر سابقه ثبتی «عضو خانواده ثبت‌شده»اند؛ همسفره با memberType: "companion" صریح می‌شود */ a.members.push({
         id,
         memberType: "registry",
         ...m
@@ -3276,6 +3276,16 @@ const DEGREES = [
     "کارشناسی ارشد",
     "کاردانی"
 ];
+const SUPPORT_SERVICES = [
+    "اکرام اطعام",
+    "کمک تغذیه",
+    "کمک شهریه دانش‌آموزی",
+    "بسته معیشتی ماهانه",
+    "کمک اجاره مسکن",
+    "خدمات بهداشتی و درمانی حمایتی",
+    "وام اشتغال‌زای کوچک",
+    "بسته آموزشی دانش‌آموزان"
+];
 function result(serviceId, status, data, note, prefills) {
     return {
         serviceId,
@@ -3536,6 +3546,37 @@ function simulateServiceFetch(serviceId, a) {
                     memberPrefills
                 } : undefined);
             }
+        /* ===== واکشی سابقه پرونده حمایتی از بانک سامانه — داده زمینه‌ای؛ ورود دستی مجاز نیست ===== */ case "samaneh_bank":
+            {
+                if (nid.length !== 10) {
+                    return result(serviceId, "error", {}, "برای استعلام پرونده از بانک سامانه، ابتدا کد ملی ده‌رقمی سرپرست را ثبت و واکشی کنید — ورود دستی این فیلدها مجاز نیست.");
+                }
+                const seed = hashStr("sam:" + nid);
+                const hasCase = seed % 4 !== 0; // ۷۵٪ سابقه پرونده فعال
+                if (!hasCase) {
+                    return result(serviceId, "ok", {
+                        "سابقه پرونده در بانک سامانه": "یافت نشد",
+                        "اثر بر فرم": "فیلدهای «شروع دوره حمایت» و «خدمات حمایتی قبلی» خالی می‌مانند؛ در صورت شروع خدمات، با استعلام مجدد تکمیل می‌شود."
+                    }, "سابقه حمایتی برای این خانوار در بانک سامانه ثبت نشده است؛ داده زمینه‌ای است و نبود سابقه تأثیری در امتیاز محرومیت ندارد.");
+                }
+                const startYear = 1395 + seed % 8; // ۱۳۹۵ تا ۱۴۰۲
+                const startMonth = 1 + (seed >>> 7) % 12;
+                const supportSince = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$format$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["faStr"])(`${startYear}/${String(startMonth).padStart(2, "0")}`);
+                const svcCount = 2 + seed % 2; // ۲ یا ۳ خدمت
+                const services = [];
+                for(let i = 0; i < svcCount; i++)services.push(pick(seed, SUPPORT_SERVICES, i + 1));
+                const priorServices = services.join("، ");
+                return result(serviceId, "ok", {
+                    "شروع دوره حمایت (سابقه سامانه)": supportSince,
+                    "خدمات/برنامه‌های حمایتی قبلی": priorServices,
+                    "اثر بر سنجش": "داده زمینه‌ای برای پیگیری مددکاری — خارج از امتیاز محرومیت"
+                }, "این فیلدها صرفاً از واکشی بانک سامانه ثبت می‌شود و ورود دستی مجاز نیست؛ اصلاح فقط با درخواست به مرجع داده امکان‌پذیر است.", {
+                    householdPatch: {
+                        supportSince,
+                        priorServices
+                    }
+                });
+            }
         default:
             return result(serviceId, "error", {}, "سرویس شناسایی نشد.");
     }
@@ -3555,7 +3596,11 @@ const LOCKED_FIELDS = {
     property: [],
     insurance: [],
     education_school: [],
-    higher_edu: []
+    higher_edu: [],
+    samaneh_bank: [
+        "supportSince",
+        "priorServices"
+    ]
 };
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
@@ -3594,7 +3639,7 @@ function emptyAssessment() {
 }
 function member(a, m) {
     const id = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$format$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["uid"])("m");
-    /* خانوارهای نمونه از منظر سابقه ثبتی «عضو خانوار ثبت‌شده»اند؛ همسفره با memberType: "companion" صریح می‌شود */ a.members.push({
+    /* خانوارهای نمونه از منظر سابقه ثبتی «عضو خانواده ثبت‌شده»اند؛ همسفره با memberType: "companion" صریح می‌شود */ a.members.push({
         id,
         memberType: "registry",
         ...m
@@ -7552,6 +7597,18 @@ const WEB_SERVICES = [
             "B7"
         ],
         scope: "members"
+    },
+    {
+        id: "samaneh_bank",
+        name: "بانک سامانه — سابقه پرونده و خدمات حمایتی",
+        org: "بانک اطلاعات سامانه‌های حمایتی و مددکاری",
+        provides: [
+            "شروع دوره حمایت‌های قبلی",
+            "خدمات/برنامه‌های حمایتی دریافتی",
+            "سابقه پرونده حمایتی خانوار"
+        ],
+        feeds: [],
+        scope: "household"
     }
 ];
 const DATA_PRIORITY = [

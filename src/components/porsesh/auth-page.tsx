@@ -148,7 +148,7 @@ export function AuthPage() {
             <Badge variant="outline" className="bg-white/10 text-white border-white/20 gap-1">
               <Sparkles className="size-3" aria-hidden /> نسخه ۰.۷.۰
             </Badge>
-            <span>۳۰ شاخص • ۵ بُعد • سقف ۱۰۰۰ امتیاز • ۷ مرجع متولی</span>
+            <span>۳۰ شاخص • ۵ بُعد • سقف ۱۰۰۰ امتیاز • ۸ مرجع متولی</span>
           </div>
         </section>
 

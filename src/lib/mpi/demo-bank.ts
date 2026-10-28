@@ -68,7 +68,7 @@ function member(
   m: Partial<Assessment["members"][number]> & { firstName: string; relation: string; age: number },
 ): string {
   const id = uid("m");
-  /* خانوارهای نمونه از منظر سابقه ثبتی «عضو خانوار ثبت‌شده»اند؛ همسفره با memberType: "companion" صریح می‌شود */
+  /* خانوارهای نمونه از منظر سابقه ثبتی «عضو خانواده ثبت‌شده»اند؛ همسفره با memberType: "companion" صریح می‌شود */
   a.members.push({ id, memberType: "registry", ...m } as Assessment["members"][number]);
   return id;
 }

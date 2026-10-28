@@ -1332,7 +1332,7 @@ function AuthPage() {
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                        children: "۳۰ شاخص • ۵ بُعد • سقف ۱۰۰۰ امتیاز • ۷ مرجع متولی"
+                                        children: "۳۰ شاخص • ۵ بُعد • سقف ۱۰۰۰ امتیاز • ۸ مرجع متولی"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/auth-page.tsx",
                                         lineNumber: 151,
@@ -7658,6 +7658,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$re
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$info$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Info$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/info.js [app-client] (ecmascript) <export default as Info>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$satellite$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Satellite$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/satellite.js [app-client] (ecmascript) <export default as Satellite>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$chevron$2d$left$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ChevronLeft$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/chevron-left.js [app-client] (ecmascript) <export default as ChevronLeft>");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$database$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Database$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/database.js [app-client] (ecmascript) <export default as Database>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/lib/utils.ts [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/src/hooks/use-toast.ts [app-client] (ecmascript)");
 ;
@@ -7688,7 +7689,8 @@ var _s = __turbopack_context__.k.signature();
     insurance: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$heart$2d$pulse$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__HeartPulse$3e$__["HeartPulse"],
     property: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$building$2d$2$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Building2$3e$__["Building2"],
     education_school: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$book$2d$open$2d$check$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__BookOpenCheck$3e$__["BookOpenCheck"],
-    higher_edu: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$graduation$2d$cap$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__GraduationCap$3e$__["GraduationCap"]
+    higher_edu: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$graduation$2d$cap$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__GraduationCap$3e$__["GraduationCap"],
+    samaneh_bank: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$database$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Database$3e$__["Database"]
 };
 const PRIORITY_TONE = {
     teal: "bg-teal-50 text-teal-800 border-teal-200",
@@ -7709,14 +7711,14 @@ function DataPriorityLegend({ className }) {
                         "aria-hidden": true
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 53,
+                        lineNumber: 54,
                         columnNumber: 9
                     }, this),
                     " تقدم منابع داده (قاعده اعتبارسنجی)"
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 52,
+                lineNumber: 53,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7724,7 +7726,7 @@ function DataPriorityLegend({ className }) {
                 children: "در صورت تناقض بین منابع، داده با تقدم بالاتر ملاک است و سامانه «هشدار کیفیت داده» صادر می‌کند؛ امتیاز یا پیشنهاد نهایی تا بررسی تناقض قطعی تلقی نمی‌شود."
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 55,
+                lineNumber: 56,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ol", {
@@ -7737,7 +7739,7 @@ function DataPriorityLegend({ className }) {
                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$format$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["faNum"])(p.rank)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 62,
+                                lineNumber: 63,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7748,7 +7750,7 @@ function DataPriorityLegend({ className }) {
                                         children: p.source
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                        lineNumber: 66,
+                                        lineNumber: 67,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7756,30 +7758,30 @@ function DataPriorityLegend({ className }) {
                                         children: p.desc
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                        lineNumber: 67,
+                                        lineNumber: 68,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 65,
+                                lineNumber: 66,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, p.rank, true, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 61,
+                        lineNumber: 62,
                         columnNumber: 11
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 59,
+                lineNumber: 60,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/web-services.tsx",
-        lineNumber: 51,
+        lineNumber: 52,
         columnNumber: 5
     }, this);
 }
@@ -7805,14 +7807,14 @@ function StatusBadge({ status }) {
                 "aria-hidden": true
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 91,
+                lineNumber: 92,
                 columnNumber: 82
             }, this),
             " دریافت شد — ملاک"
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/web-services.tsx",
-        lineNumber: 91,
+        lineNumber: 92,
         columnNumber: 31
     }, this);
     if (status === "partial") return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -7823,14 +7825,14 @@ function StatusBadge({ status }) {
                 "aria-hidden": true
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 92,
+                lineNumber: 93,
                 columnNumber: 85
             }, this),
             " دریافت جزئی"
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/web-services.tsx",
-        lineNumber: 92,
+        lineNumber: 93,
         columnNumber: 36
     }, this);
     if (status === "pending") return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -7842,14 +7844,14 @@ function StatusBadge({ status }) {
                 "aria-hidden": true
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 93,
+                lineNumber: 94,
                 columnNumber: 79
             }, this),
             " در حال استعلام ..."
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/web-services.tsx",
-        lineNumber: 93,
+        lineNumber: 94,
         columnNumber: 36
     }, this);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -7861,14 +7863,14 @@ function StatusBadge({ status }) {
                 "aria-hidden": true
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 94,
+                lineNumber: 95,
                 columnNumber: 92
             }, this),
             " استعلام ناموفق"
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/web-services.tsx",
-        lineNumber: 94,
+        lineNumber: 95,
         columnNumber: 10
     }, this);
 }
@@ -7881,6 +7883,15 @@ function ServiceCard({ service, assessment }) {
     const clearWebService = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePorsesh"])({
         "ServiceCard.usePorsesh[clearWebService]": (s)=>s.clearWebService
     }["ServiceCard.usePorsesh[clearWebService]"]);
+    const updateHousehold = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePorsesh"])({
+        "ServiceCard.usePorsesh[updateHousehold]": (s)=>s.updateHousehold
+    }["ServiceCard.usePorsesh[updateHousehold]"]);
+    const setAnswersBulk = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePorsesh"])({
+        "ServiceCard.usePorsesh[setAnswersBulk]": (s)=>s.setAnswersBulk
+    }["ServiceCard.usePorsesh[setAnswersBulk]"]);
+    const updateMember = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePorsesh"])({
+        "ServiceCard.usePorsesh[updateMember]": (s)=>s.updateMember
+    }["ServiceCard.usePorsesh[updateMember]"]);
     const res = assessment.webServices?.[service.id];
     const [pending, setPending] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const Icon = SERVICE_ICON[service.id] ?? __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$landmark$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Landmark$3e$__["Landmark"];
@@ -7890,6 +7901,21 @@ function ServiceCard({ service, assessment }) {
         setTimeout(()=>{
             const r = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$web$2d$services$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["simulateServiceFetch"])(service.id, assessment);
             setWebService(assessment.id, service.id, r);
+            /* اعمال خودکار پیش‌تکمیل ملاک — همانند واکشی گام ۱؛
+         اعضای جدید سابقه ثبتی (memberCreates) صرفاً با تأیید صریح مددکار در گام ۳ اضافه می‌شوند */ if (r.status !== "error" && r.prefills) {
+                if (r.prefills.householdPatch && Object.keys(r.prefills.householdPatch).length > 0) {
+                    updateHousehold(assessment.id, r.prefills.householdPatch);
+                }
+                if (r.prefills.answerPrefills?.length) {
+                    setAnswersBulk(assessment.id, Object.fromEntries(r.prefills.answerPrefills.map((p)=>[
+                            p.key,
+                            p.value
+                        ])));
+                }
+                if (r.prefills.memberPrefills?.length) {
+                    for (const mp of r.prefills.memberPrefills)updateMember(assessment.id, mp.memberId, mp.patch);
+                }
+            }
             setPending(false);
             (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$hooks$2f$use$2d$toast$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"])({
                 title: r.status === "error" ? "استعلام ناموفق" : r.status === "partial" ? "استعلام جزئی" : "استعلام موفق",
@@ -7911,12 +7937,12 @@ function ServiceCard({ service, assessment }) {
                             "aria-hidden": true
                         }, void 0, false, {
                             fileName: "[project]/src/components/porsesh/web-services.tsx",
-                            lineNumber: 123,
+                            lineNumber: 140,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 122,
+                        lineNumber: 139,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7927,7 +7953,7 @@ function ServiceCard({ service, assessment }) {
                                 children: service.name
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 126,
+                                lineNumber: 143,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7935,13 +7961,13 @@ function ServiceCard({ service, assessment }) {
                                 children: service.org
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 127,
+                                lineNumber: 144,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 125,
+                        lineNumber: 142,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$badge$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Badge"], {
@@ -7950,13 +7976,13 @@ function ServiceCard({ service, assessment }) {
                         children: "ملاک ثبتی"
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 129,
+                        lineNumber: 146,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 121,
+                lineNumber: 138,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -7967,7 +7993,7 @@ function ServiceCard({ service, assessment }) {
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 134,
+                lineNumber: 151,
                 columnNumber: 7
             }, this),
             res ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -7980,7 +8006,7 @@ function ServiceCard({ service, assessment }) {
                                 status: res.status
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 141,
+                                lineNumber: 158,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -7988,13 +8014,13 @@ function ServiceCard({ service, assessment }) {
                                 children: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mpi$2f$format$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["faDateTime"])(res.fetchedAt)
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 142,
+                                lineNumber: 159,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 140,
+                        lineNumber: 157,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("dl", {
@@ -8010,7 +8036,7 @@ function ServiceCard({ service, assessment }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                        lineNumber: 147,
+                                        lineNumber: 164,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("dd", {
@@ -8022,24 +8048,24 @@ function ServiceCard({ service, assessment }) {
                                                 "aria-hidden": true
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                                lineNumber: 150,
+                                                lineNumber: 167,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                        lineNumber: 148,
+                                        lineNumber: 165,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, k, true, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 146,
+                                lineNumber: 163,
                                 columnNumber: 15
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 144,
+                        lineNumber: 161,
                         columnNumber: 11
                     }, this),
                     res.note && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8047,7 +8073,7 @@ function ServiceCard({ service, assessment }) {
                         children: res.note
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 155,
+                        lineNumber: 172,
                         columnNumber: 24
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8064,21 +8090,21 @@ function ServiceCard({ service, assessment }) {
                                         "aria-hidden": true
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                        lineNumber: 158,
+                                        lineNumber: 175,
                                         columnNumber: 26
                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__["RefreshCw"], {
                                         className: "size-3.5",
                                         "aria-hidden": true
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                        lineNumber: 158,
+                                        lineNumber: 175,
                                         columnNumber: 86
                                     }, this),
                                     "استعلام مجدد"
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 157,
+                                lineNumber: 174,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -8089,19 +8115,19 @@ function ServiceCard({ service, assessment }) {
                                 children: "بازگرداندن به حالت دستی"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 161,
+                                lineNumber: 178,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 156,
+                        lineNumber: 173,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 139,
+                lineNumber: 156,
                 columnNumber: 9
             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                 className: "space-y-2",
@@ -8110,7 +8136,7 @@ function ServiceCard({ service, assessment }) {
                         status: pending ? "pending" : "error"
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 168,
+                        lineNumber: 185,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -8123,49 +8149,49 @@ function ServiceCard({ service, assessment }) {
                                 "aria-hidden": true
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 170,
+                                lineNumber: 187,
                                 columnNumber: 24
                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$refresh$2d$cw$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__RefreshCw$3e$__["RefreshCw"], {
                                 className: "size-3.5",
                                 "aria-hidden": true
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 170,
+                                lineNumber: 187,
                                 columnNumber: 84
                             }, this),
                             "استعلام از سامانه متولی"
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 169,
+                        lineNumber: 186,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                         className: "text-[11px] text-muted-foreground leading-5",
-                        children: [
-                            "شاخص‌های مرتبط: ",
-                            service.feeds.join("، ")
-                        ]
-                    }, void 0, true, {
+                        children: service.feeds.length ? `شاخص‌های مرتبط: ${service.feeds.join("، ")}` : "داده زمینه‌ای پرونده — خارج از امتیاز محرومیت"
+                    }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 173,
+                        lineNumber: 190,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 167,
+                lineNumber: 184,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/web-services.tsx",
-        lineNumber: 120,
+        lineNumber: 137,
         columnNumber: 5
     }, this);
 }
-_s(ServiceCard, "/b+Sr4VxGc7VMnOAFnySl31ns+8=", false, function() {
+_s(ServiceCard, "QuoMguVAxpQWUxkeH+lPnG2Qa7c=", false, function() {
     return [
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePorsesh"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePorsesh"],
+        __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePorsesh"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePorsesh"],
         __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$store$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["usePorsesh"]
     ];
@@ -8183,7 +8209,7 @@ function WebServicePanel({ assessment }) {
                         "aria-hidden": true
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 186,
+                        lineNumber: 203,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8194,7 +8220,7 @@ function WebServicePanel({ assessment }) {
                                 children: "استعلام از مراجع ثبتی — داده‌ای که در فرم قابل تغییر نیست"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 188,
+                                lineNumber: 205,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8205,22 +8231,22 @@ function WebServicePanel({ assessment }) {
                                         children: "وب‌سرویس سازمان‌های متولی"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                        lineNumber: 190,
+                                        lineNumber: 207,
                                         columnNumber: 41
                                     }, this),
-                                    " (ثبت احوال، پست، بیمه‌ها، اموال و املاک، علوم و دانشگاه آزاد، آموزش‌وپرورش) دریافت می‌شود. طبق قاعده تقدم منابع، این داده ",
+                                    " (ثبت احوال، پست، بیمه‌ها، اموال و املاک، علوم و دانشگاه آزاد، آموزش‌وپرورش، بانک سامانه) دریافت می‌شود. طبق قاعده تقدم منابع، این داده ",
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
                                         children: "ملاک است"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                        lineNumber: 191,
-                                        columnNumber: 94
+                                        lineNumber: 208,
+                                        columnNumber: 107
                                     }, this),
                                     "؛ پس از دریافت، فیلد مرتبط فقط‌خواندنی می‌شود و اصلاح آن فقط از مسیر درخواست به مرجع ثبتی امکان‌پذیر است."
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 189,
+                                lineNumber: 206,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -8231,7 +8257,7 @@ function WebServicePanel({ assessment }) {
                                         "aria-hidden": true
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                        lineNumber: 195,
+                                        lineNumber: 212,
                                         columnNumber: 13
                                     }, this),
                                     "نسخه نمایشی آفلاین است؛ پاسخ استعلام ",
@@ -8239,26 +8265,26 @@ function WebServicePanel({ assessment }) {
                                         children: "شبیه‌سازی‌شده"
                                     }, void 0, false, {
                                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                        lineNumber: 196,
+                                        lineNumber: 213,
                                         columnNumber: 50
                                     }, this),
                                     " از همان اطلاعاتی که در فرم وارد شده ساخته می‌شود."
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 194,
+                                lineNumber: 211,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 187,
+                        lineNumber: 204,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 185,
+                lineNumber: 202,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -8268,18 +8294,18 @@ function WebServicePanel({ assessment }) {
                         assessment: assessment
                     }, s.id, false, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 202,
+                        lineNumber: 219,
                         columnNumber: 34
                     }, this))
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 201,
+                lineNumber: 218,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/web-services.tsx",
-        lineNumber: 184,
+        lineNumber: 201,
         columnNumber: 5
     }, this);
 }
@@ -8308,12 +8334,12 @@ function WebServiceStatusStrip({ assessment }) {
                                 "aria-hidden": true
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 235,
+                                lineNumber: 252,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/components/porsesh/web-services.tsx",
-                            lineNumber: 234,
+                            lineNumber: 251,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8324,7 +8350,7 @@ function WebServiceStatusStrip({ assessment }) {
                                     children: "وضعیت واکشی از مراجع ثبتی"
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                    lineNumber: 238,
+                                    lineNumber: 255,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8332,13 +8358,13 @@ function WebServiceStatusStrip({ assessment }) {
                                     children: summary
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                    lineNumber: 239,
+                                    lineNumber: 256,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/porsesh/web-services.tsx",
-                            lineNumber: 237,
+                            lineNumber: 254,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8351,13 +8377,13 @@ function WebServiceStatusStrip({ assessment }) {
                                     className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$utils$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["cn"])("size-2.5 rounded-full", STATUS_DOT[st], st === "ok" && "ring-2 ring-emerald-600/20")
                                 }, s.id, false, {
                                     fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                    lineNumber: 246,
+                                    lineNumber: 263,
                                     columnNumber: 17
                                 }, this);
                             })
                         }, void 0, false, {
                             fileName: "[project]/src/components/porsesh/web-services.tsx",
-                            lineNumber: 242,
+                            lineNumber: 259,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -8369,24 +8395,24 @@ function WebServiceStatusStrip({ assessment }) {
                                     "aria-hidden": true
                                 }, void 0, false, {
                                     fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                    lineNumber: 260,
+                                    lineNumber: 277,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/porsesh/web-services.tsx",
-                            lineNumber: 258,
+                            lineNumber: 275,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/components/porsesh/web-services.tsx",
-                    lineNumber: 229,
+                    lineNumber: 246,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 228,
+                lineNumber: 245,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogContent"], {
@@ -8399,39 +8425,39 @@ function WebServiceStatusStrip({ assessment }) {
                                 children: "وضعیت واکشی از مراجع ثبتی"
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 266,
+                                lineNumber: 283,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$components$2f$ui$2f$dialog$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["DialogDescription"], {
                                 children: "نتایج استعلام از وب‌سرویس سازمان‌های متولی، با امکان استعلام مجدد یا بازگرداندن فیلد به حالت دستی."
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                                lineNumber: 267,
+                                lineNumber: 284,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 265,
+                        lineNumber: 282,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(WebServicePanel, {
                         assessment: assessment
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/web-services.tsx",
-                        lineNumber: 271,
+                        lineNumber: 288,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/web-services.tsx",
-                lineNumber: 264,
+                lineNumber: 281,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/web-services.tsx",
-        lineNumber: 227,
+        lineNumber: 244,
         columnNumber: 5
     }, this);
 }
@@ -8941,7 +8967,7 @@ _c2 = IdentityHelp;
                                                 lineNumber: 131,
                                                 columnNumber: 17
                                             }, this),
-                                            " در جدول اعضا مشخص می‌شود: «عضو خانوار» (ثبت‌شده در سابقه ثبتی ثبت احوال — مبنای واکشی) یا «همسفره» (همراهِ ساکن خارج از سابقه ثبتی)."
+                                            " در جدول اعضا مشخص می‌شود: «عضو خانواده» (ثبت‌شده در سابقه ثبتی ثبت احوال — مبنای واکشی) یا «همسفره» (همراهِ ساکن خارج از سابقه ثبتی)."
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/porsesh/page-help.tsx",
@@ -9052,17 +9078,33 @@ _c2 = IdentityHelp;
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
-                                                children: "فرم ثبت‌نام:"
+                                                children: "بانک سامانه:"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/components/porsesh/page-help.tsx",
                                                 lineNumber: 144,
+                                                columnNumber: 17
+                                            }, this),
+                                            " شروع دوره حمایت و خدمات حمایتی قبلی — صرفاً از واکشی؛ ورود دستی مجاز نیست و نبود سابقه در سامانه، فیلد را خالی نگه می‌دارد."
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/src/components/porsesh/page-help.tsx",
+                                        lineNumber: 144,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                                children: "فرم ثبت‌نام:"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/components/porsesh/page-help.tsx",
+                                                lineNumber: 145,
                                                 columnNumber: 17
                                             }, this),
                                             " شماره موبایل سرپرست."
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/components/porsesh/page-help.tsx",
-                                        lineNumber: 144,
+                                        lineNumber: 145,
                                         columnNumber: 13
                                     }, this)
                                 ]
@@ -9076,7 +9118,7 @@ _c2 = IdentityHelp;
                                 children: "اصلاح این فیلدها فقط از مسیر «اصلاح شناسه‌ها و واکشی مجدد» در گام ۱ یا درخواست به مرجع ثبتی ممکن است — طبق قاعده تقدم منابع، داده مرجع ملاک است و پیش‌تکمیل تأیید خودکار شرایط جاری نیست."
                             }, void 0, false, {
                                 fileName: "[project]/src/components/porsesh/page-help.tsx",
-                                lineNumber: 146,
+                                lineNumber: 147,
                                 columnNumber: 11
                             }, this)
                         ]
@@ -9092,12 +9134,12 @@ _c2 = IdentityHelp;
                             children: "کد ملی سرپرست کلید پرونده و اجباری است. اگر سرپرست مدارک هویتی ندارد، گزینه «فاقد مدرک / نیازمند بررسی» را انتخاب کنید — مسیر دریافت مدرک (پرچم R8) با همراهی مددکار فعال می‌شود و گزینه «در جریان دریافت» برای پرونده‌های در حال پیگیری است."
                         }, void 0, false, {
                             fileName: "[project]/src/components/porsesh/page-help.tsx",
-                            lineNumber: 153,
+                            lineNumber: 154,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/page-help.tsx",
-                        lineNumber: 152,
+                        lineNumber: 153,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(HelpBlock, {
@@ -9113,14 +9155,14 @@ _c2 = IdentityHelp;
                                             children: "بی‌خانمان"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/page-help.tsx",
-                                            lineNumber: 162,
+                                            lineNumber: 163,
                                             columnNumber: 26
                                         }, this),
                                         "، نشانی اجباری نیست؛ با تیک «فاقد نشانی ثابت» مسیر بررسی میدانی فعال می‌شود."
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/porsesh/page-help.tsx",
-                                    lineNumber: 162,
+                                    lineNumber: 163,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
@@ -9129,7 +9171,7 @@ _c2 = IdentityHelp;
                                             children: "هزینه‌های ماهانه مسکن"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/page-help.tsx",
-                                            lineNumber: 163,
+                                            lineNumber: 164,
                                             columnNumber: 17
                                         }, this),
                                         " (اجاره، ودیعه، شارژ، قبوض، معوقه) در گام «مسکن» — کارت «داده‌های هزینه مسکن (C8)» — ثبت می‌شود و متناسب با ",
@@ -9137,32 +9179,42 @@ _c2 = IdentityHelp;
                                             children: "نوع تصرف"
                                         }, void 0, false, {
                                             fileName: "[project]/src/components/porsesh/page-help.tsx",
-                                            lineNumber: 163,
+                                            lineNumber: 164,
                                             columnNumber: 153
                                         }, this),
                                         " نمایش داده می‌شود؛ ودیعه جدا از اجاره ثبت و در فشار هزینه مسکن لحاظ نمی‌گردد."
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/components/porsesh/page-help.tsx",
-                                    lineNumber: 163,
+                                    lineNumber: 164,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
-                                    children: "«شروع دوره حمایت» و «خدمات حمایتی قبلی» (زمینه پرونده) همین‌جا و اختیاری ثبت می‌شوند."
-                                }, void 0, false, {
+                                    children: [
+                                        "«شروع دوره حمایت» و «خدمات حمایتی قبلی» (زمینه پرونده) صرفاً از واکشی ",
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("b", {
+                                            children: "بانک سامانه"
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/components/porsesh/page-help.tsx",
+                                            lineNumber: 165,
+                                            columnNumber: 87
+                                        }, this),
+                                        " ثبت می‌شوند و ورود دستی ندارند؛ در نبود سابقه حمایتی، خالی می‌مانند."
+                                    ]
+                                }, void 0, true, {
                                     fileName: "[project]/src/components/porsesh/page-help.tsx",
-                                    lineNumber: 164,
+                                    lineNumber: 165,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/components/porsesh/page-help.tsx",
-                            lineNumber: 161,
+                            lineNumber: 162,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/page-help.tsx",
-                        lineNumber: 160,
+                        lineNumber: 161,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(HelpBlock, {
@@ -9172,12 +9224,12 @@ _c2 = IdentityHelp;
                             children: "همه داده‌ها فقط در مرورگر شما ذخیره می‌شود (نسخه نمایشی آفلاین)؛ پاسخ وب‌سرویس‌ها شبیه‌سازی‌شده است و هیچ اطلاعاتی به بیرون ارسال نمی‌گردد."
                         }, void 0, false, {
                             fileName: "[project]/src/components/porsesh/page-help.tsx",
-                            lineNumber: 169,
+                            lineNumber: 170,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/page-help.tsx",
-                        lineNumber: 168,
+                        lineNumber: 169,
                         columnNumber: 9
                     }, this)
                 ]
@@ -9201,12 +9253,12 @@ function PageHelpBar({ stepKey, title, hint, icon: Icon }) {
                     "aria-hidden": true
                 }, void 0, false, {
                     fileName: "[project]/src/components/porsesh/page-help.tsx",
-                    lineNumber: 189,
+                    lineNumber: 190,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/page-help.tsx",
-                lineNumber: 188,
+                lineNumber: 189,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -9217,7 +9269,7 @@ function PageHelpBar({ stepKey, title, hint, icon: Icon }) {
                         children: title
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/page-help.tsx",
-                        lineNumber: 192,
+                        lineNumber: 193,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -9225,26 +9277,26 @@ function PageHelpBar({ stepKey, title, hint, icon: Icon }) {
                         children: hint
                     }, void 0, false, {
                         fileName: "[project]/src/components/porsesh/page-help.tsx",
-                        lineNumber: 193,
+                        lineNumber: 194,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/components/porsesh/page-help.tsx",
-                lineNumber: 191,
+                lineNumber: 192,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(PageHelpDialog, {
                 stepKey: stepKey
             }, void 0, false, {
                 fileName: "[project]/src/components/porsesh/page-help.tsx",
-                lineNumber: 195,
+                lineNumber: 196,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/components/porsesh/page-help.tsx",
-        lineNumber: 187,
+        lineNumber: 188,
         columnNumber: 5
     }, this);
 }
@@ -10424,7 +10476,7 @@ const TABLE1 = [
     {
         old: "دوره حمایت از خانواده",
         action: "keep",
-        next: "تاریخ شروع حمایت، وضعیت جاری و خدمات قبلی؛ ترجیحاً پیش‌تکمیل از پرونده (خارج از امتیاز)",
+        next: "تاریخ شروع حمایت، وضعیت جاری و خدمات قبلی؛ صرفاً از واکشی بانک سامانه ثبت می‌شود (خارج از امتیاز)",
         model: "سابقه خدمات"
     },
     {

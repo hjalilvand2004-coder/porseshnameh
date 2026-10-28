@@ -27,3 +27,21 @@ https://nextjs.org/telemetry
 ✓ Compiled in 78ms
 ✓ Compiled in 51ms
 ✓ Compiled in 425ms
+ GET / 200 in 29ms (compile: 2ms, render: 27ms)
+ GET / 200 in 130ms (compile: 20ms, render: 110ms)
+✓ Compiled in 508ms
+✓ Compiled in 92ms
+✓ Compiled in 98ms
+✓ Compiled in 162ms
+✓ Compiled in 59ms
+✓ Compiled in 65ms
+✓ Compiled in 158ms
+✓ Compiled in 172ms
+✓ Compiled in 522ms
+✓ Compiled in 241ms
+✓ Compiled in 393ms
+✓ Compiled in 173ms
+✓ Compiled in 64ms
+✓ Compiled in 62ms
+✓ Compiled in 191ms
+✓ Compiled in 218ms
