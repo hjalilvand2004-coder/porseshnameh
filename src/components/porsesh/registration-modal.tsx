@@ -18,6 +18,7 @@ import {
   type RegistrationKind,
 } from "@/lib/mpi/registration";
 import { simulateServiceFetch } from "@/lib/mpi/web-services";
+import { JalaliDatePicker } from "@/components/porsesh/jalali-date-picker";
 import { uid, nowIso } from "@/lib/mpi/format";
 import type { Assessment, Member, WebServiceResult } from "@/lib/mpi/types";
 import {
@@ -349,12 +350,13 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-birth">تاریخ تولد</Label>
-                  <Input
-                    id="reg-birth" dir="ltr" value={birth}
-                    onChange={(e) => setBirth(e.target.value)}
-                    placeholder="۱۳۶۲/۰۵/۱۲ (شمسی)"
-                    aria-required="true" aria-invalid={showErr(birthErr)}
-                    className={cn(showErr(birthErr) && "border-destructive focus-visible:ring-destructive/30")}
+                  <JalaliDatePicker
+                    id="reg-birth"
+                    value={birth}
+                    onChange={(v) => setBirth(v)}
+                    placeholder="انتخاب از تقویم شمسی"
+                    invalid={showErr(birthErr)}
+                    ariaLabel="انتخاب تاریخ تولد از تقویم شمسی"
                   />
                   {(attempted || birth.length > 0) && birthErr && <p className="text-[11px] text-destructive leading-4" role="alert">{birthErr}</p>}
                 </div>
@@ -418,13 +420,14 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
               {/* نوع درخواست */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">نوع درخواست</Label>
-                <RadioGroup value={kind} onValueChange={(v) => setKind(v as RegistrationKind)} className="gap-2.5" aria-required="true">
+                <RadioGroup value={kind} onValueChange={(v) => setKind(v as RegistrationKind)} className="gap-2.5" dir="rtl" aria-required="true">
                   {REGISTRATION_KINDS.map((k) => (
                     <div key={k.value} className="space-y-1.5">
                       <Label
                         htmlFor={`reg-kind-${k.value}`}
+                        dir="rtl"
                         className={cn(
-                          "flex items-start gap-2.5 rounded-xl border p-3.5 cursor-pointer transition-colors min-h-11",
+                          "flex flex-row items-start gap-2.5 rounded-xl border p-3.5 cursor-pointer transition-colors min-h-11 text-start",
                           kind === k.value ? "border-teal-strong/50 bg-teal-soft/40" : "bg-background hover:border-ring/60",
                         )}
                       >

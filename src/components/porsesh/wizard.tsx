@@ -14,6 +14,8 @@ import { MemberManager, IncomeEditor } from "@/components/porsesh/editors";
 import { FlagsDialog, FlagsList } from "@/components/porsesh/flags";
 import { QualityPanel, ReferralPanel, ResultCard } from "@/components/porsesh/dashboard";
 import { WebServicePanel } from "@/components/porsesh/web-services";
+import { PageHelpBar } from "@/components/porsesh/page-help";
+import { JalaliDatePicker } from "@/components/porsesh/jalali-date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -441,29 +443,19 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
 
   return (
     <div className="space-y-4 max-w-4xl">
-      {/* محرمانگی و هدف */}
-      <div className="rounded-2xl border bg-card p-4.5 space-y-2.5 leading-7 text-sm">
-        <h3 className="font-bold text-base flex items-center gap-2"><ShieldCheck className="size-5 text-teal-strong" aria-hidden /> به پرسش‌نامه خانوار خوش آمدید</h3>
-        <p>
-          این پرسش‌نامه برای <b>سنجش عملیاتی محرومیت</b> خانوار طراحی شده است، نه رد یا پذیرش درخواست. پاسخ‌ها به <strong>محرمانگی کامل</strong> پردازش می‌شوند.
-          اگر از فرم ثبت‌نام آمده‌اید، شناسه‌ها و داده هویتی به‌صورت خودکار واکشی شده است؛ در غیر این صورت سه شناسه زیر را وارد کنید تا واکشی انجام شود.
-        </p>
-        <ul className="list-disc ps-5 space-y-1 text-muted-foreground text-[13px]">
-          <li><b className="text-foreground">کد ملی سرپرست اجباری است</b> — کلید شناسایی خانوار و مبنای استعلام همه مراجع (ثبت احوال، پست، شاپرک، تأمین اجتماعی، املاک، آموزش‌وپرورش، علوم). اگر سرپرست فاقد مدرک است، مسیر دریافت مدرک (R8) با همراهی مددکار فعال می‌شود.</li>
-          <li>نوع درخواست شما در <b>ثبت‌نام</b> انتخاب شده است؛ در گام آخر به‌عنوان داده خدماتی قابل تکمیل و اصلاح است.</li>
-          <li>شماره موبایل، رمز عبور (فقط هش) و توافقنامه بانکی نیز از ثبت‌نام منتقل شده‌اند.</li>
-          <li>اگر وضعیت فوری یا خطرناکی دارید، از دکمه «فوریت» در پایین صفحه استفاده کنید — نیازی به تکمیل بقیه فرم نیست.</li>
-          <li>کد پستی برای واکشی نشانی از پست است و برای بی‌خانمان‌ها اجباری نیست.</li>
-          <li>در هر زمان می‌توانید پیش‌نویس را ذخیره و بعداً ادامه دهید.</li>
-        </ul>
-      </div>
+      {/* راهنمای صفحه — توضیحات کامل در مودال */}
+      <PageHelpBar
+        stepKey="identity"
+        icon={ShieldCheck}
+        title="به پرسش‌نامه خانوار خوش آمدید"
+        hint="سنجش عملیاتی محرومیت — نه رد یا پذیرش درخواست؛ پاسخ‌ها محرمانه است — جزئیات در راهنمای این صفحه."
+      />
 
       {/* شناسه‌های واکشی */}
       <div className="rounded-2xl border border-teal-strong/30 bg-teal-soft/30 p-4.5 space-y-3">
         <h3 className="font-semibold flex items-center gap-2"><Fingerprint className="size-5 text-teal-strong" aria-hidden /> شروع با واکشی — سه شناسه</h3>
         <p className="text-xs text-muted-foreground leading-5">
-          <b>کد ملی کلید و مبنای شناسایی فرد است و اجباری:</b> هویت و اعضای خانوار از <b>ثبت احوال</b> و نشانی و موقعیت جغرافیایی از <b>پست</b> (از کد پستی) واکشی می‌شود؛
-          سپس سایر مراجع متولی (بیمه، املاک، آموزش‌وپرورش، علوم) نیز با همان کد ملی استعلام می‌شوند. داده واکشی‌شده <b>ملاک</b> است و در فرم فقط‌خواندنی می‌شود.
+          <b>کد ملی کلید استعلام همه مراجع است؛</b> هویت از ثبت احوال و نشانی از پست واکشی و <b>ملاک</b> می‌شود — شرح کامل در راهنمای این صفحه.
         </p>
         {fetched ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
@@ -497,7 +489,13 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="id-birth">تاریخ تولد سرپرست</Label>
-              <Input id="id-birth" dir="ltr" value={birth} onChange={(e) => setBirth(e.target.value)} placeholder="مثلاً ۱۳۶۲/۰۵/۱۲" />
+              <JalaliDatePicker
+                id="id-birth"
+                value={birth}
+                onChange={(v) => setBirth(v)}
+                placeholder="انتخاب تاریخ تولد (شمسی)"
+                ariaLabel="انتخاب تاریخ تولد سرپرست از تقویم شمسی"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="id-postal">کد پستی محل سکونت (۱۰ رقم)</Label>
@@ -579,8 +577,7 @@ function IdentityStep({ assessment }: { assessment: Assessment }) {
       <div className="rounded-2xl border bg-card p-4.5 space-y-3">
         <h3 className="font-semibold flex items-center gap-2"><Landmark className="size-5 text-teal-strong" aria-hidden /> استعلام سایر مراجع متولی با کد ملی</h3>
         <p className="text-xs text-muted-foreground leading-5">
-          با استفاده از کد ملی سرپرست، تا حد امکان اطلاعات مرتبط با پرسشنامه از سایر سازمان‌ها استعلام می‌شود.
-          نتیجه به‌صورت <b>«پیش‌تکمیل»</b> با حفظ منبع و تاریخ اعمال می‌شود — پیش‌تکمیل تأیید خودکار شرایط جاری نیست (قاعده مهاجرت داده).
+          نتیجه به‌صورت <b>«پیش‌تکمیل»</b> با حفظ منبع و تاریخ اعمال می‌شود — تأیید خودکار شرایط جاری نیست (شرح کامل در راهنمای این صفحه).
         </p>
         <div className="grid sm:grid-cols-2 gap-3">
           {OTHER_SERVICES.map((s) => {
@@ -701,14 +698,20 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
 
   return (
     <div className="space-y-5">
+      {/* راهنمای صفحه — توضیحات کامل (شامل ملاک‌های وب‌سرویس) در مودال */}
+      <PageHelpBar
+        stepKey="base"
+        icon={Info}
+        title="اطلاعات پایه و پرونده‌ای"
+        hint="شناخت خانوار بدون امتیاز مستقل — قواعد قفل ملاک وب‌سرویس‌ها و هزینه‌های مسکن در راهنمای این صفحه."
+      />
+
       <WebServicePanel assessment={assessment} />
 
       <div className="rounded-2xl border bg-card p-4">
         <h3 className="font-semibold mb-1 flex items-center gap-2"><Info className="size-5 text-teal-strong" aria-hidden /> اطلاعات پایه و پرونده‌ای</h3>
         <p className="text-xs text-muted-foreground mb-4 leading-5">
-          این اطلاعات «شناخت خانوار» است و <b>بدون امتیاز مستقل</b>؛ فقط برای اجرای منطق نمایش و مراجعه.
-          کد ملی، کد پستی و تاریخ تولد در گام ۱ ثبت و واکشی می‌شوند؛ سرپرست و فرد پاسخ‌گو دو نقش مستقل‌اند.
-          برای جلوگیری از پرسش تکراری، نوع محل سکونت و حق سکونت در گام «مسکن» (C1/C3) و تعداد اتاق/زیربنا در شاخص C4 ثبت می‌شود.
+          شناخت خانوار بدون امتیاز مستقل؛ سرپرست و پاسخ‌گو دو نقش مستقل‌اند — فیلدهای ملاک پس از واکشی قفل می‌شوند.
         </p>
         <div className="grid sm:grid-cols-2 gap-3">
           {field("responderName", "نام فرد پاسخ‌گو / مسئول پیگیری خانوار")}
@@ -748,8 +751,7 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
       <div className="rounded-2xl border bg-card p-4">
         <h3 className="font-semibold mb-1">هزینه‌های مسکن (داده‌های محاسبه C8)</h3>
         <p className="text-xs text-muted-foreground mb-3 leading-5">
-          وديعة جدا از هزینه ماهانه ثبت می‌شود و در محاسبه فشار هزینه مسکن لحاظ نمی‌گردد.
-          تعداد اتاق و زیربنا — که در تراکم (C4) امتیاز دارند — فقط در گام «مسکن» و شاخص C4 پرسیده می‌شوند و اینجا تکرار نمی‌شوند.
+          ودیعه جدا از اجاره ثبت و در فشار هزینه مسکن لحاظ نمی‌شود؛ اتاق/زیربنا فقط در گام «مسکن» (C4) پرسیده می‌شود.
         </p>
         <div className="grid sm:grid-cols-3 gap-3">
           {field("monthlyRent", "اجاره ماهانه (تومان)", { type: "number" })}

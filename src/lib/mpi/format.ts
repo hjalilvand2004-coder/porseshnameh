@@ -5,6 +5,12 @@ export function faNum(n: number | undefined | null, digits = 0): string {
   return n.toLocaleString("fa-IR", { maximumFractionDigits: digits, minimumFractionDigits: 0 });
 }
 
+/** تبدیل ارقام یک رشته (مثل تاریخ 1362/01/12) به ارقام فارسی */
+export function faStr(s: string | undefined | null): string {
+  if (!s) return "—";
+  return s.replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[Number(d)]);
+}
+
 export function faScore(n: number | undefined | null): string {
   if (n === undefined || n === null || Number.isNaN(n)) return "—";
   return n.toLocaleString("fa-IR", { maximumFractionDigits: 2 });
