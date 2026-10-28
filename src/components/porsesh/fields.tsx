@@ -315,7 +315,7 @@ const KIND_ICONS: Record<EvidenceKind, React.ElementType> = {
   other: Paperclip,
 };
 
-function EvidenceRecorder({ forKey, suggested, label, docs, assessmentId }: {
+export function EvidenceRecorder({ forKey, suggested, label, docs, assessmentId }: {
   forKey: string;
   suggested: EvidenceKind;
   label: string;

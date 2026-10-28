@@ -238,7 +238,8 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
       });
       setSummary({ aid, name: civilName, address: lastAddress, kind: kind as RegistrationKind, results });
       setPhase("done");
-    } catch {
+    } catch (e) {
+      console.error("REG-FAIL", e);
       setPhase("form");
       toast({ title: "خطا در ثبت‌نام", description: "دوباره تلاش کنید.", variant: "destructive" });
     }
@@ -325,8 +326,8 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                     id="reg-mobile" dir="ltr" inputMode="numeric" value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     placeholder="۰۹۱۲۳۴۵۶۷۸۹"
-                    aria-required="true" aria-invalid={showErr(mobile, !!mobErr)}
-                    className={cn(showErr(mobile, !!mobErr) && "border-destructive focus-visible:ring-destructive/30")}
+                    aria-required="true" aria-invalid={showErr(mobile, !mobErr)}
+                    className={cn(showErr(mobile, !mobErr) && "border-destructive focus-visible:ring-destructive/30")}
                   />
                   {(attempted || mobile.length > 0) && mobErr && <p className="text-[11px] text-destructive leading-4" role="alert">{mobErr}</p>}
                 </div>
@@ -336,8 +337,8 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                     id="reg-birth" dir="ltr" value={birth}
                     onChange={(e) => setBirth(e.target.value)}
                     placeholder="۱۳۶۲/۰۵/۱۲ (شمسی)"
-                    aria-required="true" aria-invalid={showErr(birth, !!birthErr)}
-                    className={cn(showErr(birth, !!birthErr) && "border-destructive focus-visible:ring-destructive/30")}
+                    aria-required="true" aria-invalid={showErr(birth, !birthErr)}
+                    className={cn(showErr(birth, !birthErr) && "border-destructive focus-visible:ring-destructive/30")}
                   />
                   {(attempted || birth.length > 0) && birthErr && <p className="text-[11px] text-destructive leading-4" role="alert">{birthErr}</p>}
                 </div>
@@ -364,8 +365,8 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                         id="reg-pw" dir="ltr" type={showPw ? "text" : "password"} value={pw}
                         onChange={(e) => setPw(e.target.value)}
                         placeholder="۶ کاراکتر — حروف انگلیسی و عدد"
-                        aria-required="true" aria-invalid={showErr(pw, !!pwErr)}
-                        className={cn("pe-9", showErr(pw, !!pwErr) && "border-destructive focus-visible:ring-destructive/30")}
+                        aria-required="true" aria-invalid={showErr(pw, !pwErr)}
+                        className={cn("pe-9", showErr(pw, !pwErr) && "border-destructive focus-visible:ring-destructive/30")}
                       />
                       <button
                         type="button" onClick={() => setShowPw((v) => !v)}
@@ -383,8 +384,8 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                       id="reg-pw2" dir="ltr" type={showPw ? "text" : "password"} value={pw2}
                       onChange={(e) => setPw2(e.target.value)}
                       placeholder="تکرار همان رمز"
-                      aria-required="true" aria-invalid={showErr(pw2, !!pw2Err)}
-                      className={cn(showErr(pw2, !!pw2Err) && "border-destructive focus-visible:ring-destructive/30")}
+                      aria-required="true" aria-invalid={showErr(pw2, !pw2Err)}
+                      className={cn(showErr(pw2, !pw2Err) && "border-destructive focus-visible:ring-destructive/30")}
                     />
                     {(attempted || pw2.length > 0) && pw2Err && <p className="text-[11px] text-destructive leading-4" role="alert">{pw2Err}</p>}
                     {pw2.length > 0 && pw2 === pw && <p className="text-[11px] text-emerald-700 flex items-center gap-1"><CircleCheck className="size-3.5" aria-hidden /> تکرار درست است.</p>}

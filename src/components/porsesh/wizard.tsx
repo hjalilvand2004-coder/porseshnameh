@@ -3,15 +3,13 @@
 import { useMemo, useState } from "react";
 import { usePorsesh } from "@/lib/store";
 import { STEPS, groupsOfStep, QUESTION_GROUPS, REQUEST_TYPES, type Question, type QuestionGroup } from "@/lib/mpi/questions";
-import type { Assessment, Member, WebServiceResult, EvidenceDoc } from "@/lib/mpi/types";
-import { indicatorLegacyBadge } from "@/lib/mpi/legacy-map";
-import { WEIGHTS } from "@/lib/mpi/rules";
-import type { IndicatorId } from "@/lib/mpi/types";
+import type { Assessment, Member, WebServiceResult, EvidenceDoc, IndicatorId } from "@/lib/mpi/types";
 import { simulateServiceFetch } from "@/lib/mpi/web-services";
 import { isValidIranianNationalId, isValidPostalCode, nationalIdError, normalizeDigits } from "@/lib/mpi/national-id";
 import { SectionGuideDialog, IndicatorGuideButton } from "@/components/porsesh/section-guide";
 import { IndicatorCharterButton } from "@/components/porsesh/charter-modal";
 import { QuestionField } from "@/components/porsesh/fields";
+import { MemberAttributionCard, LegacyBadge, WeightBadge, MATRIX_CFG } from "@/components/porsesh/member-matrix";
 import { MemberManager, IncomeEditor } from "@/components/porsesh/editors";
 import { FlagsDialog, FlagsList } from "@/components/porsesh/flags";
 import { QualityPanel, ReferralPanel, ResultCard } from "@/components/porsesh/dashboard";
@@ -23,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { faNum, faPct, faDateTime } from "@/lib/mpi/format";
-import { CircleCheck, ChevronLeft, ChevronRight, History, Info, Lock, Siren, Save, CheckCircle2, Loader2, RefreshCw, Landmark, Fingerprint, MapPin, HeartPulse, Building2, BookOpenCheck, GraduationCap, ClipboardList, FileBadge2, ShieldCheck, UserCheck, Handshake, Trash2 } from "lucide-react";
+import { CircleCheck, ChevronLeft, ChevronRight, Info, Lock, Siren, Save, CheckCircle2, Loader2, RefreshCw, Landmark, Fingerprint, MapPin, HeartPulse, Building2, BookOpenCheck, GraduationCap, ClipboardList, FileBadge2, ShieldCheck, UserCheck, Handshake, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
@@ -237,26 +235,6 @@ function FinishButton({ assessment }: { assessment: Assessment }) {
       <CircleCheck className="size-4" aria-hidden /> ثبت نهایی پرسشنامه
     </Button>
   );
-}
-
-/* برچسب میراث نسخه قبلی — نشان می‌دهد این شاخص از کدام فیلد پرسشنامه قبلی آمده و با چه اقدامی */
-function LegacyBadge({ id }: { id: IndicatorId }) {
-  const lg = indicatorLegacyBadge(id);
-  return (
-    <span
-      title={lg.title}
-      aria-label={`منبع نسخه قبلی: ${lg.old}`}
-      className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] cursor-help select-none whitespace-nowrap", lg.className)}
-    >
-      <History className="size-3" aria-hidden /> {lg.short}
-    </span>
-  );
-}
-
-/* وزن شاخص */
-function WeightBadge({ id }: { id: IndicatorId }) {
-  const w = WEIGHTS[id];
-  return <Badge variant="outline" className="text-[10px] whitespace-nowrap" title="وزن رسمی این شاخص در امتیاز کل ۱۰۰۰">وزن {faNum(w)}</Badge>;
 }
 
 /* ---------------- بدنه هر گام ---------------- */
@@ -788,6 +766,10 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
 }
 
 /* گام‌های ۴ تا ۸ — شاخص‌ها */
+
+/** گروه‌های عضومحور که با «ماتریس انتساب اعضا» رندر می‌شوند — هر شاخص فقط یک‌بار پرسیده می‌شود (رفع پرسش تکراری) */
+const MEMBER_MATRIX_KEYS = new Set(["A1", "A2", "A3", "A5", "A_nutrition", "B1", "B2", "B6"]);
+
 function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Assessment }) {
   const groups = groupsOfStep(stepKey);
   const setAnswer = usePorsesh((s) => s.setAnswer);
@@ -824,6 +806,10 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
       )}
 
       {groups.map((g) => {
+        /* گروه‌های عضومحور: یک کارت به‌ازای شاخص + ماتریس «کدام اعضا؟» — به‌جای کارت تکراری به‌ازای هر عضو */
+        if (g.loop && MEMBER_MATRIX_KEYS.has(g.key)) {
+          return <MemberAttributionCard key={g.key} g={g} assessment={assessment} cfg={MATRIX_CFG[g.key]} />;
+        }
         const rel = membersFor(g);
         return (
           <div key={g.key} className="space-y-3">
@@ -838,9 +824,6 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
               <p className="text-sm rounded-xl border bg-muted/40 p-3.5 leading-6">
                 <b>{g.title}:</b> عضو در سن آموزش اجباری ثبت نشده است — این شاخص به‌طور صحیح صفر محاسبه می‌شود.
               </p>
-            )}
-            {rel.length === 0 && g.loop && (!g.memberFilter || g.memberFilter === "all") && assessment.members.length > 0 && (
-              <p className="text-sm rounded-xl border bg-muted/40 p-3.5 leading-6">—</p>
             )}
 
             {rel.map((m) => (
@@ -986,6 +969,9 @@ function DocumentsSummary({ assessment }: { assessment: Assessment }) {
   };
   const qTitle = (key: string) => {
     const qid = key.split("#")[0].split("__")[0];
+    /* کلید مدرک می‌تواند کلید گروه شاخص (مثلاً A1) یا شناسه پرسش (مثلاً A1_disease) باشد */
+    const grp = QUESTION_GROUPS.find((g) => g.key === qid);
+    if (grp) return grp.title;
     for (const g of QUESTION_GROUPS) {
       const q = g.questions.find((x) => x.id === qid);
       if (q) return q.title;
