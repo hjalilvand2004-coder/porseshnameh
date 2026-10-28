@@ -44,7 +44,7 @@ export function PageHelpDialog({ stepKey, trigger }: { stepKey: PageHelpKey; tri
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
         {stepKey === "identity" ? <IdentityHelp /> : <BaseHelp />}
       </DialogContent>
     </Dialog>

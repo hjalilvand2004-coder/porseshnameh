@@ -9,8 +9,12 @@ import { faDateTime, faNum } from "@/lib/mpi/format";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger,
+} from "@/components/ui/dialog";
+import {
   Fingerprint, MapPin, HeartPulse, Building2, GraduationCap, BookOpenCheck,
   Landmark, Lock, RefreshCw, Loader2, CircleCheck, CircleAlert, CircleMinus, Info,
+  Satellite, ChevronLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
@@ -68,6 +72,20 @@ export function DataPriorityLegend({ className }: { className?: string }) {
     </div>
   );
 }
+
+const STATUS_LABEL: Record<string, string> = {
+  ok: "دریافت شد — ملاک",
+  partial: "دریافت جزئی",
+  error: "استعلام ناموفق",
+  none: "بدون استعلام",
+};
+
+const STATUS_DOT: Record<string, string> = {
+  ok: "bg-emerald-600",
+  partial: "bg-amber-500",
+  error: "bg-red-500",
+  none: "bg-muted-foreground/30",
+};
 
 function StatusBadge({ status }: { status: "ok" | "partial" | "error" | "pending" }) {
   if (status === "ok") return <Badge className="gap-1 bg-emerald-600 text-white"><CircleCheck className="size-3.5" aria-hidden /> دریافت شد — ملاک</Badge>;
@@ -184,5 +202,74 @@ export function WebServicePanel({ assessment }: { assessment: Assessment }) {
         {WEB_SERVICES.map((s) => <ServiceCard key={s.id} service={s} assessment={assessment} />)}
       </div>
     </section>
+  );
+}
+
+/**
+ * نوار فشرده «آخرین وضعیت واکشی سرویس‌ها» — جای پنل بلند روی فرم گام ۳.
+ *
+ * کل پنل استعلام (مقدمه + کارت هر ۷ مرجع با استعلام مجدد / بازگرداندن به حالت دستی)
+ * به یک مودال منتقل شده است؛ روی فرم فقط یک خط خلاصه با نقطه‌های وضعیت هر سرویس می‌ماند.
+ */
+export function WebServiceStatusStrip({ assessment }: { assessment: Assessment }) {
+  const ws = assessment.webServices ?? {};
+  const okCount = WEB_SERVICES.filter((s) => ws[s.id]?.status === "ok").length;
+  const partialCount = WEB_SERVICES.filter((s) => ws[s.id]?.status === "partial").length;
+  const errCount = WEB_SERVICES.filter((s) => ws[s.id]?.status === "error").length;
+  const total = WEB_SERVICES.length;
+  const hasAny = okCount + partialCount > 0;
+
+  const summary = hasAny
+    ? `${faNum(okCount + partialCount)} از ${faNum(total)} مرجع داده ملاک ارسال کرد${errCount > 0 ? ` • ${faNum(errCount)} استعلام ناموفق` : ""}`
+    : "هنوز استعلامی انجام نشده — برای واکشی داده ملاک، مودال را باز کنید";
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          aria-label="آخرین وضعیت واکشی سرویس‌ها — باز کردن مودال استعلام از مراجع ثبتی"
+          className="w-full rounded-2xl border bg-card p-3.5 flex items-center gap-3 flex-wrap text-start cursor-pointer hover:border-teal-strong/40 hover:bg-teal-soft/20 transition-colors"
+        >
+          <span className="grid place-items-center size-9 rounded-xl bg-teal-soft text-teal-strong shrink-0">
+            <Satellite className="size-5" aria-hidden />
+          </span>
+          <span className="min-w-40 flex-1">
+            <span className="block text-sm font-bold">وضعیت واکشی از مراجع ثبتی</span>
+            <span className="block text-xs text-muted-foreground leading-5 mt-0.5">{summary}</span>
+          </span>
+          {/* نقطه‌های وضعیت هر ۷ مرجع */}
+          <span className="flex items-center gap-1.5" aria-hidden>
+            {WEB_SERVICES.map((s) => {
+              const st = ws[s.id]?.status ?? "none";
+              return (
+                <span
+                  key={s.id}
+                  title={`${s.name} — ${STATUS_LABEL[st]}`}
+                  className={cn(
+                    "size-2.5 rounded-full",
+                    STATUS_DOT[st],
+                    st === "ok" && "ring-2 ring-emerald-600/20",
+                  )}
+                />
+              );
+            })}
+          </span>
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-teal-strong shrink-0">
+            آخرین وضعیت واکشی سرویس‌ها
+            <ChevronLeft className="size-4" aria-hidden />
+          </span>
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader className="sr-only">
+          <DialogTitle>وضعیت واکشی از مراجع ثبتی</DialogTitle>
+          <DialogDescription>
+            نتایج استعلام از وب‌سرویس سازمان‌های متولی، با امکان استعلام مجدد یا بازگرداندن فیلد به حالت دستی.
+          </DialogDescription>
+        </DialogHeader>
+        <WebServicePanel assessment={assessment} />
+      </DialogContent>
+    </Dialog>
   );
 }

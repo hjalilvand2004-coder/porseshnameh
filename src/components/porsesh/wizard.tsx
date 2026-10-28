@@ -13,7 +13,7 @@ import { MemberAttributionCard, LegacyBadge, WeightBadge, MATRIX_CFG } from "@/c
 import { MemberManager, IncomeEditor } from "@/components/porsesh/editors";
 import { FlagsDialog, FlagsList } from "@/components/porsesh/flags";
 import { QualityPanel, ReferralPanel, ResultCard } from "@/components/porsesh/dashboard";
-import { WebServicePanel } from "@/components/porsesh/web-services";
+import { WebServiceStatusStrip } from "@/components/porsesh/web-services";
 import { PageHelpBar } from "@/components/porsesh/page-help";
 import { JalaliDatePicker } from "@/components/porsesh/jalali-date-picker";
 import { Input } from "@/components/ui/input";
@@ -706,7 +706,8 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
         hint="شناخت خانوار بدون امتیاز مستقل — قواعد قفل ملاک وب‌سرویس‌ها و هزینه‌های مسکن در راهنمای این صفحه."
       />
 
-      <WebServicePanel assessment={assessment} />
+      {/* استعلام مراجع ثبتی — پنل کامل در مودال «آخرین وضعیت واکشی سرویس‌ها» */}
+      <WebServiceStatusStrip assessment={assessment} />
 
       <div className="rounded-2xl border bg-card p-4">
         <h3 className="font-semibold mb-1 flex items-center gap-2"><Info className="size-5 text-teal-strong" aria-hidden /> اطلاعات پایه و پرونده‌ای</h3>
