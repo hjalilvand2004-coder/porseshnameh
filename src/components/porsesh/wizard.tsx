@@ -10,7 +10,7 @@ import { SectionGuideDialog, IndicatorGuideButton } from "@/components/porsesh/s
 import { IndicatorCharterButton } from "@/components/porsesh/charter-modal";
 import { QuestionField } from "@/components/porsesh/fields";
 import { MemberAttributionCard, LegacyBadge, WeightBadge, MATRIX_CFG } from "@/components/porsesh/member-matrix";
-import { MemberManager, IncomeEditor } from "@/components/porsesh/editors";
+import { MemberManager, IncomeEditor, HousingCostFields } from "@/components/porsesh/editors";
 import { FlagsDialog, FlagsList } from "@/components/porsesh/flags";
 import { QualityPanel, ReferralPanel, ResultCard } from "@/components/porsesh/dashboard";
 import { WebServiceStatusStrip } from "@/components/porsesh/web-services";
@@ -703,7 +703,7 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
         stepKey="base"
         icon={Info}
         title="اطلاعات پایه و پرونده‌ای"
-        hint="شناخت خانوار بدون امتیاز مستقل — قواعد قفل ملاک وب‌سرویس‌ها و هزینه‌های مسکن در راهنمای این صفحه."
+        hint="شناخت خانوار بدون امتیاز مستقل — قواعد قفل ملاک وب‌سرویس‌ها در راهنمای این صفحه؛ هزینه‌های مسکن در گام «مسکن» (C8) گرفته می‌شود."
       />
 
       {/* استعلام مراجع ثبتی — پنل کامل در مودال «آخرین وضعیت واکشی سرویس‌ها» */}
@@ -750,16 +750,11 @@ function BaseStep({ assessment }: { assessment: Assessment }) {
       <MemberManager assessment={assessment} />
 
       <div className="rounded-2xl border bg-card p-4">
-        <h3 className="font-semibold mb-1">هزینه‌های مسکن (داده‌های محاسبه C8)</h3>
+        <h3 className="font-semibold mb-1">زمینه پرونده و سابقه خدمات</h3>
         <p className="text-xs text-muted-foreground mb-3 leading-5">
-          ودیعه جدا از اجاره ثبت و در فشار هزینه مسکن لحاظ نمی‌شود؛ اتاق/زیربنا فقط در گام «مسکن» (C4) پرسیده می‌شود.
+          شروع دوره حمایت و خدمات حمایتی قبلی — داده زمینه‌ای برای پیگیری مددکاری؛ هزینه‌های ماهانه مسکن (اجاره، ودیعه، شارژ، قبوض، معوقه) به گام «مسکن» (C8) منتقل شده و متناسب با نوع تصرف گرفته می‌شود.
         </p>
-        <div className="grid sm:grid-cols-3 gap-3">
-          {field("monthlyRent", "اجاره ماهانه (تومان)", { type: "number" })}
-          {field("deposit", "ودیعه (تومان) — جدا از اجاره", { type: "number" })}
-          {field("monthlyCharge", "شارژ ماهانه (تومان)", { type: "number" })}
-          {field("monthlyBills", "میانگین قبوض ماهانه (تومان)", { type: "number" })}
-          {field("arrears", "مجموع معوقه (تومان)", { type: "number" })}
+        <div className="grid sm:grid-cols-2 gap-3">
           {field("supportSince", "شروع دوره حمایت (اختیاری)", { placeholder: "مثلاً ۱۴۰۲" })}
           {field("priorServices", "خدمات/برنامه‌های حمایتی قبلی", { placeholder: "مثلاً اکرام، تغذیه، شهریه ..." })}
         </div>
@@ -874,6 +869,8 @@ function ScoredStep({ stepKey, assessment }: { stepKey: string; assessment: Asse
                     نوع محل سکونت ثبت‌شده (اطلاعات پایه): <b className="text-foreground">{h.dwellingType}</b> — این شاخص فقط پایداری و تهدید محل خواب را می‌سنجد و پرسش جداگانه‌ای درباره نوع سکونت ندارد.
                   </p>
                 )}
+                {/* هزینه‌های مسکن — فیلدهای C8 متناسب با نوع تصرف (از اطلاعات پایه به این گام منتقل شد) */}
+                {g.indicator === "C8" && <HousingCostFields assessment={assessment} />}
                 {g.indicator === "C3" && h.tenureType && (
                   <p className="text-[11px] text-muted-foreground bg-muted/40 border rounded-lg px-3 py-2 leading-5">
                     نوع تصرف ثبت‌شده: <b className="text-foreground">{h.tenureType}</b>

@@ -41,7 +41,8 @@ function emptyAssessment(): Assessment {
 
 function member(a: Assessment, m: Partial<Assessment["members"][number]> & { firstName: string; relation: string }): string {
   const id = uid("m");
-  a.members.push({ id, ...m } as Assessment["members"][number]);
+  /* خانوارهای نمونه از منظر سابقه ثبتی «عضو خانوار ثبت‌شده»اند؛ همسفره با memberType: "companion" صریح می‌شود */
+  a.members.push({ id, memberType: "registry", ...m } as Assessment["members"][number]);
   return id;
 }
 

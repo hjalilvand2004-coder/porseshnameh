@@ -27,12 +27,24 @@ export type AnswerValue = string | string[] | number | boolean | null | undefine
 export type Answers = Record<string, AnswerValue>;
 /** کلید پاسخ سطح عضو: `${questionId}#${memberId}` */
 
+/** نوع اثبات‌شده عضو: واکشی ثبت احوال (ملاک) یا همسفره اعلامی — پیش‌فرض: همسفره */
+export function memberRegistryType(m: Pick<Member, "fromRegistry" | "memberType">): "registry" | "companion" {
+  return m.fromRegistry || m.memberType === "registry" ? "registry" : "companion";
+}
+
 export interface Member {
   id: string;
   firstName: string;
   lastName?: string;
   /** عضو از واکشی ثبت احوال ایجاد شده (پیش‌تکمیل با حفظ منبع — قابل ویرایش برای شرایط جاری) */
   fromRegistry?: boolean;
+  /**
+   * نوع عضو از نگاه سابقه ثبتی:
+   * «registry» = عضو خانوار — ثبت‌شده در سابقه ثبتی ثبت احوال؛
+   * «companion» = همسفره — همراهِ ساکن با خانوار که در سابقه ثبتی ثبت نشده است.
+   * برای اعضای واکشی‌شده، fromRegistry مبناست و این فیلد صرفاً تکرار همان نوع است.
+   */
+  memberType?: "registry" | "companion";
   /** اختیاری — نبود مدرک موجب رد درخواست نمی‌شود */
   nationalId?: string;
   nationalIdStatus?: "has" | "missing" | "in_progress";

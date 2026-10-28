@@ -505,7 +505,7 @@ export const QUESTION_GROUPS: QuestionGroup[] = [
     key: "C8", title: "هزینه مسکن", indicator: "C8",
     questions: [
       { id: "C8_arrears_severity", title: "وضعیت معوقات اجاره/شارژ/قبوض چیست؟", type: "single", level: "household", indicator: "C8", dimension: "C", scored: true,
-        help: "مبلغ معوقه در اطلاعات پایه ثبت می‌شود. ودیعه جداگانه ثبت می‌شود و در هزینه ماهانه محاسبه نمی‌شود.",
+        help: "مبلغ معوقه در کارت «داده‌های هزینه مسکن» همین شاخص ثبت می‌شود. ودیعه جداگانه ثبت می‌شود و در هزینه ماهانه محاسبه نمی‌شود.",
         followUp: { trigger: ["minor", "significant"], title: "مستندسازی معوقات", evidence: { suggested: "administrative", label: "مدرک مثبت (اخطار پرداخت، صورت‌حساب، قبض)" } },
         options: [
           { value: "none", label: "معوقه نداریم" },
