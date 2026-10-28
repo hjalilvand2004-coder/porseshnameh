@@ -92,7 +92,12 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
     results: { name: string; status: string }[];
   } | null>(null);
 
-  const showErr = (v: string, valid: boolean) => attempted && !valid;
+  /**
+   * آیا پس از تلاش برای ثبت، این ورودی هنوز نامعتبر است؟
+   * ورودی تابع «خودِ خطا» است: رشته خطا (نامعتبر) یا null/true→نامعتبر/false→معتبر؛
+   * این امضا احتمال واروده‌شدن قطبی را صفر می‌کند — قرمز فقط وقتی که واقعاً خطا هست.
+   */
+  const showErr = (invalid: string | boolean | null | undefined) => attempted && !!invalid;
 
   /* کد ملی نرمال‌شده — برای نمایش در فاز خلاصه و استفاده در ثبت */
   const nidNorm = normalizeDigits(nid);
@@ -106,6 +111,17 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
   const pw2Err = pw2.length > 0 && pw2 !== pw ? "تکرار رمز عبور با رمز عبور یکسان نیست." : pw2.length === 0 ? "تکرار رمز عبور اجباری است." : null;
   const kindOk = kind !== "none";
   const formValid = !nidErr && !mobErr && !birthErr && postalOk && !pwErr && !pw2Err && kindOk && agreed;
+
+  /* فهرست واقعی موارد بازِ مانعِ ثبت — به‌جای سرزنش ثابت کد ملی */
+  const blockers: string[] = [];
+  if (nidErr) blockers.push("کد ملی معتبر (۱۰ رقم با رقم کنترل درست)");
+  if (mobErr) blockers.push("شماره موبایل (۰۹ + ۹ رقم)");
+  if (birthErr) blockers.push("تاریخ تولد شمسی");
+  if (!postalOk) blockers.push("کد پستی ۱۰ رقمی");
+  if (pwErr) blockers.push("رمز عبور (۶ کاراکتر حرف + عدد)");
+  if (pw2Err) blockers.push("تکرار رمز عبور");
+  if (!kindOk) blockers.push("انتخاب نوع درخواست");
+  if (!agreed) blockers.push("پذیرش توافقنامه دسترسی بانکی");
 
   const reset = () => {
     setPhase("form"); setNid(""); setMobile(""); setBirth(""); setPostal("");
@@ -314,8 +330,8 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                     id="reg-nid" dir="ltr" inputMode="numeric" value={nid}
                     onChange={(e) => setNid(e.target.value)}
                     placeholder="۱۰ رقم — مبنای استعلام همه سرویس‌ها"
-                    aria-required="true" aria-invalid={showErr(nid, !nidErr)}
-                    className={cn(showErr(nid, !nidErr) && "border-destructive focus-visible:ring-destructive/30")}
+                    aria-required="true" aria-invalid={showErr(nidErr)}
+                    className={cn(showErr(nidErr) && "border-destructive focus-visible:ring-destructive/30")}
                   />
                   {(attempted || nid.length > 0) && nidErr && <p className="text-[11px] text-destructive leading-4" role="alert">{nidErr}</p>}
                   {isValidIranianNationalId(nid) && <p className="text-[11px] text-emerald-700 flex items-center gap-1"><CircleCheck className="size-3.5" aria-hidden /> کد ملی معتبر است.</p>}
@@ -326,8 +342,8 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                     id="reg-mobile" dir="ltr" inputMode="numeric" value={mobile}
                     onChange={(e) => setMobile(e.target.value)}
                     placeholder="۰۹۱۲۳۴۵۶۷۸۹"
-                    aria-required="true" aria-invalid={showErr(mobile, !mobErr)}
-                    className={cn(showErr(mobile, !mobErr) && "border-destructive focus-visible:ring-destructive/30")}
+                    aria-required="true" aria-invalid={showErr(mobErr)}
+                    className={cn(showErr(mobErr) && "border-destructive focus-visible:ring-destructive/30")}
                   />
                   {(attempted || mobile.length > 0) && mobErr && <p className="text-[11px] text-destructive leading-4" role="alert">{mobErr}</p>}
                 </div>
@@ -337,8 +353,8 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                     id="reg-birth" dir="ltr" value={birth}
                     onChange={(e) => setBirth(e.target.value)}
                     placeholder="۱۳۶۲/۰۵/۱۲ (شمسی)"
-                    aria-required="true" aria-invalid={showErr(birth, !birthErr)}
-                    className={cn(showErr(birth, !birthErr) && "border-destructive focus-visible:ring-destructive/30")}
+                    aria-required="true" aria-invalid={showErr(birthErr)}
+                    className={cn(showErr(birthErr) && "border-destructive focus-visible:ring-destructive/30")}
                   />
                   {(attempted || birth.length > 0) && birthErr && <p className="text-[11px] text-destructive leading-4" role="alert">{birthErr}</p>}
                 </div>
@@ -348,10 +364,11 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                     id="reg-postal" dir="ltr" inputMode="numeric" value={postal}
                     onChange={(e) => setPostal(e.target.value)}
                     placeholder="۱۰ رقم — برای واکشی نشانی از پست"
-                    aria-required="true" aria-invalid={showErr(postal, !postalOk)}
-                    className={cn(showErr(postal, !postalOk) && "border-destructive focus-visible:ring-destructive/30")}
+                    aria-required="true" aria-invalid={showErr(!postalOk)}
+                    className={cn(showErr(!postalOk) && "border-destructive focus-visible:ring-destructive/30")}
                   />
                   {postal.length > 0 && !postalOk && <p className="text-[11px] text-destructive leading-4" role="alert">کد پستی باید ۱۰ رقم باشد.</p>}
+                  {postalOk && <p className="text-[11px] text-emerald-700 flex items-center gap-1"><CircleCheck className="size-3.5" aria-hidden /> کد پستی معتبر است.</p>}
                 </div>
               </div>
 
@@ -365,8 +382,8 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                         id="reg-pw" dir="ltr" type={showPw ? "text" : "password"} value={pw}
                         onChange={(e) => setPw(e.target.value)}
                         placeholder="۶ کاراکتر — حروف انگلیسی و عدد"
-                        aria-required="true" aria-invalid={showErr(pw, !pwErr)}
-                        className={cn("pe-9", showErr(pw, !pwErr) && "border-destructive focus-visible:ring-destructive/30")}
+                        aria-required="true" aria-invalid={showErr(pwErr)}
+                        className={cn("pe-9", showErr(pwErr) && "border-destructive focus-visible:ring-destructive/30")}
                       />
                       <button
                         type="button" onClick={() => setShowPw((v) => !v)}
@@ -384,8 +401,8 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
                       id="reg-pw2" dir="ltr" type={showPw ? "text" : "password"} value={pw2}
                       onChange={(e) => setPw2(e.target.value)}
                       placeholder="تکرار همان رمز"
-                      aria-required="true" aria-invalid={showErr(pw2, !pw2Err)}
-                      className={cn(showErr(pw2, !pw2Err) && "border-destructive focus-visible:ring-destructive/30")}
+                      aria-required="true" aria-invalid={showErr(pw2Err)}
+                      className={cn(showErr(pw2Err) && "border-destructive focus-visible:ring-destructive/30")}
                     />
                     {(attempted || pw2.length > 0) && pw2Err && <p className="text-[11px] text-destructive leading-4" role="alert">{pw2Err}</p>}
                     {pw2.length > 0 && pw2 === pw && <p className="text-[11px] text-emerald-700 flex items-center gap-1"><CircleCheck className="size-3.5" aria-hidden /> تکرار درست است.</p>}
@@ -454,9 +471,12 @@ export function RegistrationModal({ children }: { children: React.ReactNode }) {
               </div>
 
               {attempted && !formValid && (
-                <p className="text-xs text-destructive rounded-lg border border-destructive/30 bg-red-50 px-3 py-2 leading-5" role="alert">
-                  ثبت‌نام تا رفع موارد قرمز بالا انجام نمی‌شود — کد ملی کلید اجباری سامانه است.
-                </p>
+                <div className="text-xs text-destructive rounded-lg border border-destructive/30 bg-red-50 px-3 py-2 leading-5 space-y-1" role="alert">
+                  <p className="font-semibold">ثبت‌نام تا رفع موارد قرمز بالا انجام نمی‌شود — موارد باقی‌مانده:</p>
+                  <ul className="list-disc ps-5 space-y-0.5">
+                    {blockers.map((b) => <li key={b}>{b}</li>)}
+                  </ul>
+                </div>
               )}
 
               <Button className="w-full min-h-11" onClick={submit}>
