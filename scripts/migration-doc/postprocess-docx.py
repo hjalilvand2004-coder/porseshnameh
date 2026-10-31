@@ -2,7 +2,7 @@
 """پس‌پردازش docx: پچ instrText فوتر (PAGE → PAGE \\* arabic) + حذف <w:pgNumType/> خالی بخش جلد"""
 import re, shutil, sys, zipfile, pathlib
 
-DOC = pathlib.Path("/home/z/my-project/download/porseshnameh-migration-doc-v1.0.docx")
+DOC = pathlib.Path("/home/z/my-project/download/porseshnameh-migration-doc-v2.0.docx")
 TMP = DOC.with_suffix(".tmp.docx")
 
 with zipfile.ZipFile(DOC) as zin, zipfile.ZipFile(TMP, "w", zipfile.ZIP_DEFLATED) as zout:

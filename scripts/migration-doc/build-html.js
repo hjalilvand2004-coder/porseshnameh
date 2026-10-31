@@ -3,9 +3,9 @@
 "use strict";
 const fs = require("fs");
 const path = require("path");
-const { DIMENSIONS, INDICATORS, ACTION_META, STEPS, SERVICES, DATA_PRIORITY, VERSIONS } = require("./data.js");
-const { META, DOC_INFO_TABLE, EXEC_SUMMARY, CH1, CH2 } = require("./content.js");
-const { CH3, CH4, APPX } = require("./content2.js");
+const { SERVICES, DATA_PRIORITY } = require("./data.js");
+const { META, DOC_INFO_TABLE, EXEC, CH1, CH2 } = require("./content-v2.js");
+const { CH3, CH4, APPX, SVC_DETAIL, SVC_CARD_ROWS } = require("./content-v2b.js");
 
 const OUT_DIR = path.join(__dirname, "out");
 const FONT_DIR = path.join(__dirname, "fonts");
@@ -51,47 +51,25 @@ function renderTable(tbl) {
     `<table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
-function renderDimTables() {
-  let out = "";
-  let n = 8;
-  for (const d of DIMENSIONS) {
-    const ids = Object.keys(INDICATORS).filter((k) => INDICATORS[k].dim === d.id);
-    const rows = ids.map((k) => {
-      const it = INDICATORS[k];
-      return [k, `${it.title} — وزن ${it.w}`, it.old.join(" | "), ACTION_META[it.action].short, it.note];
-    });
-    out += renderTable({
-      caption: `جدول ${n} — نگاشت بُعد ${d.id} (${d.title})`,
-      headers: ["شاخص", "عنوان و وزن", "فیلد(های) نسخه قبلی", "اقدام", "خلاصه تغییر"],
-      widths: [7, 21, 27, 9, 36],
-      rows, small: true,
-    });
-    n += 1;
-  }
-  return out;
-}
-
-function renderSvcTables() {
+function renderSvcCards() {
   let out = "";
   SERVICES.forEach((s, i) => {
-    const kv = [
-      ["متولی", s.org],
-      ["هدف از استعلام", s.goal],
-      ["داده‌های ارائه‌شده", s.provides.join("؛ ")],
-      ["شاخص‌های تغذیه‌شده", s.feeds.join("، ")],
-      ["دامنه داده", s.scope],
-      ["فیلدهای ملاک قفل‌شونده", Array.isArray(s.locked) ? s.locked.join("؛ ") : s.locked],
-    ];
-    out += `<h2 id="svc-${i}">الف-${faNum(i + 1)} — ${esc(s.name)}</h2>`;
-    out += renderTable({ caption: `شناسنامه سرویس ${faNum(i + 1)} از ۸ — ${s.name}`, headers: ["مشخصه", "شرح"], widths: [26, 74], rows: kv });
-    out += `<div class="note"><div class="note-title">رفتار خطا و وضعیت‌های استعلام</div><p>${bold(s.error)}</p></div>`;
+    const fa = faNum(i + 1);
+    const id = mark(2, `الف-${fa} — ${s.name}`);
+    out += `<h2 id="anch-${id}">الف-${fa} — ${esc(s.name)}</h2>`;
+    const d = SVC_DETAIL[s.id];
+    const rows = SVC_CARD_ROWS.map(([label, fn]) => [label, fn(s, d)]);
+    out += renderTable({
+      caption: `جدول ${faNum(15 + i)} — شناسنامه سرویس ${fa} از ۸ — ${s.name}`,
+      headers: ["مشخصه", "شرح"], widths: [26, 74], rows,
+    });
   });
   return out;
 }
 
 function renderPrioTable() {
   return renderTable({
-    caption: "جدول ۱۶ — تقدم پنج‌سطحی منابع داده",
+    caption: "جدول ۲۳ — تقدم پنج‌سطحی منابع داده",
     headers: ["تقدم", "منبع", "شرح"],
     widths: [10, 30, 60],
     rows: DATA_PRIORITY.map((p) => [p.rank, p.source, p.desc]),
@@ -120,10 +98,12 @@ function renderBlocks(blocks) {
       out += `<div class="note"><div class="note-title">${esc(b.title)}</div><p>${bold(b.text)}</p></div>`;
     } else if (b.t === "table") {
       out += renderTable(b);
-    } else if (b.t === "dimTables") {
-      out += renderDimTables();
-    } else if (b.t === "svcTables") {
-      out += renderSvcTables();
+    } else if (b.t === "chain") {
+      out += `<div class="chain">` + b.items.map((x, i) =>
+        `<span class="chip">${esc(x)}</span>` + (i < b.items.length - 1 ? `<span class="arr">←</span>` : "")
+      ).join("") + `</div>`;
+    } else if (b.t === "svcCards") {
+      out += renderSvcCards();
     } else if (b.t === "prioTable") {
       out += renderPrioTable();
     }
@@ -131,20 +111,9 @@ function renderBlocks(blocks) {
   return out;
 }
 
-// ---------- پرکردن جدول‌های placeholder ----------
-const STEPS_TBL = { ...CH1.find((b) => b.t === "table" && b.caption.startsWith("جدول ۴")) };
-STEPS_TBL.rows = STEPS.map((s) => [s.n, s.title, s.scored, s.desc]);
-const CH1F = CH1.map((b) => (b.t === "table" && b.caption.startsWith("جدول ۴") ? STEPS_TBL : b));
-
-const VER_TBL = { ...CH2.find((b) => b.t === "table" && b.caption.startsWith("جدول ۶")) };
-VER_TBL.rows = VERSIONS.map((v) => [v.v, v.summary]);
-const CH2F = CH2.map((b) => (b.t === "table" && b.caption.startsWith("جدول ۶") ? VER_TBL : b));
-
-// ---------- فهرست مطالب (قبل از رندر بلاک‌ها باید entries داشته باشیم) ----------
-// ترتیب: ابتدا رندر بدنه (پر شدن tocEntries)، سپس ساخت TOC — چون JS در رشته است، دو مرحله‌ای می‌سازیم:
 // ---------- رندر: ابتدا خلاصه مدیریتی (برای ترتیب صحیح id)، سپس بدنه ----------
-const execHTML = renderBlocks(EXEC_SUMMARY);
-const bodyHTML = renderBlocks([...CH1F, ...CH2F, ...CH3, ...CH4, ...APPX]);
+const execHTML = renderBlocks(EXEC);
+const bodyHTML = renderBlocks([...CH1, ...CH2, ...CH3, ...CH4, ...APPX]);
 const docInfoHTML = renderTable(DOC_INFO_TABLE);
 
 const tocHTML = tocEntries.map((e) =>
@@ -152,6 +121,9 @@ const tocHTML = tocEntries.map((e) =>
     ? `<div class="toc-l1"><span class="toc-t">${esc(e.text)}</span><span class="toc-dots"></span>${pgNum(e.id)}</div>`
     : `<div class="toc-l2"><span class="toc-t">${esc(e.text)}</span><span class="toc-dots"></span>${pgNum(e.id)}</div>`
 ).join("\n");
+
+// عنوان جلد: جلوگیری از شکستن EM-MPI در خط تیره
+const titleHTML = esc(META.title).replace(/EM-MPI/g, '<span style="white-space:nowrap">EM-MPI</span>');
 
 const html = `<!DOCTYPE html>
 <html dir="rtl" lang="fa">
@@ -183,8 +155,8 @@ body{ line-break:strict; word-break:normal; overflow-wrap:break-word; }
 .cover .corner.bl{ bottom:20px; left:20px; border-bottom:2px solid var(--gold); border-left:2px solid var(--gold); }
 .cover .kicker{ color:var(--gold-l); font-size:14px; font-weight:600; word-spacing:.35em; margin-bottom:26px; }
 .cover .kicker b{ display:inline-block; }
-.cover .title{ font-size:41px; font-weight:700; line-height:1.45; margin-bottom:14px; }
-.cover .subtitle{ font-size:16.5px; font-weight:400; color:#C7D3E2; line-height:2; margin-bottom:34px; }
+.cover .title{ font-size:32px; font-weight:700; line-height:1.55; margin-bottom:14px; }
+.cover .subtitle{ font-size:17px; font-weight:500; color:var(--gold-l); line-height:2; margin-bottom:30px; }
 .cover .goldbar{ color:var(--gold); font-size:17px; margin-bottom:38px; }
 .cover .summary{ font-size:13.5px; color:#AAB9CC; line-height:2.1; max-width:520px; margin-bottom:44px; text-align:justify; }
 .cover .meta{ display:flex; flex-wrap:wrap; gap:0 40px; max-width:560px; }
@@ -226,6 +198,12 @@ tbody tr:nth-child(odd) td{ background:var(--stripe); }
 tbody tr:nth-child(even) td{ background:var(--card); }
 tr{ break-inside:avoid; }
 
+/* ---------- زنجیره طراحی ---------- */
+.chain{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 9px; background:var(--card);
+  border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin:10px 0 16px; break-inside:avoid; }
+.chain .chip{ background:var(--navy); color:#FFFFFF; font-size:12.5px; font-weight:600; padding:5px 13px; border-radius:20px; }
+.chain .arr{ color:var(--gold); font-weight:700; font-size:16px; }
+
 /* ---------- شناسنامه + خلاصه ---------- */
 .docinfo{ break-inside:avoid; }
 .exec{ }
@@ -248,20 +226,20 @@ tr{ break-inside:avoid; }
 <div class="cover">
   <div class="corner tr"></div>
   <div class="corner bl"></div>
-  <div class="kicker">سند رسمی مهاجرت</div>
-  <div class="title">${esc(META.title)}</div>
-  <div class="subtitle">${esc(META.subtitle)}</div>
+  <div class="kicker">سند رسمی طراحی و مهاجرت</div>
+  <div class="title">${titleHTML}</div>
+  <div class="subtitle">${esc(META.shortTitle)}</div>
   <div class="goldbar">◆</div>
-  <div class="summary">این سند، مرجع رسمی گذار از پرسشنامه اکسل سنتی (برگه‌های خانوار و فردی) به سامانه سنجش EM-MPI است. منطق نسخه جدید با رویکرد بالا به پایین تبیین می‌شود، وضعیت قبلی در فصلی جداگانه مستند گردیده و شناسنامه کامل هشت سرویس نرم‌افزاری مرتبط در پیوست ارائه شده است. مخاطب سند ترکیبی است: مدیران و سیاست‌گذاران، کارشناسان مددکاری میدانی و تیم فنی.</div>
+  <div class="summary">این سند چارچوب رسمی طراحی و مهاجرت به ابزار یکپارچه گردآوری و ارزیابی اطلاعات خانوار را تعیین می‌کند: طراحی از نیازهای سنجش EM-MPI و شاخه تخصصی پویا (CDI) به‌صورت بالا به پایین، بررسی پایین به بالای داده‌های موجود، منطق پویای گردآوری و برنامه اعتبارسنجی و مهاجرت مرحله‌ای. شناسنامه استاندارد هشت وب‌سرویس مرجع در سیزده مشخصه در پیوست ارائه شده است. مخاطب سند ترکیبی است: مدیران و سیاست‌گذاران، کارشناسان مددکاری میدانی و تیم فنی.</div>
   <div class="meta">
     <div class="m"><div class="k">کد سند</div><div class="v">${esc(META.docCode)}</div></div>
     <div class="m"><div class="k">نسخه سند</div><div class="v">${esc(META.version)}</div></div>
     <div class="m"><div class="k">تاریخ انتشار</div><div class="v">${esc(META.date)}</div></div>
     <div class="m"><div class="k">نسخه مرجع نرم‌افزار</div><div class="v">v0.9.6</div></div>
     <div class="m"><div class="k">طبقه‌بندی</div><div class="v">رسمی — قابل انتشار</div></div>
-    <div class="m"><div class="k">سند مرجع فنی</div><div class="v">EM-MPI-RF 1.0.0-demo</div></div>
+    <div class="m"><div class="k">مرجع سنجش</div><div class="v">EM-MPI-RF 1.0.0-demo</div></div>
   </div>
-  <div class="foot"><span>${esc(META.org)}</span><span class="b">EM-MPI</span><span>${esc(META.preparedBy)}</span></div>
+  <div class="foot"><span>${esc(META.org)}</span><span class="b">EM-MPI · CDI</span><span>${esc(META.preparedBy)}</span></div>
 </div>
 
 <div class="main-content">
@@ -285,6 +263,6 @@ fs.mkdirSync(OUT_DIR, { recursive: true });
 const outPath = path.join(OUT_DIR, "migration.html");
 fs.writeFileSync(outPath, html, "utf8");
 fs.mkdirSync(DL, { recursive: true });
-fs.writeFileSync(path.join(DL, "porseshnameh-migration-doc-v1.0.html"), html, "utf8");
+fs.writeFileSync(path.join(DL, "porseshnameh-migration-doc-v2.0.html"), html, "utf8");
 fs.writeFileSync(path.join(OUT_DIR, "toc-entries.json"), JSON.stringify(tocEntries, null, 1), "utf8");
 console.log("HTML built:", outPath, "|", html.length, "bytes | toc entries:", tocEntries.length);

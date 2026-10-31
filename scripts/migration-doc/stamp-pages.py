@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """مهر شماره صفحه فارسی روی PDF نهایی (جلد بدون شماره؛ صفحه فیزیکی n ← شماره n-1)
-+ متن نسخه در گوشه + متادیتا. خروجی: download/porseshnameh-migration-doc-v1.0.pdf"""
++ متن نسخه در گوشه + متادیتا. خروجی: download/porseshnameh-migration-doc-v2.0.pdf"""
 import io, pathlib, sys
 import fitz
 import arabic_reshaper
@@ -13,7 +13,7 @@ from pypdf import PdfReader, PdfWriter
 
 BASE = pathlib.Path("/home/z/my-project")
 SRC = BASE / "scripts/migration-doc/out/migration-final.pdf"
-DST = BASE / "download/porseshnameh-migration-doc-v1.0.pdf"
+DST = BASE / "download/porseshnameh-migration-doc-v2.0.pdf"
 FONT = BASE / "scripts/rahnama/Vazirmatn-Regular.ttf"
 
 pdfmetrics.registerFont(TTFont("Vazir", str(FONT)))
@@ -39,8 +39,8 @@ for i in range(len(reader.pages)):
         c.drawCentredString(W / 2, 14, fa(logical))
         c.setFont("Vazir", 7.5)
         c.setFillColor(GRAY)
-        c.drawRightString(W - 34, 14.5, rtl("نسخه ۱٫۰ — آبان ۱۴۰۵"))
-        c.drawString(34, 14.5, "PN-MIG-1405-01")
+        c.drawRightString(W - 34, 14.5, rtl("نسخه ۲٫۰ — آبان ۱۴۰۵"))
+        c.drawString(34, 14.5, "PN-MIG-1405-02")
     c.showPage()
 c.save()
 buf.seek(0)
@@ -53,11 +53,11 @@ for i, page in enumerate(reader.pages):
     writer.add_page(page)
 
 writer.add_metadata({
-    "/Title": "مستند مهاجرت پرسشنامه اطلاعات خانوار — از پرسشنامه اکسل سنتی به سامانه EM-MPI",
+    "/Title": "چارچوب طراحی و مهاجرت به ابزار یکپارچه گردآوری و ارزیابی اطلاعات خانوار مبتنی بر EM-MPI و CDI",
     "/Author": "تیم سامانه پرسشنامه EM-MPI",
-    "/Subject": "سند رسمی مهاجرت نسخه ۱٫۰ — منطق جدید، وضعیت قبلی، نگاشت مهاجرت و شناسنامه سرویس‌های نرم‌افزاری",
+    "/Subject": "سند مهاجرت به پرسشنامه جدید خانوار — نسخه ۲٫۰ (PN-MIG-1405-02)",
     "/Creator": "Z.ai",
-    "/Keywords": "EM-MPI, مهاجرت, پرسشنامه خانوار, غربالگری, PN-MIG-1405-01",
+    "/Keywords": "EM-MPI, CDI, مهاجرت, پرسشنامه خانوار, غربالگری, PN-MIG-1405-02",
 })
 with open(DST, "wb") as f:
     writer.write(f)

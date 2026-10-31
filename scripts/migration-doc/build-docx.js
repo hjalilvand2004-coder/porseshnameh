@@ -8,11 +8,11 @@ const {
   HeadingLevel, WidthType, BorderStyle, ShadingType, TableOfContents,
   SectionType, TableLayoutType, VerticalAlign,
 } = require("docx");
-const { DIMENSIONS, INDICATORS, ACTION_META, STEPS, SERVICES, DATA_PRIORITY, VERSIONS } = require("./data.js");
-const { META, DOC_INFO_TABLE, EXEC_SUMMARY, CH1, CH2 } = require("./content.js");
-const { CH3, CH4, APPX } = require("./content2.js");
+const { SERVICES, DATA_PRIORITY } = require("./data.js");
+const { META, DOC_INFO_TABLE, EXEC, CH1, CH2 } = require("./content-v2.js");
+const { CH3, CH4, APPX, SVC_DETAIL, SVC_CARD_ROWS } = require("./content-v2b.js");
 
-const OUT = "/home/z/my-project/download/porseshnameh-migration-doc-v1.0.docx";
+const OUT = "/home/z/my-project/download/porseshnameh-migration-doc-v2.0.docx";
 
 // ============================ پالت ============================
 const P = {
@@ -172,18 +172,27 @@ function calcTitleLayout(title, maxWidthTwips, preferredPt = 38, minPt = 24) {
 function buildCoverR2(config) {
   const C = P.cover;
   const padL = 1400, padR = 1400;
-  const { titlePt, titleLines } = calcTitleLayout(config.title, 11906 - padL - padR, 38, 24);
+  // خطوط عنوان: یا صریح (متعادل) یا محاسبه خودکار
+  let titlePt, titleLines;
+  if (config.titleLines) {
+    titlePt = config.titlePt || 24;
+    titleLines = config.titleLines;
+  } else {
+    const r = calcTitleLayout(config.title, 11906 - padL - padR, 38, 24);
+    titlePt = r.titlePt; titleLines = r.titleLines;
+  }
+  const extraLines = Math.max(0, titleLines.length - 2);
   const titleSize = titlePt * 2;
   const thickBorder = { style: BorderStyle.SINGLE, size: 18, color: C.accent, space: 20 };
   const children = [];
 
   // ۱. خط طلایی بالایی
   children.push(new Paragraph({
-    indent: { left: padL - 400, right: padR - 400 }, spacing: { before: 1200, after: 200 },
+    indent: { left: padL - 400, right: padR - 400 }, spacing: { before: 1000, after: 200 },
     border: { top: thickBorder }, children: [],
   }));
-  // ۲. فاصله
-  children.push(new Paragraph({ spacing: { before: 1700 } }));
+  // ۲. فاصله (تطبیقی با طول عنوان)
+  children.push(new Paragraph({ spacing: { before: Math.max(600, 1700 - extraLines * 300) } }));
   // ۳. برچسب لاتین
   children.push(new Paragraph({
     alignment: AlignmentType.CENTER, spacing: { after: 500 },
@@ -203,7 +212,7 @@ function buildCoverR2(config) {
     children: [new TextRun({ text: config.subtitle, size: 24, sizeComplexScript: 24, color: C.subtitleColor, font: FONT, rightToLeft: true })],
   }));
   // ۶. فاصله
-  children.push(new Paragraph({ spacing: { before: 1100 } }));
+  children.push(new Paragraph({ spacing: { before: Math.max(500, 1100 - extraLines * 150) } }));
   // ۷. متادیتا — ۱۸pt
   for (const line of config.metaLines) {
     children.push(new Paragraph({
@@ -213,7 +222,7 @@ function buildCoverR2(config) {
     }));
   }
   // ۸. فاصله
-  children.push(new Paragraph({ spacing: { before: 1900 } }));
+  children.push(new Paragraph({ spacing: { before: Math.max(700, 1900 - extraLines * 450) } }));
   // ۹. پانویس + خط طلایی پایینی
   children.push(new Paragraph({
     alignment: AlignmentType.CENTER, bidirectional: true,
@@ -238,6 +247,34 @@ function buildCoverR2(config) {
 }
 
 // ============================ رندر بلاک‌ها ============================
+const faNum = (n) => String(n).replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
+
+function chainBox(items) {
+  const children = [];
+  items.forEach((x, i) => {
+    children.push(new TextRun({ text: x, size: 21, sizeComplexScript: 21, bold: true, boldComplexScript: true, color: P.navy, font: FONT, rightToLeft: true }));
+    if (i < items.length - 1) children.push(new TextRun({ text: "  ←  ", size: 21, bold: true, color: P.gold, font: FONT }));
+  });
+  return [new Table({
+    visuallyRightToLeft: true,
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: allNoBorders,
+    rows: [new TableRow({
+      cantSplit: true,
+      children: [new TableCell({
+        shading: { type: ShadingType.CLEAR, fill: P.stripe },
+        borders: {
+          top: { style: BorderStyle.SINGLE, size: 4, color: P.border },
+          bottom: { style: BorderStyle.SINGLE, size: 4, color: P.border },
+          left: NB, right: NB,
+        },
+        margins: { top: 120, bottom: 120, left: 140, right: 140 },
+        children: [new Paragraph({ bidirectional: true, alignment: AlignmentType.CENTER, spacing: { line: 340 }, children })],
+      })],
+    })],
+  }), new Paragraph({ bidirectional: true, spacing: { after: 100 }, children: [] })];
+}
+
 function renderBlocks(blocks) {
   const out = [];
   for (const b of blocks) {
@@ -248,41 +285,21 @@ function renderBlocks(blocks) {
     else if (b.t === "ul") b.items.forEach(it => out.push(ulItem(it)));
     else if (b.t === "note") out.push(...noteBox(b.title, b.text));
     else if (b.t === "table") out.push(...tbl(b));
-    else if (b.t === "dimTables") {
-      let n = 8;
-      for (const d of DIMENSIONS) {
-        const ids = Object.keys(INDICATORS).filter(k => INDICATORS[k].dim === d.id);
-        out.push(...tbl({
-          caption: `جدول ${n} — نگاشت بُعد ${d.id} (${d.title})`,
-          headers: ["شاخص", "عنوان و وزن", "فیلد(های) نسخه قبلی", "اقدام", "خلاصه تغییر"],
-          widths: [7, 20, 27, 9, 37], small: true,
-          rows: ids.map(k => {
-            const it = INDICATORS[k];
-            return [k, `${it.title} — وزن ${it.w}`, it.old.join(" | "), ACTION_META[it.action].short, it.note];
-          }),
-        }));
-        n++;
-      }
-    } else if (b.t === "svcTables") {
+    else if (b.t === "chain") out.push(...chainBox(b.items));
+    else if (b.t === "svcCards") {
       SERVICES.forEach((s, i) => {
-        out.push(heading(`الف-${String(i + 1).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d])} — ${s.name}`, 2));
+        const fa = faNum(i + 1);
+        out.push(heading(`الف-${fa} — ${s.name}`, 2));
+        const d = SVC_DETAIL[s.id];
         out.push(...tbl({
-          caption: `شناسنامه سرویس ${String(i + 1).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d])} از ۸ — ${s.name}`,
-          headers: ["مشخصه", "شرح"], widths: [26, 74],
-          rows: [
-            ["متولی", s.org],
-            ["هدف از استعلام", s.goal],
-            ["داده‌های ارائه‌شده", s.provides.join("؛ ")],
-            ["شاخص‌های تغذیه‌شده", s.feeds.join("، ")],
-            ["دامنه داده", s.scope],
-            ["فیلدهای ملاک قفل‌شونده", Array.isArray(s.locked) ? s.locked.join("؛ ") : s.locked],
-          ],
+          caption: `جدول ${faNum(15 + i)} — شناسنامه سرویس ${fa} از ۸ — ${s.name}`,
+          headers: ["مشخصه", "شرح"], widths: [26, 74], small: true,
+          rows: SVC_CARD_ROWS.map(([label, fn]) => [label, fn(s, d)]),
         }));
-        out.push(...noteBox("رفتار خطا و وضعیت‌های استعلام", s.error));
       });
     } else if (b.t === "prioTable") {
       out.push(...tbl({
-        caption: "جدول ۱۶ — تقدم پنج‌سطحی منابع داده",
+        caption: "جدول ۲۳ — تقدم پنج‌سطحی منابع داده",
         headers: ["تقدم", "منبع", "شرح"], widths: [10, 30, 60],
         rows: DATA_PRIORITY.map(p => [p.rank, p.source, p.desc]),
       }));
@@ -291,21 +308,15 @@ function renderBlocks(blocks) {
   return out;
 }
 
-// پرکردن جدول‌های placeholder
-const CH1F = CH1.map(b => (b.t === "table" && b.caption.startsWith("جدول ۴"))
-  ? { ...b, rows: STEPS.map(s => [s.n, s.title, s.scored, s.desc]) } : b);
-const CH2F = CH2.map(b => (b.t === "table" && b.caption.startsWith("جدول ۶"))
-  ? { ...b, rows: VERSIONS.map(v => [v.v, v.summary]) } : b);
-
-const execBlocks = renderBlocks(EXEC_SUMMARY);
-const bodyBlocks = renderBlocks([...CH1F, ...CH2F, ...CH3, ...CH4, ...APPX]);
+const execBlocks = renderBlocks(EXEC);
+const bodyBlocks = renderBlocks([...CH1, ...CH2, ...CH3, ...CH4, ...APPX]);
 
 // ============================ سرصفحه/پاصفحه ============================
 const pageHeader = () => new Header({
   children: [new Paragraph({
     bidirectional: true, alignment: AlignmentType.CENTER,
     border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: P.border, space: 4 } },
-    children: [new TextRun({ text: META.title, size: 18, color: "808080", font: FONT, rightToLeft: true })],
+    children: [new TextRun({ text: META.shortTitle, size: 18, color: "808080", font: FONT, rightToLeft: true })],
   })],
 });
 const pageFooter = () => new Footer({
@@ -313,7 +324,7 @@ const pageFooter = () => new Footer({
     bidirectional: true, alignment: AlignmentType.CENTER,
     children: [
       new TextRun({ children: [PageNumber.CURRENT], size: 18, color: "808080", font: FONT }),
-      new TextRun({ text: "   —   نسخه ۱٫۰", size: 18, color: "808080", font: FONT, rightToLeft: true }),
+      new TextRun({ text: "   —   نسخه ۲٫۰", size: 18, color: "808080", font: FONT, rightToLeft: true }),
     ],
   })],
 });
@@ -323,10 +334,10 @@ const pgSize = { width: 11906, height: 16838 };
 const pgMargin = { top: 1440, bottom: 1440, left: 1417, right: 1701 }; // RTL: چسبندگی بیشتر سمت شروع
 
 const doc = new Document({
-  title: "مستند مهاجرت پرسشنامه اطلاعات خانوار — از پرسشنامه اکسل سنتی به سامانه EM-MPI",
-  subject: "سند رسمی مهاجرت نسخه ۱٫۰ — منطق جدید، وضعیت قبلی، نگاشت مهاجرت و شناسنامه سرویس‌ها",
+  title: META.title,
+  subject: "سند مهاجرت به پرسشنامه جدید خانوار — نسخه ۲٫۰ (PN-MIG-1405-02)",
   creator: "تیم سامانه پرسشنامه EM-MPI",
-  description: "PN-MIG-1405-01 — نسخه ۱٫۰ — ۷ آبان ۱۴۰۵",
+  description: "PN-MIG-1405-02 — نسخه ۲٫۰ — ۹ آبان ۱۴۰۵",
   styles: {
     default: {
       document: {
@@ -341,15 +352,20 @@ const doc = new Document({
     { // بخش ۱ — جلد (بدون شماره)
       properties: { page: { size: pgSize, margin: { top: 0, bottom: 0, left: 0, right: 0 } } },
       children: buildCoverR2({
-        englishLabel: "MIGRATION DOCUMENT",
-        title: META.title,
-        subtitle: META.subtitle,
+        englishLabel: "DESIGN & MIGRATION FRAMEWORK",
+        titleLines: [
+          "چارچوب طراحی و مهاجرت به ابزار یکپارچه",
+          "گردآوری و ارزیابی اطلاعات خانوار",
+          "مبتنی بر EM-MPI و CDI",
+        ],
+        titlePt: 24,
+        subtitle: META.shortTitle,
         metaLines: [
-          "کد سند: PN-MIG-1405-01",
-          "نسخه سند: ۱٫۰",
-          "تاریخ انتشار: ۷ آبان ۱۴۰۵",
+          "کد سند: PN-MIG-1405-02",
+          "نسخه سند: ۲٫۰",
+          "تاریخ انتشار: ۹ آبان ۱۴۰۵",
           "نسخه مرجع نرم‌افزار: v0.9.6",
-          "سند مرجع فنی: EM-MPI-RF 1.0.0-demo",
+          "مرجع سنجش: EM-MPI-RF 1.0.0-demo",
           "طبقه‌بندی: رسمی — قابل انتشار",
         ],
         footerRight: "سامانه پرسشنامه EM-MPI  •  تیم سامانه پرسشنامه",
